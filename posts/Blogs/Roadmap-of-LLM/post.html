@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Yuyang Zhang">
+<meta name="dcterms.date" content="2026-04-17">
+<meta name="description" content="在这篇文章中，我们将探讨大语言模型的发展史，以及如何训练出一个强大的LLM。我们从数据的收集和预处理开始，逐步介绍模型架构，训练方法，后训练，评估，部署，以及应用。之后我们将探讨LLM的应用，包括LLM-Based Agents，等等。最后我们将展望LLM的未来发展趋势。这篇文章不是一个详尽的技术指南，而是一个概览，旨在帮助读者理解LLM的基本概念和发展历程。">
+
+<title>A Roadmap of Large Language Models (LLMs)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../.././style/icon.avif" rel="icon">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-44402bf054b1fe078bc4e7aebe64bce9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
+<script src="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.js"></script>
+<link href="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.css" rel="stylesheet">
+<script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-E8EJCZTZG1"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
+</script>
+<link href="https://fonts.cdnfonts.com/css/cmu-sans-serif" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<script>
+    MathJax = {
+        loader: {
+        load: ['[tex]/boldsymbol']
+        },
+        tex: {
+        tags: "all",
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']],
+        processEscapes: true,
+        processEnvironments: true,
+        packages: {
+            '[+]': ['boldsymbol']
+        }
+        }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) {
+        block.classList.toggle("is-open");
+      }
+    });
+
+    // 可访问性（键盘）
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
+      }
+    });
+  });
+});
+</script>
+    <style type="text/css">
+    .ps-root .ps-algorithm {
+      border-top: 2px solid;
+      border-bottom: 2px solid;
+    }
+    .pseudocode-container {
+      text-align: left;
+    }
+    </style>
+  
+      <style type="text/css">
+      .ps-algorithm > .ps-line {
+        text-align: left;
+      }
+      </style>
+    
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="A Roadmap of Large Language Models (LLMs)">
+<meta property="og:description" content="在这篇文章中，我们将探讨大语言模型的发展史，以及如何训练出一个强大的LLM。我们从数据的收集和预处理开始，逐步介绍模型架构，训练方法，后训练，评估，部署，以及应用。之后我们将探讨LLM的应用，包括LLM-Based Agents，等等。最后我们将展望LLM的未来发展趋势。这篇文章不是一个详尽的技术指南，而是一个概览，旨在帮助读者理解LLM的基本概念和发展历程。">
+<meta property="og:image" content="./assets/openVLA-overview.png">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/YYZhang2025"> 
+<span class="menu-text"><i class="fa-brands fa-github fa-xl"></i></span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.linkedin.com/in/zhang-yuyang/"> 
+<span class="menu-text"><i class="fa-brands fa-linkedin fa-xl"></i></span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../posts/Blogs/blogs_index.html"> 
+<span class="menu-text">Blogs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../posts/Projects/projects_index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://yyzhang2025.github.io/100-AI-Papers-with-Code/"> 
+<span class="menu-text">100-PwC</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-learning-notes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Learning Notes</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-learning-notes">    
+        <li>
+    <a class="dropdown-item" href="../../../posts/LearningNotes/CS336/index.html">
+ <span class="dropdown-text">Stanford CS336 LLM From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../posts/LearningNotes/Stanford-CME296-Diffusion/index.html">
+ <span class="dropdown-text">Stanford CME296 Diffusion &amp; Large Vision Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../posts/LearningNotes/MIT6S184-Flow/index.html">
+ <span class="dropdown-text">MIT 6.S184 Flow Matching and Diffusion Models</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title">A Roadmap of Large Language Models (LLMs)</h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#llm" id="toc-llm" class="nav-link active" data-scroll-target="#llm"><span class="header-section-number">1</span> LLM</a></li>
+  <li><a href="#pre-training-phase" id="toc-pre-training-phase" class="nav-link" data-scroll-target="#pre-training-phase"><span class="header-section-number">2</span> Pre-Training Phase</a>
+  <ul>
+  <li><a href="#transformer-llm" id="toc-transformer-llm" class="nav-link" data-scroll-target="#transformer-llm"><span class="header-section-number">2.1</span> Transformer LLM</a>
+  <ul>
+  <li><a href="#work-embedding-layer" id="toc-work-embedding-layer" class="nav-link" data-scroll-target="#work-embedding-layer"><span class="header-section-number">2.1.1</span> Work Embedding Layer</a></li>
+  <li><a href="#position-embedding-layer" id="toc-position-embedding-layer" class="nav-link" data-scroll-target="#position-embedding-layer"><span class="header-section-number">2.1.2</span> Position Embedding Layer</a>
+  <ul class="collapse">
+  <li><a href="#extend-position-to-longer-sequence" id="toc-extend-position-to-longer-sequence" class="nav-link" data-scroll-target="#extend-position-to-longer-sequence"><span class="header-section-number">2.1.2.1</span> Extend Position to Longer Sequence</a></li>
+  </ul></li>
+  <li><a href="#attention-mechanism" id="toc-attention-mechanism" class="nav-link" data-scroll-target="#attention-mechanism"><span class="header-section-number">2.1.3</span> Attention Mechanism</a></li>
+  <li><a href="#feed-forward-network" id="toc-feed-forward-network" class="nav-link" data-scroll-target="#feed-forward-network"><span class="header-section-number">2.1.4</span> Feed-Forward Network</a>
+  <ul class="collapse">
+  <li><a href="#mixture-of-experts-moe" id="toc-mixture-of-experts-moe" class="nav-link" data-scroll-target="#mixture-of-experts-moe"><span class="header-section-number">2.1.4.1</span> Mixture of Experts (MoE)</a></li>
+  </ul></li>
+  <li><a href="#normalization-layers" id="toc-normalization-layers" class="nav-link" data-scroll-target="#normalization-layers"><span class="header-section-number">2.1.5</span> Normalization Layers</a>
+  <ul class="collapse">
+  <li><a href="#position-of-normalization" id="toc-position-of-normalization" class="nav-link" data-scroll-target="#position-of-normalization"><span class="header-section-number">2.1.5.1</span> Position of Normalization</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#scaling-laws" id="toc-scaling-laws" class="nav-link" data-scroll-target="#scaling-laws"><span class="header-section-number">2.2</span> Scaling Laws</a></li>
+  </ul></li>
+  <li><a href="#parallelism" id="toc-parallelism" class="nav-link" data-scroll-target="#parallelism"><span class="header-section-number">3</span> Parallelism</a>
+  <ul>
+  <li><a href="#data-parallelism" id="toc-data-parallelism" class="nav-link" data-scroll-target="#data-parallelism"><span class="header-section-number">3.1</span> Data Parallelism</a></li>
+  <li><a href="#model-parallelism" id="toc-model-parallelism" class="nav-link" data-scroll-target="#model-parallelism"><span class="header-section-number">3.2</span> Model Parallelism</a></li>
+  <li><a href="#pipeline-parallelism" id="toc-pipeline-parallelism" class="nav-link" data-scroll-target="#pipeline-parallelism"><span class="header-section-number">3.3</span> Pipeline Parallelism</a></li>
+  <li><a href="#zero" id="toc-zero" class="nav-link" data-scroll-target="#zero"><span class="header-section-number">3.4</span> ZeRO</a></li>
+  <li><a href="#fsdp" id="toc-fsdp" class="nav-link" data-scroll-target="#fsdp"><span class="header-section-number">3.5</span> FSDP</a></li>
+  <li><a href="#d-parallelism" id="toc-d-parallelism" class="nav-link" data-scroll-target="#d-parallelism"><span class="header-section-number">3.6</span> 4D Parallelism</a></li>
+  </ul></li>
+  <li><a href="#optimizer" id="toc-optimizer" class="nav-link" data-scroll-target="#optimizer"><span class="header-section-number">4</span> Optimizer</a>
+  <ul>
+  <li><a href="#adamw" id="toc-adamw" class="nav-link" data-scroll-target="#adamw"><span class="header-section-number">4.1</span> AdamW</a></li>
+  <li><a href="#muon" id="toc-muon" class="nav-link" data-scroll-target="#muon"><span class="header-section-number">4.2</span> Muon</a></li>
+  <li><a href="#soap" id="toc-soap" class="nav-link" data-scroll-target="#soap"><span class="header-section-number">4.3</span> SOAP</a></li>
+  </ul></li>
+  <li><a href="#fine-tuning" id="toc-fine-tuning" class="nav-link" data-scroll-target="#fine-tuning"><span class="header-section-number">5</span> Fine-Tuning</a>
+  <ul>
+  <li><a href="#lora-q-lora" id="toc-lora-q-lora" class="nav-link" data-scroll-target="#lora-q-lora"><span class="header-section-number">5.1</span> LoRA &amp; Q-LoRA</a></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"><span class="header-section-number">5.2</span> </a></li>
+  </ul></li>
+  <li><a href="#post-training" id="toc-post-training" class="nav-link" data-scroll-target="#post-training"><span class="header-section-number">6</span> Post-Training</a>
+  <ul>
+  <li><a href="#supervised-fine-tuning-sft" id="toc-supervised-fine-tuning-sft" class="nav-link" data-scroll-target="#supervised-fine-tuning-sft"><span class="header-section-number">6.1</span> Supervised Fine-Tuning (SFT)</a></li>
+  <li><a href="#reinforcement-learning-with-human-feedback-rlhf" id="toc-reinforcement-learning-with-human-feedback-rlhf" class="nav-link" data-scroll-target="#reinforcement-learning-with-human-feedback-rlhf"><span class="header-section-number">6.2</span> Reinforcement Learning with Human Feedback (RLHF)</a></li>
+  <li><a href="#reinforcement-learning-with-verified-feedback-rlvf" id="toc-reinforcement-learning-with-verified-feedback-rlvf" class="nav-link" data-scroll-target="#reinforcement-learning-with-verified-feedback-rlvf"><span class="header-section-number">6.3</span> Reinforcement Learning with Verified Feedback (RLVF)</a></li>
+  <li><a href="#reinforcement-learning-with-ai-feedback-rlaif" id="toc-reinforcement-learning-with-ai-feedback-rlaif" class="nav-link" data-scroll-target="#reinforcement-learning-with-ai-feedback-rlaif"><span class="header-section-number">6.4</span> Reinforcement Learning with AI Feedback (RLAIF)</a></li>
+  </ul></li>
+  <li><a href="#inference-deployment" id="toc-inference-deployment" class="nav-link" data-scroll-target="#inference-deployment"><span class="header-section-number">7</span> Inference &amp; Deployment</a>
+  <ul>
+  <li><a href="#kv-cache" id="toc-kv-cache" class="nav-link" data-scroll-target="#kv-cache"><span class="header-section-number">7.1</span> KV-Cache</a></li>
+  <li><a href="#quantization" id="toc-quantization" class="nav-link" data-scroll-target="#quantization"><span class="header-section-number">7.2</span> Quantization</a></li>
+  <li><a href="#distillation" id="toc-distillation" class="nav-link" data-scroll-target="#distillation"><span class="header-section-number">7.3</span> Distillation</a></li>
+  </ul></li>
+  <li><a href="#continuous-learning" id="toc-continuous-learning" class="nav-link" data-scroll-target="#continuous-learning"><span class="header-section-number">8</span> Continuous Learning</a></li>
+  <li><a href="#llm-applications" id="toc-llm-applications" class="nav-link" data-scroll-target="#llm-applications"><span class="header-section-number">9</span> LLM Applications</a>
+  <ul>
+  <li><a href="#multi-modality-llm" id="toc-multi-modality-llm" class="nav-link" data-scroll-target="#multi-modality-llm"><span class="header-section-number">9.1</span> Multi-Modality LLM</a></li>
+  <li><a href="#llm-based-autonomous-agents" id="toc-llm-based-autonomous-agents" class="nav-link" data-scroll-target="#llm-based-autonomous-agents"><span class="header-section-number">9.2</span> LLM-Based Autonomous Agents</a></li>
+  <li><a href="#vision-language-actionvla-models" id="toc-vision-language-actionvla-models" class="nav-link" data-scroll-target="#vision-language-actionvla-models"><span class="header-section-number">9.3</span> Vision Language Action(VLA) Models</a></li>
+  </ul></li>
+  <li><a href="#future-of-llm" id="toc-future-of-llm" class="nav-link" data-scroll-target="#future-of-llm"><span class="header-section-number">10</span> Future of LLM</a></li>
+  <li><a href="#related-resources" id="toc-related-resources" class="nav-link" data-scroll-target="#related-resources"><span class="header-section-number">11</span> Related Resources</a></li>
+  <li><a href="#in-the-end" id="toc-in-the-end" class="nav-link" data-scroll-target="#in-the-end"><span class="header-section-number">12</span> In the end</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">A Roadmap of Large Language Models (LLMs)</h1>
+</div>
+
+<div>
+  <div class="description">
+    在这篇文章中，我们将探讨大语言模型的发展史，以及如何训练出一个强大的LLM。我们从数据的收集和预处理开始，逐步介绍模型架构，训练方法，后训练，评估，部署，以及应用。之后我们将探讨LLM的应用，包括LLM-Based Agents，等等。最后我们将展望LLM的未来发展趋势。这篇文章不是一个详尽的技术指南，而是一个概览，旨在帮助读者理解LLM的基本概念和发展历程。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Yuyang Zhang </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 17, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC-body" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#llm" id="toc-llm"><span class="header-section-number">1</span> LLM</a></li>
+  <li><a href="#pre-training-phase" id="toc-pre-training-phase"><span class="header-section-number">2</span> Pre-Training Phase</a>
+  <ul>
+  <li><a href="#transformer-llm" id="toc-transformer-llm"><span class="header-section-number">2.1</span> Transformer LLM</a>
+  <ul>
+  <li><a href="#work-embedding-layer" id="toc-work-embedding-layer"><span class="header-section-number">2.1.1</span> Work Embedding Layer</a></li>
+  <li><a href="#position-embedding-layer" id="toc-position-embedding-layer"><span class="header-section-number">2.1.2</span> Position Embedding Layer</a>
+  <ul>
+  <li><a href="#extend-position-to-longer-sequence" id="toc-extend-position-to-longer-sequence"><span class="header-section-number">2.1.2.1</span> Extend Position to Longer Sequence</a></li>
+  </ul></li>
+  <li><a href="#attention-mechanism" id="toc-attention-mechanism"><span class="header-section-number">2.1.3</span> Attention Mechanism</a></li>
+  <li><a href="#feed-forward-network" id="toc-feed-forward-network"><span class="header-section-number">2.1.4</span> Feed-Forward Network</a>
+  <ul>
+  <li><a href="#mixture-of-experts-moe" id="toc-mixture-of-experts-moe"><span class="header-section-number">2.1.4.1</span> Mixture of Experts (MoE)</a></li>
+  </ul></li>
+  <li><a href="#normalization-layers" id="toc-normalization-layers"><span class="header-section-number">2.1.5</span> Normalization Layers</a>
+  <ul>
+  <li><a href="#position-of-normalization" id="toc-position-of-normalization"><span class="header-section-number">2.1.5.1</span> Position of Normalization</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#scaling-laws" id="toc-scaling-laws"><span class="header-section-number">2.2</span> Scaling Laws</a></li>
+  </ul></li>
+  <li><a href="#parallelism" id="toc-parallelism"><span class="header-section-number">3</span> Parallelism</a>
+  <ul>
+  <li><a href="#data-parallelism" id="toc-data-parallelism"><span class="header-section-number">3.1</span> Data Parallelism</a></li>
+  <li><a href="#model-parallelism" id="toc-model-parallelism"><span class="header-section-number">3.2</span> Model Parallelism</a></li>
+  <li><a href="#pipeline-parallelism" id="toc-pipeline-parallelism"><span class="header-section-number">3.3</span> Pipeline Parallelism</a></li>
+  <li><a href="#zero" id="toc-zero"><span class="header-section-number">3.4</span> ZeRO</a></li>
+  <li><a href="#fsdp" id="toc-fsdp"><span class="header-section-number">3.5</span> FSDP</a></li>
+  <li><a href="#d-parallelism" id="toc-d-parallelism"><span class="header-section-number">3.6</span> 4D Parallelism</a></li>
+  </ul></li>
+  <li><a href="#optimizer" id="toc-optimizer"><span class="header-section-number">4</span> Optimizer</a>
+  <ul>
+  <li><a href="#adamw" id="toc-adamw"><span class="header-section-number">4.1</span> AdamW</a></li>
+  <li><a href="#muon" id="toc-muon"><span class="header-section-number">4.2</span> Muon</a></li>
+  <li><a href="#soap" id="toc-soap"><span class="header-section-number">4.3</span> SOAP</a></li>
+  </ul></li>
+  <li><a href="#fine-tuning" id="toc-fine-tuning"><span class="header-section-number">5</span> Fine-Tuning</a>
+  <ul>
+  <li><a href="#lora-q-lora" id="toc-lora-q-lora"><span class="header-section-number">5.1</span> LoRA &amp; Q-LoRA</a></li>
+  <li><a href="#section" id="toc-section"><span class="header-section-number">5.2</span> </a></li>
+  </ul></li>
+  <li><a href="#post-training" id="toc-post-training"><span class="header-section-number">6</span> Post-Training</a>
+  <ul>
+  <li><a href="#supervised-fine-tuning-sft" id="toc-supervised-fine-tuning-sft"><span class="header-section-number">6.1</span> Supervised Fine-Tuning (SFT)</a></li>
+  <li><a href="#reinforcement-learning-with-human-feedback-rlhf" id="toc-reinforcement-learning-with-human-feedback-rlhf"><span class="header-section-number">6.2</span> Reinforcement Learning with Human Feedback (RLHF)</a></li>
+  <li><a href="#reinforcement-learning-with-verified-feedback-rlvf" id="toc-reinforcement-learning-with-verified-feedback-rlvf"><span class="header-section-number">6.3</span> Reinforcement Learning with Verified Feedback (RLVF)</a></li>
+  <li><a href="#reinforcement-learning-with-ai-feedback-rlaif" id="toc-reinforcement-learning-with-ai-feedback-rlaif"><span class="header-section-number">6.4</span> Reinforcement Learning with AI Feedback (RLAIF)</a></li>
+  </ul></li>
+  <li><a href="#inference-deployment" id="toc-inference-deployment"><span class="header-section-number">7</span> Inference &amp; Deployment</a>
+  <ul>
+  <li><a href="#kv-cache" id="toc-kv-cache"><span class="header-section-number">7.1</span> KV-Cache</a></li>
+  <li><a href="#quantization" id="toc-quantization"><span class="header-section-number">7.2</span> Quantization</a></li>
+  <li><a href="#distillation" id="toc-distillation"><span class="header-section-number">7.3</span> Distillation</a></li>
+  </ul></li>
+  <li><a href="#continuous-learning" id="toc-continuous-learning"><span class="header-section-number">8</span> Continuous Learning</a></li>
+  <li><a href="#llm-applications" id="toc-llm-applications"><span class="header-section-number">9</span> LLM Applications</a>
+  <ul>
+  <li><a href="#multi-modality-llm" id="toc-multi-modality-llm"><span class="header-section-number">9.1</span> Multi-Modality LLM</a></li>
+  <li><a href="#llm-based-autonomous-agents" id="toc-llm-based-autonomous-agents"><span class="header-section-number">9.2</span> LLM-Based Autonomous Agents</a></li>
+  <li><a href="#vision-language-actionvla-models" id="toc-vision-language-actionvla-models"><span class="header-section-number">9.3</span> Vision Language Action(VLA) Models</a></li>
+  </ul></li>
+  <li><a href="#future-of-llm" id="toc-future-of-llm"><span class="header-section-number">10</span> Future of LLM</a></li>
+  <li><a href="#related-resources" id="toc-related-resources"><span class="header-section-number">11</span> Related Resources</a></li>
+  <li><a href="#in-the-end" id="toc-in-the-end"><span class="header-section-number">12</span> In the end</a></li>
+  </ul>
+</nav>
+<p>LLM的发展很快速，迭代的也很快，自从2023年ChatGPT的发布，LLM已经成为了AI领域的热点话题。每年都有新的“SOTA”LLM模型发布。并且随着2026年初OpenClaw的发布，让人们讨论AGI的可能性又一次升温了。LLM的应用也越来越广泛，从文本生成到代码生成，从对话系统到LLM Based Autonomous Agents，LLM正在改变我们与计算机交互的方式。在这篇文章中，我们讲从一个开发者的角度，回顾一下LLM的发展历程，如何训练一个LLM，当前的应用，以及未来的发展趋势。</p>
+<section id="llm" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> LLM</h1>
+<p>LLM 可以简单的训练可以简单的分为三个阶段： - Pre-Training：在这个阶段，模型会被训练在一个大规模的文本数据集上，学习语言的基本结构和语义。这通常是一个无监督的过程，模型通过预测下一个词来学习语言的规律。 - Post-Training：在这个阶段，模型会被进一步训练在一个特定的任务或者领域的数据集上，以提高在该任务上的性能。比如Fine-Tuning成为一个对话模型，或者微调模型让他变成安全的模型。</p>
+<p>不同的阶段有不同阶段的Evaluation Metric以及挑战，我们会在后面详细介绍。首先我们来看看Pre-Training的阶段。</p>
+</section>
+<section id="pre-training-phase" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Pre-Training Phase</h1>
+<p>所有的现在SOTA得LLM，包括LLaMA，Qwen，DeepSeek，Gemini，GPT等，都有一个共同的训练目标:</p>
+<p><span id="eq-next-token-prediction"><span class="math display">\[
+\mathcal{L} = -\sum_{t=1}^{T} \log P(x_t | x_{&lt;t})
+\tag{1}\]</span></span></p>
+<p>这个也叫做Next Token Prediction Task。用大白话来讲，就是成语接龙：给模型一个文本序列，让它预测下一个词是什么。</p>
+<p>接下来我们来看一下训练的模型，基本上现在的所有的模型都是Decoder-Only的Transformer<span class="citation" data-cites="AttentionAllYou2023vaswani">(<a href="#ref-AttentionAllYou2023vaswani" role="doc-biblioref">Vaswani et al. 2023</a>)</span>。这种框架之所以这么流行，是因为它的Parallelism非常好，可以利用GPU的计算能力进行大规模的训练。</p>
+<section id="transformer-llm" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="transformer-llm"><span class="header-section-number">2.1</span> Transformer LLM</h2>
+<p>Transformer LLM的模型有以下几个核心组件：</p>
+<ul>
+<li>Word Embedding：将输入的文本序列转换成一个连续的向量表示。</li>
+<li>Position Embedding：由于Transformer没有内置的序列信息，所以需要通过位置编码来告诉模型每个词在序列中的位置。</li>
+<li>Attention Mechanism：这是Transformer的核心组件，它允许模型在处理输入序列时关注不同位置的信息。对于Decoder-Only的Transformer来说，通常使用的是Masked Self-Attention，这样模型只能关注当前词之前的信息。</li>
+<li>Feed-Forward Network：这是一个全连接的神经网络，用于处理Attention Mechanism输出的结果。</li>
+<li>Normalization Layers：</li>
+</ul>
+<section id="work-embedding-layer" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="work-embedding-layer"><span class="header-section-number">2.1.1</span> Work Embedding Layer</h3>
+<p>Word Embedding Layer的作用是将输入的文本序列转换成一个连续的向量表示。通常使用的是一个查找表（Lookup Table），将每个词映射到一个固定维度的向量空间中。这个向量空间的维度通常是模型的隐藏层维度，比如512，1024，2048等。通过训练，这些词向量会学习到词与词之间的语义关系，使得相似意义的词在向量空间中更接近。这是所有语言模型的必做的第一步，因为模型只能处理数值数据，所以需要将文本转换成数值表示。Word Embedding Layer就是完成这个任务的组件。</p>
+</section>
+<section id="position-embedding-layer" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="position-embedding-layer"><span class="header-section-number">2.1.2</span> Position Embedding Layer</h3>
+<p>由于Transformer没有内置的序列信息，所以需要通过位置编码来告诉模型每个词在序列中的位置。常见的Position Embedding方法有两种：一种是绝对位置编码（Absolute Position Encoding），另一种是相对位置编码（Relative Position Encoding）。绝对位置编码为每个位置分配一个唯一的向量，而相对位置编码则关注词之间的相对位置关系。Position Embedding Layer的作用是将这些位置信息与Word Embedding结合起来，使得模型能够理解输入序列的顺序和结构。现在常见的最常见的Position Embedding是RoPE<span class="citation" data-cites="RoFormerEnhancedTransformer2023sun">(<a href="#ref-RoFormerEnhancedTransformer2023sun" role="doc-biblioref"><strong>RoFormerEnhancedTransformer2023sun?</strong></a>)</span>,它是一种相对位置编码方法，通过旋转位置编码来捕捉词之间的相对位置信息，同时又输入了绝对位置信息，使得模型能够更好地理解输入序列的结构和关系。</p>
+<section id="extend-position-to-longer-sequence" class="level4" data-number="2.1.2.1">
+<h4 data-number="2.1.2.1" class="anchored" data-anchor-id="extend-position-to-longer-sequence"><span class="header-section-number">2.1.2.1</span> Extend Position to Longer Sequence</h4>
+<p>在训练的时候，我们通常会设置一个最大输入长度，比如2048，4096，8192等。但是在实际应用中，我们可能需要处理更长的输入序列，比如10000，20000，甚至更长。为了让模型能够处理更长的输入序列，我们需要对Position Embedding进行扩展。常见的方法有两种：一种是直接将Position Embedding扩展到更长的序列长度，另一种是使用一些特殊的Position Embedding方法，比如ALiBi<span class="citation" data-cites="ALiBiAttentionBias2023press">(<a href="#ref-ALiBiAttentionBias2023press" role="doc-biblioref"><strong>ALiBiAttentionBias2023press?</strong></a>)</span>，它通过引入一个线性偏置来捕捉词之间的相对位置信息，使得模型能够处理更长的输入序列。或者Yarn<span class="citation" data-cites="YaRNEfficientContext2023peng">(<a href="#ref-YaRNEfficientContext2023peng" role="doc-biblioref">Peng et al. 2023</a>)</span>，它通过引入一个可变长度的Position Embedding来捕捉词之间的相对位置信息，使得模型能够处理更长的输入序列。</p>
+</section>
+</section>
+<section id="attention-mechanism" class="level3" data-number="2.1.3">
+<h3 data-number="2.1.3" class="anchored" data-anchor-id="attention-mechanism"><span class="header-section-number">2.1.3</span> Attention Mechanism</h3>
+<p>Attention Mechanism是Transformer的核心组件，它允许模型在处理输入序列时关注不同位置的信息。对于Decoder-Only的Transformer来说，通常使用的是Masked Self-Attention，这样模型只能关注当前词之前的信息。Attention Mechanism通过计算输入序列中每个词与其他词之间的相关性来生成一个加权的表示，使得模型能够捕捉到输入序列中的长距离依赖关系。这是LLM能够理解和生成自然语言的关键所在。但是，简单的Multi-Headed Attention存在一个显然的问题，就是它的计算复杂度是 <span class="math inline">\(\mathcal{O}(N^2)\)</span>，其中N是输入序列的长度。这对于长序列来说是非常昂贵的，也会随着输入序列长度的增加而迅速增长。因此关于Attention的优化方式层出不穷，主要有以下几种：</p>
+<ul>
+<li>Sparse Attention：通过引入稀疏性来减少计算量，比如只关注输入序列中的一部分位置，或者使用一些特殊的Attention模式，比如Local Attention，Global Attention等。</li>
+<li>Low-Rank Approximation：通过对Attention矩阵进行低秩近似来减少计算量，比如使用一些矩阵分解方法来近似Attention矩阵。</li>
+<li>Memory-Augmented Attention：通过引入一个外部记忆来存储输入序列中的信息，从而减少计算量，比如使用一些特殊的Memory机制来存储输入序列中的信息</li>
+<li>Kernel-Based Attention：通过使用一些特殊的核函数来近似Attention矩阵，从而减少计算量，比如使用一些特殊的核函数来近似Attention矩阵。比如Flash Attention</li>
+</ul>
+<p>Grouped Query Attention（GQA）<span class="citation" data-cites="GroupedQueryAttention2023dao">(<a href="#ref-GroupedQueryAttention2023dao" role="doc-biblioref"><strong>GroupedQueryAttention2023dao?</strong></a>)</span>，它通过将查询向量分成多个组来减少计算量，使得模型能够更高效地处理长序列输入。</p>
+</section>
+<section id="feed-forward-network" class="level3" data-number="2.1.4">
+<h3 data-number="2.1.4" class="anchored" data-anchor-id="feed-forward-network"><span class="header-section-number">2.1.4</span> Feed-Forward Network</h3>
+<p>Feed-Forward Network是Transformer中的一个全连接的神经网络，用于处理Attention Mechanism输出的结果。它通常由两个线性层和一个非线性激活函数组成，比如ReLU或者GELU。Feed-Forward Network的作用是对Attention Mechanism输出的结果进行进一步的处理，使得模型能够更好地理解输入序列中的信息。它可以看作是一个特征提取器，通过对Attention Mechanism输出的结果进行非线性变换来提取更高层次的特征，从而提高模型的表达能力和性能。 ### Activation Functions</p>
+<section id="mixture-of-experts-moe" class="level4" data-number="2.1.4.1">
+<h4 data-number="2.1.4.1" class="anchored" data-anchor-id="mixture-of-experts-moe"><span class="header-section-number">2.1.4.1</span> Mixture of Experts (MoE)</h4>
+<p>Mixture of Experts（MoE）是一种特殊的Feed-Forward Network，它通过引入多个专家网络来提高模型的表达能力和性能。每个专家网络都是一个独立的Feed-Forward Network，它们通过一个门控机制来选择哪个专家网络来处理输入数据。MoE的主要优势在于它能够通过引入多个专家网络来提高模型的表达能力和性能，同时又能够通过门控机制来控制计算量，从而使得模型能够更高效地处理输入数据。MoE在LLM中被广泛使用，比如GLaM<span class="citation" data-cites="GLaMEfficientMixture2021du">(<a href="#ref-GLaMEfficientMixture2021du" role="doc-biblioref"><strong>GLaMEfficientMixture2021du?</strong></a>)</span>，Switch Transformer<span class="citation" data-cites="SwitchTransformerScaling2021fedus">(<a href="#ref-SwitchTransformerScaling2021fedus" role="doc-biblioref"><strong>SwitchTransformerScaling2021fedus?</strong></a>)</span>，等等。</p>
+<p>当一个MoE层有N个专家网路时，每个输入数据只会被分配到其中的K个专家网络进行处理，这样就可以大大减少计算量，同时又能够提高模型的表达能力和性能。这就是为什么很多模型命名为 -20BA2B，其中20B代表模型的参数量，2B代表MoE层中每个输入数据被分配到的专家网络数量。</p>
+</section>
+</section>
+<section id="normalization-layers" class="level3" data-number="2.1.5">
+<h3 data-number="2.1.5" class="anchored" data-anchor-id="normalization-layers"><span class="header-section-number">2.1.5</span> Normalization Layers</h3>
+<p>Normalization Layers是Transformer中的一个重要组件，它用于对模型的输入进行归一化处理，从而提高模型的训练稳定性和性能。常见的Normalization方法有Layer Normalization，Batch Normalization，等等。在LLM中，通常使用的是Layer Normalization，它通过对每个样本的特征进行归一化来提高模型的训练稳定性和性能。Normalization Layers的作用是对模型的输入进行归一化处理，使得模型能够更好地学习输入数据中的模式和规律，从而提高模型的表达能力和性能。</p>
+<section id="position-of-normalization" class="level4" data-number="2.1.5.1">
+<h4 data-number="2.1.5.1" class="anchored" data-anchor-id="position-of-normalization"><span class="header-section-number">2.1.5.1</span> Position of Normalization</h4>
+<p>主要有Pre-Norm和Post Norm</p>
+</section>
+</section>
+</section>
+<section id="scaling-laws" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="scaling-laws"><span class="header-section-number">2.2</span> Scaling Laws</h2>
+<p>当我们提出一个模型，我们通常关心模型的性能和效率。性能通常是指模型在某个任务上的表现，比如准确率，召回率，等等。效率通常是指模型的计算资源消耗，比如训练时间，推理时间，等等。Scaling Laws是指当我们增加模型的参数量或者训练数据量时，模型的性能和效率会如何变化。通常来说，当我们增加模型的参数量或者训练数据量时，模型的性能会提高，但是效率会降低。这就是为什么我们需要在性能和效率之间进行权衡，以找到一个合适的模型规模。</p>
+</section>
+</section>
+<section id="parallelism" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Parallelism</h1>
+<p>LLM之所以这么，并且能够训练这么大规模的模型，主要是因为它的Parallelism非常好。我们可以通过数据并行，模型并行，流水线并行等方式来加速训练过程。</p>
+<section id="data-parallelism" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="data-parallelism"><span class="header-section-number">3.1</span> Data Parallelism</h2>
+<p>Data Parallelism是指将训练数据分成多个小批次，然后在多个GPU上并行地处理这些小批次。每个GPU都会计算一个小批次的梯度，然后通过通信来同步这些梯度，从而更新模型的参数。Data Parallelism的主要优势在于它能够通过并行处理训练数据来加速训练过程，同时又能够保持模型的性能和效率。</p>
+</section>
+<section id="model-parallelism" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="model-parallelism"><span class="header-section-number">3.2</span> Model Parallelism</h2>
+</section>
+<section id="pipeline-parallelism" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="pipeline-parallelism"><span class="header-section-number">3.3</span> Pipeline Parallelism</h2>
+</section>
+<section id="zero" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="zero"><span class="header-section-number">3.4</span> ZeRO</h2>
+</section>
+<section id="fsdp" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="fsdp"><span class="header-section-number">3.5</span> FSDP</h2>
+</section>
+<section id="d-parallelism" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="d-parallelism"><span class="header-section-number">3.6</span> 4D Parallelism</h2>
+</section>
+</section>
+<section id="optimizer" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Optimizer</h1>
+<p>模型训练最重要的组件之一就是Optimizer，它负责更新模型的参数以最小化损失函数。常见的Optimizer有SGD，Adam，AdamW，等等。在LLM中，通常使用的是AdamW，它是一种改进的Adam优化器，通过引入权重衰减来提高模型的泛化能力和性能。Optimizer的选择对于模型的训练效果和效率有着重要的影响，因此在训练LLM时需要仔细选择合适的Optimizer。</p>
+<section id="adamw" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="adamw"><span class="header-section-number">4.1</span> AdamW</h2>
+</section>
+<section id="muon" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="muon"><span class="header-section-number">4.2</span> Muon</h2>
+</section>
+<section id="soap" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="soap"><span class="header-section-number">4.3</span> SOAP</h2>
+</section>
+</section>
+<section id="fine-tuning" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Fine-Tuning</h1>
+<p>当我们训练完一个LLM之后，我们通常会进行Fine-Tuning来让模型在特定的任务或者领域上表现更好。Fine-Tuning是指在一个预训练的模型基础上，使用一个特定的任务或者领域的数据集来进一步训练模型，以提高在该任务上的性能。Fine-Tuning的主要优势在于它能够通过利用预训练模型中学到的知识来提高在特定任务上的性能，同时又能够减少训练时间和计算资源的消耗。</p>
+<section id="lora-q-lora" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="lora-q-lora"><span class="header-section-number">5.1</span> LoRA &amp; Q-LoRA</h2>
+</section>
+<section id="section" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="section"><span class="header-section-number">5.2</span> </h2>
+</section>
+</section>
+<section id="post-training" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Post-Training</h1>
+<section id="supervised-fine-tuning-sft" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="supervised-fine-tuning-sft"><span class="header-section-number">6.1</span> Supervised Fine-Tuning (SFT)</h2>
+</section>
+<section id="reinforcement-learning-with-human-feedback-rlhf" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="reinforcement-learning-with-human-feedback-rlhf"><span class="header-section-number">6.2</span> Reinforcement Learning with Human Feedback (RLHF)</h2>
+</section>
+<section id="reinforcement-learning-with-verified-feedback-rlvf" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="reinforcement-learning-with-verified-feedback-rlvf"><span class="header-section-number">6.3</span> Reinforcement Learning with Verified Feedback (RLVF)</h2>
+</section>
+<section id="reinforcement-learning-with-ai-feedback-rlaif" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="reinforcement-learning-with-ai-feedback-rlaif"><span class="header-section-number">6.4</span> Reinforcement Learning with AI Feedback (RLAIF)</h2>
+</section>
+</section>
+<section id="inference-deployment" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Inference &amp; Deployment</h1>
+<p>在我们训练完，并且Fine-Tuning完一个LLM之后，我们需要将模型部署到生产环境中，以供用户使用。在这个过程中，我们需要考虑模型的Inference效率，安全性，等等。最主要的是模型Inference的效率，因为LLM通常是非常大的模型，具有数十亿甚至数百亿的参数，因此在推理过程中需要消耗大量的计算资源和时间。因此，在部署LLM时，我们需要采取一些优化措施来提高模型的Inference效率，比如使用量化技术，蒸馏技术，等等。</p>
+<section id="kv-cache" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="kv-cache"><span class="header-section-number">7.1</span> KV-Cache</h2>
+</section>
+<section id="quantization" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="quantization"><span class="header-section-number">7.2</span> Quantization</h2>
+</section>
+<section id="distillation" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="distillation"><span class="header-section-number">7.3</span> Distillation</h2>
+</section>
+</section>
+<section id="continuous-learning" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Continuous Learning</h1>
+<p>当然，LLM的训练和部署并不是一个一次性的过程，而是一个持续的过程。我们需要不断地收集新的数据，更新模型，以适应不断变化的环境和需求。这就是Continuous Learning的概念，它指的是模型能够在部署后继续学习和适应新的数据和任务，从而保持其性能和效率。</p>
+</section>
+<section id="llm-applications" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> LLM Applications</h1>
+<p>在训练完LLM之后，</p>
+<section id="multi-modality-llm" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="multi-modality-llm"><span class="header-section-number">9.1</span> Multi-Modality LLM</h2>
+<p>最训练完LLM之后，我们可以讲它最为基座，继续训练它，让它能够处理多模态的数据，比如图像，视频，音频等。这些模型通常被称为Multi-Modality LLM，比如GPT-4，Gemini，等等。Multi-Modality LLM的主要优势在于它能够通过处理多模态的数据来提高模型的表达能力和性能，从而更好地理解和生成自然语言。</p>
+</section>
+<section id="llm-based-autonomous-agents" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="llm-based-autonomous-agents"><span class="header-section-number">9.2</span> LLM-Based Autonomous Agents</h2>
+<p>这个现在最火的OpenClaw， Claude Code等，都是基于LLM的Autonomous Agents。它们通过利用LLM的强大语言理解和生成能力，结合一些特定的工具和环境交互能力，来实现自主决策和行动。这些Autonomous Agents能够在各种任务中表现出色，比如对话系统，代码生成，等等。LLM-Based Autonomous Agents的主要优势在于它们能够通过利用LLM的强大语言理解和生成能力来实现自主决策和行动，从而更好地满足用户的需求。 它利用LLM作为它的大脑</p>
+</section>
+<section id="vision-language-actionvla-models" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="vision-language-actionvla-models"><span class="header-section-number">9.3</span> Vision Language Action(VLA) Models</h2>
+<div id="fig-openVLA-overview.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-openVLA-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/openVLA-overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Overview of OpenVLA."><img src="./assets/openVLA-overview.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-openVLA-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Overview of OpenVLA.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="future-of-llm" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Future of LLM</h1>
+<p>现在LLM的已经非常强大了，但是仍然还有很多的局限性，比如Inference的效率，不管怎么优化，LLM的Inference效率仍然是一个瓶颈。还有就是LLM的安全性和伦理问题，LLM可能会生成有害的内容，或者被恶意使用。</p>
+</section>
+<section id="related-resources" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Related Resources</h1>
+<p>关于LLM的资源非常多，以下是一些我觉得比较有用的资源：</p>
+</section>
+<section id="in-the-end" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> In the end</h1>
+<p>创作不易，如果你觉得内容对你有帮助，欢迎请我 <span class="hilite-teal">喝杯咖啡/支付宝红包</span>，支持我继续创作！你们的支持是我最大的动力！ :) <br></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="../../../style/AliPay.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="../../../style/AliPay.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img" width="400"></a></p>
+</figure>
+</div>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-YaRNEfficientContext2023peng" class="csl-entry" role="listitem">
+Peng, Bowen, Jeffrey Quesnelle, Honglu Fan, and Enrico Shippole. 2023. <span>“<span>YaRN</span>: <span>Efficient Context Window Extension</span> of <span>Large Language Models</span>.”</span> November 1, 2023. <a href="https://doi.org/10.48550/arXiv.2309.00071">https://doi.org/10.48550/arXiv.2309.00071</a>.
+</div>
+<div id="ref-AttentionAllYou2023vaswani" class="csl-entry" role="listitem">
+Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. 2023. <span>“Attention <span>Is All You Need</span>.”</span> August 2, 2023. <a href="https://doi.org/10.48550/arXiv.1706.03762">https://doi.org/10.48550/arXiv.1706.03762</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark_dimmed">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "YYZhang2025/YYZhang2025.github.io";
+    script.dataset.repoId = "R_kgDOQlDTcQ";
+    script.dataset.category = "General";
+    script.dataset.categoryId = "DIC_kwDOQlDTcc4C2MRz";
+    script.dataset.mapping = "title";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "top";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© CC-By Yuyang, 2025</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This page is built with ❤️ and <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+    <script type="text/javascript">
+    (function(d) {
+      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+        let pseudocodeOptions = {
+          indentSize: el.dataset.indentSize,
+          commentDelimiter: el.dataset.commentDelimiter,
+          lineNumber: el.dataset.lineNumber.toLowerCase() === "true",
+          lineNumberPunc: el.dataset.lineNumberPunc,
+          noEnd: el.dataset.noEnd.toLowerCase() === "true",
+          titlePrefix: el.dataset.captionPrefix
+        };
+        pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
+      });
+    })(document);
+    (function(d) {
+      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+        let captionSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
+        if (captionSpan !== null) {
+          let captionPrefix = el.dataset.captionPrefix + " ";
+          let captionNumber = "";
+          if (el.dataset.pseudocodeNumber) {
+            captionNumber = el.dataset.pseudocodeNumber + " ";
+            if (el.dataset.chapterLevel) {
+              captionNumber = el.dataset.chapterLevel + "." + captionNumber;
+            }
+          }
+          captionSpan.innerHTML = captionPrefix + captionNumber;
+        }
+      });
+    })(document);
+    </script>
+  
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
+</body></html>

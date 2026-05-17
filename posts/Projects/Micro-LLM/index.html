@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Yuyang Zhang">
+<meta name="dcterms.date" content="2026-03-01">
+<meta name="keywords" content="LLM, Pre-Training, Scaling Laws, SFT, GRPO, Mixed Precision Training, ZeRO-2">
+<meta name="description" content="Built an end-to-end LLM stack from scratch, covering scaling law experiments, compute-optimal model sizing, pre-training, supervised fine-tuning, and GRPO-based post-training. Trained a ChatGPT-style conversational model and deployed an interactive demo to showcase instruction following, reasoning, and multi-turn generation.">
+
+<title>ChatLLM: From-Scratch LLM Training and Post-Training Stack</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../.././style/icon.avif" rel="icon">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-44402bf054b1fe078bc4e7aebe64bce9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
+<script src="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.js"></script>
+<link href="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.css" rel="stylesheet">
+<script src="../../../site_libs/quarto-contrib/videojs/video.min.js"></script>
+<link href="../../../site_libs/quarto-contrib/videojs/video-js.css" rel="stylesheet">
+<script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-E8EJCZTZG1"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
+</script>
+<link href="https://fonts.cdnfonts.com/css/cmu-sans-serif" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<script>
+    MathJax = {
+        loader: {
+        load: ['[tex]/boldsymbol']
+        },
+        tex: {
+        tags: "all",
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']],
+        processEscapes: true,
+        processEnvironments: true,
+        packages: {
+            '[+]': ['boldsymbol']
+        }
+        }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) {
+        block.classList.toggle("is-open");
+      }
+    });
+
+    // 可访问性（键盘）
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
+      }
+    });
+  });
+});
+</script>
+    <style type="text/css">
+    .ps-root .ps-algorithm {
+      border-top: 2px solid;
+      border-bottom: 2px solid;
+    }
+    .pseudocode-container {
+      text-align: left;
+    }
+    </style>
+  
+      <style type="text/css">
+      .ps-algorithm > .ps-line {
+        text-align: left;
+      }
+      </style>
+    
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="ChatLLM: From-Scratch LLM Training and Post-Training Stack">
+<meta property="og:description" content="Built an end-to-end LLM stack from scratch, covering scaling law experiments, compute-optimal model sizing, pre-training, supervised fine-tuning, and GRPO-based post-training. Trained a ChatGPT-style conversational model and deployed an interactive demo to showcase instruction following, reasoning, and multi-turn generation.">
+<meta property="og:image" content="./assets/cover.gif">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/YYZhang2025"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/zhang-yuyang/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../posts/Blogs/blogs_index.html"> 
+<span class="menu-text">Blogs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../posts/Projects/projects_index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://yyzhang2025.github.io/LearningNotes/"> 
+<span class="menu-text">100 PwC</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../posts/CS336/index.html"> 
+<span class="menu-text">Stanford CS336</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title">ChatLLM: From-Scratch LLM Training and Post-Training Stack</h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#about-this-project" id="toc-about-this-project" class="nav-link active" data-scroll-target="#about-this-project"><span class="header-section-number">1</span> About this Project</a></li>
+  <li><a href="#create-a-virtual-environment" id="toc-create-a-virtual-environment" class="nav-link" data-scroll-target="#create-a-virtual-environment"><span class="header-section-number">2</span> Create a Virtual Environment</a></li>
+  <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model"><span class="header-section-number">3</span> Model</a>
+  <ul>
+  <li><a href="#linear-layer" id="toc-linear-layer" class="nav-link" data-scroll-target="#linear-layer"><span class="header-section-number">3.1</span> Linear Layer</a></li>
+  <li><a href="#word-embedding-layer" id="toc-word-embedding-layer" class="nav-link" data-scroll-target="#word-embedding-layer"><span class="header-section-number">3.2</span> Word Embedding Layer</a></li>
+  <li><a href="#rope-position-embedding" id="toc-rope-position-embedding" class="nav-link" data-scroll-target="#rope-position-embedding"><span class="header-section-number">3.3</span> RoPE Position Embedding</a></li>
+  <li><a href="#normalization" id="toc-normalization" class="nav-link" data-scroll-target="#normalization"><span class="header-section-number">3.4</span> Normalization</a>
+  <ul>
+  <li><a href="#pre-normalization" id="toc-pre-normalization" class="nav-link" data-scroll-target="#pre-normalization"><span class="header-section-number">3.4.1</span> Pre-Normalization</a></li>
+  </ul></li>
+  <li><a href="#attention-mechanism" id="toc-attention-mechanism" class="nav-link" data-scroll-target="#attention-mechanism"><span class="header-section-number">3.5</span> Attention Mechanism</a>
+  <ul>
+  <li><a href="#globel-attention" id="toc-globel-attention" class="nav-link" data-scroll-target="#globel-attention"><span class="header-section-number">3.5.1</span> Globel Attention</a></li>
+  <li><a href="#sliding-window-attention" id="toc-sliding-window-attention" class="nav-link" data-scroll-target="#sliding-window-attention"><span class="header-section-number">3.5.2</span> Sliding Window Attention</a></li>
+  <li><a href="#hybrid-attention" id="toc-hybrid-attention" class="nav-link" data-scroll-target="#hybrid-attention"><span class="header-section-number">3.5.3</span> Hybrid Attention</a></li>
+  </ul></li>
+  <li><a href="#feed-forward-network-ffn" id="toc-feed-forward-network-ffn" class="nav-link" data-scroll-target="#feed-forward-network-ffn"><span class="header-section-number">3.6</span> Feed-Forward Network (FFN)</a></li>
+  <li><a href="#attention-residual" id="toc-attention-residual" class="nav-link" data-scroll-target="#attention-residual"><span class="header-section-number">3.7</span> Attention Residual</a></li>
+  <li><a href="#dummy-test" id="toc-dummy-test" class="nav-link" data-scroll-target="#dummy-test"><span class="header-section-number">3.8</span> Dummy Test</a></li>
+  </ul></li>
+  <li><a href="#optimizer" id="toc-optimizer" class="nav-link" data-scroll-target="#optimizer"><span class="header-section-number">4</span> Optimizer</a>
+  <ul>
+  <li><a href="#adamw" id="toc-adamw" class="nav-link" data-scroll-target="#adamw"><span class="header-section-number">4.1</span> AdamW</a></li>
+  <li><a href="#muon" id="toc-muon" class="nav-link" data-scroll-target="#muon"><span class="header-section-number">4.2</span> Muon</a></li>
+  <li><a href="#zero-2" id="toc-zero-2" class="nav-link" data-scroll-target="#zero-2"><span class="header-section-number">4.3</span> ZeRO-2</a></li>
+  </ul></li>
+  <li><a href="#tokenizer" id="toc-tokenizer" class="nav-link" data-scroll-target="#tokenizer"><span class="header-section-number">5</span> Tokenizer</a></li>
+  <li><a href="#dataset-dataloader" id="toc-dataset-dataloader" class="nav-link" data-scroll-target="#dataset-dataloader"><span class="header-section-number">6</span> Dataset &amp; DataLoader</a></li>
+  <li><a href="#scaling-laws" id="toc-scaling-laws" class="nav-link" data-scroll-target="#scaling-laws"><span class="header-section-number">7</span> Scaling Laws</a></li>
+  <li><a href="#pre-training-evaluateion-metrics" id="toc-pre-training-evaluateion-metrics" class="nav-link" data-scroll-target="#pre-training-evaluateion-metrics"><span class="header-section-number">8</span> Pre-Training Evaluateion Metrics</a></li>
+  <li><a href="#pre-training" id="toc-pre-training" class="nav-link" data-scroll-target="#pre-training"><span class="header-section-number">9</span> Pre-Training</a>
+  <ul>
+  <li><a href="#mixed-precision-training" id="toc-mixed-precision-training" class="nav-link" data-scroll-target="#mixed-precision-training"><span class="header-section-number">9.1</span> Mixed Precision Training</a></li>
+  <li><a href="#gradient-accumulation" id="toc-gradient-accumulation" class="nav-link" data-scroll-target="#gradient-accumulation"><span class="header-section-number">9.2</span> Gradient Accumulation</a></li>
+  </ul></li>
+  <li><a href="#instruction-tuning-sft" id="toc-instruction-tuning-sft" class="nav-link" data-scroll-target="#instruction-tuning-sft"><span class="header-section-number">10</span> Instruction-Tuning (SFT)</a>
+  <ul>
+  <li><a href="#dataset-preparation" id="toc-dataset-preparation" class="nav-link" data-scroll-target="#dataset-preparation"><span class="header-section-number">10.1</span> Dataset Preparation</a>
+  <ul>
+  <li><a href="#basic-task" id="toc-basic-task" class="nav-link" data-scroll-target="#basic-task"><span class="header-section-number">10.1.1</span> Basic Task</a></li>
+  <li><a href="#smoltalk" id="toc-smoltalk" class="nav-link" data-scroll-target="#smoltalk"><span class="header-section-number">10.1.2</span> SmolTalk</a></li>
+  <li><a href="#arc" id="toc-arc" class="nav-link" data-scroll-target="#arc"><span class="header-section-number">10.1.3</span> Arc</a></li>
+  <li><a href="#mmlu" id="toc-mmlu" class="nav-link" data-scroll-target="#mmlu"><span class="header-section-number">10.1.4</span> MMLU</a></li>
+  <li><a href="#gsm8k" id="toc-gsm8k" class="nav-link" data-scroll-target="#gsm8k"><span class="header-section-number">10.1.5</span> GSM8K</a></li>
+  <li><a href="#customized-instruction-dataset" id="toc-customized-instruction-dataset" class="nav-link" data-scroll-target="#customized-instruction-dataset"><span class="header-section-number">10.1.6</span> Customized Instruction Dataset</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#post-training-grpo" id="toc-post-training-grpo" class="nav-link" data-scroll-target="#post-training-grpo"><span class="header-section-number">11</span> Post-Training (GRPO)</a></li>
+  <li><a href="#gradio-chat-interface" id="toc-gradio-chat-interface" class="nav-link" data-scroll-target="#gradio-chat-interface"><span class="header-section-number">12</span> Gradio Chat Interface</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">13</span> Conclusion</a></li>
+  <li><a href="#whats-next" id="toc-whats-next" class="nav-link" data-scroll-target="#whats-next"><span class="header-section-number">14</span> What’s Next</a>
+  <ul>
+  <li><a href="#autoresearch" id="toc-autoresearch" class="nav-link" data-scroll-target="#autoresearch"><span class="header-section-number">14.1</span> AutoResearch</a></li>
+  <li><a href="#multi-modality-llm" id="toc-multi-modality-llm" class="nav-link" data-scroll-target="#multi-modality-llm"><span class="header-section-number">14.2</span> Multi-Modality LLM</a></li>
+  <li><a href="#inference-system" id="toc-inference-system" class="nav-link" data-scroll-target="#inference-system"><span class="header-section-number">14.3</span> Inference System</a></li>
+  </ul></li>
+  <li><a href="#in-the-end" id="toc-in-the-end" class="nav-link" data-scroll-target="#in-the-end"><span class="header-section-number">15</span> In the end</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">ChatLLM: From-Scratch LLM Training and Post-Training Stack</h1>
+</div>
+
+<div>
+  <div class="description">
+    Built an end-to-end LLM stack from scratch, covering scaling law experiments, compute-optimal model sizing, pre-training, supervised fine-tuning, and GRPO-based post-training. Trained a ChatGPT-style conversational model and deployed an interactive demo to showcase instruction following, reasoning, and multi-turn generation.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Yuyang Zhang </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 1, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>LLM, Pre-Training, Scaling Laws, SFT, GRPO, Mixed Precision Training, ZeRO-2</p>
+  </div>
+</div>
+
+</header>
+
+<nav id="TOC-body" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#about-this-project" id="toc-about-this-project"><span class="header-section-number">1</span> About this Project</a></li>
+  <li><a href="#create-a-virtual-environment" id="toc-create-a-virtual-environment"><span class="header-section-number">2</span> Create a Virtual Environment</a></li>
+  <li><a href="#model" id="toc-model"><span class="header-section-number">3</span> Model</a>
+  <ul>
+  <li><a href="#linear-layer" id="toc-linear-layer"><span class="header-section-number">3.1</span> Linear Layer</a></li>
+  <li><a href="#word-embedding-layer" id="toc-word-embedding-layer"><span class="header-section-number">3.2</span> Word Embedding Layer</a></li>
+  <li><a href="#rope-position-embedding" id="toc-rope-position-embedding"><span class="header-section-number">3.3</span> RoPE Position Embedding</a></li>
+  <li><a href="#normalization" id="toc-normalization"><span class="header-section-number">3.4</span> Normalization</a>
+  <ul>
+  <li><a href="#pre-normalization" id="toc-pre-normalization"><span class="header-section-number">3.4.1</span> Pre-Normalization</a></li>
+  </ul></li>
+  <li><a href="#attention-mechanism" id="toc-attention-mechanism"><span class="header-section-number">3.5</span> Attention Mechanism</a>
+  <ul>
+  <li><a href="#globel-attention" id="toc-globel-attention"><span class="header-section-number">3.5.1</span> Globel Attention</a></li>
+  <li><a href="#sliding-window-attention" id="toc-sliding-window-attention"><span class="header-section-number">3.5.2</span> Sliding Window Attention</a></li>
+  <li><a href="#hybrid-attention" id="toc-hybrid-attention"><span class="header-section-number">3.5.3</span> Hybrid Attention</a></li>
+  </ul></li>
+  <li><a href="#feed-forward-network-ffn" id="toc-feed-forward-network-ffn"><span class="header-section-number">3.6</span> Feed-Forward Network (FFN)</a></li>
+  <li><a href="#attention-residual" id="toc-attention-residual"><span class="header-section-number">3.7</span> Attention Residual</a></li>
+  <li><a href="#dummy-test" id="toc-dummy-test"><span class="header-section-number">3.8</span> Dummy Test</a></li>
+  </ul></li>
+  <li><a href="#optimizer" id="toc-optimizer"><span class="header-section-number">4</span> Optimizer</a>
+  <ul>
+  <li><a href="#adamw" id="toc-adamw"><span class="header-section-number">4.1</span> AdamW</a></li>
+  <li><a href="#muon" id="toc-muon"><span class="header-section-number">4.2</span> Muon</a></li>
+  <li><a href="#zero-2" id="toc-zero-2"><span class="header-section-number">4.3</span> ZeRO-2</a></li>
+  </ul></li>
+  <li><a href="#tokenizer" id="toc-tokenizer"><span class="header-section-number">5</span> Tokenizer</a></li>
+  <li><a href="#dataset-dataloader" id="toc-dataset-dataloader"><span class="header-section-number">6</span> Dataset &amp; DataLoader</a></li>
+  <li><a href="#scaling-laws" id="toc-scaling-laws"><span class="header-section-number">7</span> Scaling Laws</a></li>
+  <li><a href="#pre-training-evaluateion-metrics" id="toc-pre-training-evaluateion-metrics"><span class="header-section-number">8</span> Pre-Training Evaluateion Metrics</a></li>
+  <li><a href="#pre-training" id="toc-pre-training"><span class="header-section-number">9</span> Pre-Training</a>
+  <ul>
+  <li><a href="#mixed-precision-training" id="toc-mixed-precision-training"><span class="header-section-number">9.1</span> Mixed Precision Training</a></li>
+  <li><a href="#gradient-accumulation" id="toc-gradient-accumulation"><span class="header-section-number">9.2</span> Gradient Accumulation</a></li>
+  </ul></li>
+  <li><a href="#instruction-tuning-sft" id="toc-instruction-tuning-sft"><span class="header-section-number">10</span> Instruction-Tuning (SFT)</a>
+  <ul>
+  <li><a href="#dataset-preparation" id="toc-dataset-preparation"><span class="header-section-number">10.1</span> Dataset Preparation</a>
+  <ul>
+  <li><a href="#basic-task" id="toc-basic-task"><span class="header-section-number">10.1.1</span> Basic Task</a></li>
+  <li><a href="#smoltalk" id="toc-smoltalk"><span class="header-section-number">10.1.2</span> SmolTalk</a></li>
+  <li><a href="#arc" id="toc-arc"><span class="header-section-number">10.1.3</span> Arc</a></li>
+  <li><a href="#mmlu" id="toc-mmlu"><span class="header-section-number">10.1.4</span> MMLU</a></li>
+  <li><a href="#gsm8k" id="toc-gsm8k"><span class="header-section-number">10.1.5</span> GSM8K</a></li>
+  <li><a href="#customized-instruction-dataset" id="toc-customized-instruction-dataset"><span class="header-section-number">10.1.6</span> Customized Instruction Dataset</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#post-training-grpo" id="toc-post-training-grpo"><span class="header-section-number">11</span> Post-Training (GRPO)</a></li>
+  <li><a href="#gradio-chat-interface" id="toc-gradio-chat-interface"><span class="header-section-number">12</span> Gradio Chat Interface</a></li>
+  <li><a href="#conclusion" id="toc-conclusion"><span class="header-section-number">13</span> Conclusion</a></li>
+  <li><a href="#whats-next" id="toc-whats-next"><span class="header-section-number">14</span> What’s Next</a>
+  <ul>
+  <li><a href="#autoresearch" id="toc-autoresearch"><span class="header-section-number">14.1</span> AutoResearch</a></li>
+  <li><a href="#multi-modality-llm" id="toc-multi-modality-llm"><span class="header-section-number">14.2</span> Multi-Modality LLM</a></li>
+  <li><a href="#inference-system" id="toc-inference-system"><span class="header-section-number">14.3</span> Inference System</a></li>
+  </ul></li>
+  <li><a href="#in-the-end" id="toc-in-the-end"><span class="header-section-number">15</span> In the end</a></li>
+  </ul>
+</nav>
+<section id="about-this-project" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> About this Project</h1>
+<p>在这个Project中，我们将从头开始构建一个ChatGPT-Style的LLM系统，我们会包含模型训练的全部过程，包含：</p>
+<ul>
+<li>Pre-Training</li>
+<li>Supervised Fine-Tuning (SFT)</li>
+<li>RLVR(GRPO)</li>
+<li>Evaluation</li>
+</ul>
+<p>通过这个完成这个Project，我相信大家会真正的掌握从0训练一个LLM模型的全过程，理解每个步骤的细节和原理，并且能够自己动手训练一个ChatGPT-Style的模型。个人认为，可以把其当成<a href="https://yyzhang2025.github.io/posts/CS336/">Stanford CS336</a>的Fine-Project，来进一步了解从0训练一个LLM的全过程。在完成的过程中，我们会涉及到很多的技术细节，比如：</p>
+<ul>
+<li>Scaling Laws</li>
+<li>Compute-Optimal Model Sizing</li>
+<li>Mixed Precision Training</li>
+<li>ZeRO-2</li>
+</ul>
+<p>等等，总之这不是一个简单的项目，但是都是值得的。在训练完成后，我们还会部署一个Gradio的Chat界面，让大家拥有自己的ChatGPT！！</p>
+<p>GitHub Repo: <a href="https://github.com/YYZhang2025/Chat-LLM">Chat-LLM</a></p>
+<div id="fig-gradio-interface" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gradio-interface-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-video"><video id="video_shortcode_videojs_video1" class="video-js vjs-default-skin vjs-fluid" controls="" preload="auto" data-setup="{}" title=""><source src="./assets/gradio-interface.mp4"></video></div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gradio-interface-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Gradio Chat interface of final application
+</figcaption>
+</figure>
+</div>
+<p>那么废话不多说了，我们直接进入正题，开始我们的LLM训练之旅吧！</p>
+</section>
+<section id="create-a-virtual-environment" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Create a Virtual Environment</h1>
+<p>当然，在训练之前，我们需要创建一个虚拟环境。我们通过 <code>uv</code> 来管理我们的package，如果没有安装 <code>uv</code>，可以通过下面的命令来安装：</p>
+<div class="sourceCode" id="cb1" data-code-line-numbers=""><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">wget</span> <span class="at">-qO-</span> https://astral.sh/uv/install.sh <span class="kw">|</span> <span class="fu">sh</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="st">"</span><span class="va">$HOME</span><span class="st">/.local/bin:</span><span class="va">$PATH</span><span class="st">"</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="ex">uv</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>之后创建一个 <code>pyproject.toml</code> 文件，来管理我们的依赖：</p>
+<div class="sourceCode" id="cb2" data-code-line-numbers=""><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">[project]</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"chat-llm"</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="dt">readme</span> <span class="op">=</span> <span class="st">"README.md"</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="dt">requires-python</span> <span class="op">=</span> <span class="st">"&gt;=3.10"</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="dt">dependencies</span> <span class="op">=</span> <span class="op">[</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="st">"datasets&gt;=4.0.0"</span><span class="op">,</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a>    <span class="st">"fastapi&gt;=0.117.1"</span><span class="op">,</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>    <span class="st">"ipykernel&gt;=7.1.0"</span><span class="op">,</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a>    <span class="st">"kernels&gt;=0.11.7"</span><span class="op">,</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a>    <span class="st">"matplotlib&gt;=3.10.8"</span><span class="op">,</span></span>
+<span id="cb2-12"><a href="#cb2-12"></a>    <span class="st">"psutil&gt;=7.1.0"</span><span class="op">,</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a>    <span class="st">"python-dotenv&gt;=1.2.1"</span><span class="op">,</span></span>
+<span id="cb2-14"><a href="#cb2-14"></a>    <span class="st">"regex&gt;=2025.9.1"</span><span class="op">,</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a>    <span class="st">"rustbpe&gt;=0.1.0"</span><span class="op">,</span></span>
+<span id="cb2-16"><a href="#cb2-16"></a>    <span class="st">"scipy&gt;=1.15.3"</span><span class="op">,</span></span>
+<span id="cb2-17"><a href="#cb2-17"></a>    <span class="st">"setuptools&gt;=80.9.0"</span><span class="op">,</span></span>
+<span id="cb2-18"><a href="#cb2-18"></a>    <span class="st">"tabulate&gt;=0.9.0"</span><span class="op">,</span></span>
+<span id="cb2-19"><a href="#cb2-19"></a>    <span class="st">"tiktoken&gt;=0.11.0"</span><span class="op">,</span></span>
+<span id="cb2-20"><a href="#cb2-20"></a>    <span class="st">"tokenizers&gt;=0.22.0"</span><span class="op">,</span></span>
+<span id="cb2-21"><a href="#cb2-21"></a>    <span class="st">"torch==2.9.1"</span><span class="op">,</span></span>
+<span id="cb2-22"><a href="#cb2-22"></a>    <span class="st">"transformers&gt;=4.57.3"</span><span class="op">,</span></span>
+<span id="cb2-23"><a href="#cb2-23"></a>    <span class="st">"uvicorn&gt;=0.36.0"</span><span class="op">,</span></span>
+<span id="cb2-24"><a href="#cb2-24"></a>    <span class="st">"wandb&gt;=0.21.3"</span><span class="op">,</span></span>
+<span id="cb2-25"><a href="#cb2-25"></a>    <span class="st">"zstandard&gt;=0.25.0"</span><span class="op">,</span></span>
+<span id="cb2-26"><a href="#cb2-26"></a>    <span class="st">"fire==0.7.1"</span><span class="op">,</span></span>
+<span id="cb2-27"><a href="#cb2-27"></a>    <span class="st">"gradio==6.10.0"</span><span class="op">,</span></span>
+<span id="cb2-28"><a href="#cb2-28"></a><span class="op">]</span></span>
+<span id="cb2-29"><a href="#cb2-29"></a></span>
+<span id="cb2-30"><a href="#cb2-30"></a></span>
+<span id="cb2-31"><a href="#cb2-31"></a><span class="co"># target torch to cuda 12.8 or CPU</span></span>
+<span id="cb2-32"><a href="#cb2-32"></a><span class="kw">[tool.uv.sources]</span></span>
+<span id="cb2-33"><a href="#cb2-33"></a><span class="dt">torch</span> <span class="op">=</span> <span class="op">[</span></span>
+<span id="cb2-34"><a href="#cb2-34"></a>    <span class="op">{ </span><span class="dt">index</span><span class="op"> =</span> <span class="st">"pytorch-cpu"</span><span class="op">, </span><span class="dt">extra</span><span class="op"> =</span> <span class="st">"cpu"</span><span class="op"> },</span></span>
+<span id="cb2-35"><a href="#cb2-35"></a>    <span class="op">{ </span><span class="dt">index</span><span class="op"> =</span> <span class="st">"pytorch-cu128"</span><span class="op">, </span><span class="dt">extra</span><span class="op"> =</span> <span class="st">"gpu"</span><span class="op"> },</span></span>
+<span id="cb2-36"><a href="#cb2-36"></a><span class="op">]</span></span>
+<span id="cb2-37"><a href="#cb2-37"></a></span>
+<span id="cb2-38"><a href="#cb2-38"></a><span class="kw">[[tool.uv.index]]</span></span>
+<span id="cb2-39"><a href="#cb2-39"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"pytorch-cpu"</span></span>
+<span id="cb2-40"><a href="#cb2-40"></a><span class="dt">url</span> <span class="op">=</span> <span class="st">"https://download.pytorch.org/whl/cpu"</span></span>
+<span id="cb2-41"><a href="#cb2-41"></a><span class="dt">explicit</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb2-42"><a href="#cb2-42"></a></span>
+<span id="cb2-43"><a href="#cb2-43"></a><span class="kw">[[tool.uv.index]]</span></span>
+<span id="cb2-44"><a href="#cb2-44"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"pytorch-cu128"</span></span>
+<span id="cb2-45"><a href="#cb2-45"></a><span class="dt">url</span> <span class="op">=</span> <span class="st">"https://download.pytorch.org/whl/cu128"</span></span>
+<span id="cb2-46"><a href="#cb2-46"></a><span class="dt">explicit</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb2-47"><a href="#cb2-47"></a></span>
+<span id="cb2-48"><a href="#cb2-48"></a><span class="kw">[tool.setuptools.packages.find]</span></span>
+<span id="cb2-49"><a href="#cb2-49"></a><span class="dt">include</span> <span class="op">=</span> <span class="op">[</span><span class="st">"chat_llm*"</span><span class="op">]</span></span>
+<span id="cb2-50"><a href="#cb2-50"></a></span>
+<span id="cb2-51"><a href="#cb2-51"></a><span class="kw">[project.optional-dependencies]</span></span>
+<span id="cb2-52"><a href="#cb2-52"></a><span class="dt">cpu</span> <span class="op">=</span> <span class="op">[</span></span>
+<span id="cb2-53"><a href="#cb2-53"></a>    <span class="st">"torch==2.9.1"</span><span class="op">,</span></span>
+<span id="cb2-54"><a href="#cb2-54"></a><span class="op">]</span></span>
+<span id="cb2-55"><a href="#cb2-55"></a><span class="dt">gpu</span> <span class="op">=</span> <span class="op">[</span></span>
+<span id="cb2-56"><a href="#cb2-56"></a>    <span class="st">"torch==2.9.1"</span><span class="op">,</span></span>
+<span id="cb2-57"><a href="#cb2-57"></a><span class="op">]</span></span>
+<span id="cb2-58"><a href="#cb2-58"></a></span>
+<span id="cb2-59"><a href="#cb2-59"></a><span class="kw">[tool.uv]</span></span>
+<span id="cb2-60"><a href="#cb2-60"></a><span class="dt">conflicts</span> <span class="op">=</span> <span class="op">[</span></span>
+<span id="cb2-61"><a href="#cb2-61"></a>    <span class="op">[</span></span>
+<span id="cb2-62"><a href="#cb2-62"></a>        <span class="op">{ </span><span class="dt">extra</span><span class="op"> =</span> <span class="st">"cpu"</span><span class="op"> },</span></span>
+<span id="cb2-63"><a href="#cb2-63"></a>        <span class="op">{ </span><span class="dt">extra</span><span class="op"> =</span> <span class="st">"gpu"</span><span class="op"> },</span></span>
+<span id="cb2-64"><a href="#cb2-64"></a>    <span class="op">],</span></span>
+<span id="cb2-65"><a href="#cb2-65"></a><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>之后我们就可以通过下面的命令来安装我们的依赖了：</p>
+<div class="sourceCode" id="cb3" data-code-line-numbers=""><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="ex">uv</span> sync <span class="co"># This will install the CPU version of PyTorch</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="ex">uv</span> sync <span class="at">--extra</span> gpu <span class="co"># This will install the GPU version of PyTorch</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>激活虚拟环境：</p>
+<div class="sourceCode" id="cb4" data-code-line-numbers=""><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="bu">source</span> .venv/bin/activate</span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import torch; print(torch.__version__); print(torch.version.cuda); print(torch.cuda.is_available())"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>只要看到输出的torch版本和cuda版本，并且 <code>torch.cuda.is_available()</code> 输出为 <code>True</code>，就说明我们成功安装了GPU版本的PyTorch，可以进行LLM的训练了！</p>
+<p>首先我们来定义我们需要的模型结构。</p>
+</section>
+<section id="model" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Model</h1>
+<p>模型的结构主要包含以下几个部分：</p>
+<ul>
+<li>Word Embedding Layer</li>
+<li>RoPE Position Embedding</li>
+<li>Normalization：
+<ul>
+<li>RMSNorm</li>
+<li>QK-Norm</li>
+</ul></li>
+<li>Attention Mechanism
+<ul>
+<li>Global Attention</li>
+<li>Sliding Window Attention</li>
+</ul></li>
+<li>Full Residual Connection</li>
+<li>Feed-Forward Network (FFN)</li>
+<li>Language Modeling Head</li>
+</ul>
+<p>基本上就是一个标准的Decoder-Only的Transformer架构，当然，在每个部分我们都会有一些改进和创新，比如在Position Embedding上，我们会使用RoPE来替代传统的Sinusoidal Position Embedding，在Normalization上，我们会使用RMSNorm来替代传统的LayerNorm，在Attention Mechanism上，我们会使用Global Attention和Sliding Window Attention的结合来提高模型的效率和性能，在Residual Connection上，我们会使用Full Residual Connection来增强模型的表达能力。接下来我们会逐一介绍这些部分的细节和实现。</p>
+<section id="linear-layer" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="linear-layer"><span class="header-section-number">3.1</span> Linear Layer</h2>
+<p>首先我们先定义一个Linear Layer，这个Linear Layer会被我们后续的模型结构所使用。这个Linear Layer的实现非常简单，主要的目的是为了支持后续的Mixed Precision Training<span class="citation" data-cites="MixedPrecisionTraining2018micikevicius">(<a href="#ref-MixedPrecisionTraining2018micikevicius" role="doc-biblioref">Micikevicius et al. 2018</a>)</span>, 主要是在计算过程中使用FP16或者BF16来提高模型的效率和性能。我们会在这个Linear Layer中添加一个参数 <code>dtype</code>，来指定我们使用的数值类型，具体代码如下:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>chat_llm/model/llm.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" data-filename="chat_llm/model/llm.py" data-source-line-numbers="7-9" data-code-line-numbers="7-9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">class</span> Linear(nn.Linear):</span>
+<span id="cb5-2"><a href="#cb5-2"></a>    <span class="co">"""</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co">    A linear layer that supports mixed precision by converting weights and bias to the input dtype during the forward pass.</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="co">    """</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a></span>
+<span id="cb5-6"><a href="#cb5-6"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb5-7"><a href="#cb5-7"></a>        dtype <span class="op">=</span> x.dtype</span>
+<span id="cb5-8"><a href="#cb5-8"></a>        weight <span class="op">=</span> <span class="va">self</span>.weight.to(dtype)</span>
+<span id="cb5-9"><a href="#cb5-9"></a>        bias <span class="op">=</span> <span class="va">self</span>.bias.to(dtype) <span class="cf">if</span> <span class="va">self</span>.bias <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a>        <span class="cf">return</span> F.linear(x, weight, bias)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>通过这个Linear Layer，我们在<code>forward</code>的过程中，显示地将weight和bias转换为输入的数值类型比如 <code>bfloat16</code> 或者 <code>float16</code>，这样就可以支持Mixed Precision Training了。接下来我们会在后续的模型结构中使用这个Linear Layer来构建我们的Transformer架构。</p>
+</section>
+<section id="word-embedding-layer" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="word-embedding-layer"><span class="header-section-number">3.2</span> Word Embedding Layer</h2>
+<p>所有的LLM的模型，不论是基于Transformer框架，还是其他框架，都会有一个Embedding Layer来将所有的输入Tokens（One hot encoding）转化为Dense Vector的形式。通常来说，Embedding Layer的输入是一个整数序列，表示输入文本中的每个Token的索引，输出是一个二维矩阵，每一行对应一个Token的向量表示。这个向量表示可以通过训练来学习得到。我们通过一个简单的 <code>nn.Embedding</code> 来实现这个Embedding Layer，具体代码如下：</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>chat_llm/model/llm.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="chat_llm/model/llm.py" data-source-line-numbers="5-7,11" data-code-line-numbers="5-7,11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">class</span> LLMModel(nn.Module):</span>
+<span id="cb6-2"><a href="#cb6-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config: ModelConfig, padded_vocab_size: <span class="bu">int</span> <span class="op">=</span> <span class="dv">64</span>):</span>
+<span id="cb6-3"><a href="#cb6-3"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb6-4"><a href="#cb6-4"></a>        ...</span>
+<span id="cb6-5"><a href="#cb6-5"></a>        padded_vocab_size <span class="op">=</span> (</span>
+<span id="cb6-6"><a href="#cb6-6"></a>            (config.vocab_size <span class="op">+</span> padded_vocab_size <span class="op">-</span> <span class="dv">1</span>) <span class="op">//</span> padded_vocab_size</span>
+<span id="cb6-7"><a href="#cb6-7"></a>        ) <span class="op">*</span> padded_vocab_size </span>
+<span id="cb6-8"><a href="#cb6-8"></a></span>
+<span id="cb6-9"><a href="#cb6-9"></a>        <span class="va">self</span>.transformer <span class="op">=</span> nn.ModuleDict(</span>
+<span id="cb6-10"><a href="#cb6-10"></a>            {</span>
+<span id="cb6-11"><a href="#cb6-11"></a>                <span class="st">"wte"</span>: nn.Embedding(padded_vocab_size, config.embed_dim), </span>
+<span id="cb6-12"><a href="#cb6-12"></a>                <span class="st">"h"</span>: nn.ModuleList([Block(config, layer_idx) <span class="cf">for</span> layer_idx <span class="kw">in</span> <span class="bu">range</span>(config.n_layers)]),</span>
+<span id="cb6-13"><a href="#cb6-13"></a>            }</span>
+<span id="cb6-14"><a href="#cb6-14"></a>        )</span>
+<span id="cb6-15"><a href="#cb6-15"></a>        ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>值得注意的一个点就是，我们在定义Embedding Layer的时候，通常会将词表大小（vocab size）进行padding，来使其成为一个特定的倍数（第5-7行），比如64的倍数，这样可以更好地利用GPU的计算资源，提高模型的效率和性能。这个就是所谓的”<strong>Nice Number</strong>”, 因为这类尺寸通常更符合现代的GPU和CUDA kernel的实现习惯，主要有以下几个好处：</p>
+<ul>
+<li><strong>更好的Warp 利用</strong>：GPU中的线程是以Warp为单位进行调度的，通常一个Warp包含32个线程。如果模型的维度是32的倍数，那么每个Warp都可以被完全利用，避免了资源的浪费。</li>
+<li><strong>CUDA Kernel优化</strong>：很多CUDA kernel在处理特定尺寸的数据时会有优化，比如当输入的维度是32、64、128等时，CUDA kernel可以更高效地进行计算，减少内存访问的开销。</li>
+<li><strong>更适合显存访问</strong>：GPU 读取显存不是一个元素一个元素慢慢读，而是按固定大小的 memory segment 来取数据。</li>
+<li><strong>Tensor Core优化</strong>：对于NVIDIA的Tensor Core来说，通常要求输入的维度是8、16、32等特定的倍数，这样才能充分利用Tensor Core的计算能力。如果不满足这些条件，则可能无法使用Tensor Core，导致性能下降。</li>
+</ul>
+<p>因此，在设计Embedding Layer的时候，我们通常会将词表大小进行padding，来使其成为一个特定的倍数，这样可以更好地利用GPU的计算资源，提高模型的效率和性能。</p>
+</section>
+<section id="rope-position-embedding" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="rope-position-embedding"><span class="header-section-number">3.3</span> RoPE Position Embedding</h2>
+<p>有了Word Embedding Layer之后，我们就需要引入位置信息了。由于Transformer模型没有循环结构，因此需要通过位置编码来引入位置信息，使模型能够理解输入序列中各个元素的相对位置。传统的Transforme<span class="citation" data-cites="AttentionAllYou2023vaswani">(<a href="#ref-AttentionAllYou2023vaswani" role="doc-biblioref">Vaswani et al. 2023</a>)</span>使用的是<strong>Sinusoidal Position Encoding</strong>，但是在现代的LLM中，我们通常会使用RoPE（Rotary Position Embedding）<span class="citation" data-cites="RoFormerEnhancedTransformer2023su">(<a href="#ref-RoFormerEnhancedTransformer2023su" role="doc-biblioref">Su et al. 2023</a>)</span>来替代传统的Sinusoidal Position Encoding，RoPE是一种基于旋转的位置信息编码方法，它通过对输入的Token向量进行旋转来引入位置信息。具体来说，RoPE将hidden state分成两个一组，然后对每一组进行旋转，旋转的角度由位置信息和hidden state 的维度决定。这样，模型就可以通过旋转后的向量来捕捉输入序列中各个元素的相对位置关系</p>
+<div id="fig-rope-overview.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rope-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/rope-overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;2: "><img src="./assets/rope-overview.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-rope-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2
+</figcaption>
+</figure>
+</div>
+<p>用数学公式表示就是：</p>
+<p><span id="eq-rope-mathematical-formula"><span class="math display">\[
+RoPE(x, m) =
+\begin{pmatrix}
+x_1 \\
+x_2 \\
+x_3 \\
+x_4 \\
+\vdots \\
+x_{d-1} \\
+x_d
+\end{pmatrix}
+\otimes
+\begin{pmatrix}
+\cos m\theta_1 \\
+\cos m\theta_1 \\
+\cos m\theta_2 \\
+\cos m\theta_2 \\
+\vdots \\
+\cos m\theta_{d/2} \\
+\cos m\theta_{d/2}
+\end{pmatrix}
++
+\begin{pmatrix}
+-x_2 \\
+x_1 \\
+-x_4 \\
+x_3 \\
+\vdots \\
+-x_d \\
+x_{d-1}
+\end{pmatrix}
+\otimes
+\begin{pmatrix}
+\sin m\theta_1 \\
+\sin m\theta_1 \\
+\sin m\theta_2 \\
+\sin m\theta_2 \\
+\vdots \\
+\sin m\theta_{d/2} \\
+\sin m\theta_{d/2}
+\end{pmatrix}
+\tag{1}\]</span></span></p>
+<p>我们可以看到，其中<span class="math inline">\((x_1, x_2)\)</span>是一组，<span class="math inline">\((x_3, x_4)\)</span>是一组，以此类推，每一组都会被旋转，旋转的角度由位置信息<span class="math inline">\(m\)</span>和hidden state的维度决定。通过这种方式，RoPE能够引入位置信息，使模型能够捕捉输入序列中各个元素的相对位置关系，从而提高模型的性能和表达能力。其中<span class="math inline">\(\theta_i\)</span> 是一个预定义的频率，通常是根据hidden state的维度来计算的，具体来说，<span class="math inline">\(\theta_i\)</span> 的计算方式如下：</p>
+<p><span id="eq-rope-frequency-mathematical-formula"><span class="math display">\[
+\theta_i = \frac{1}{\text{base}^{2i/d}}
+\tag{2}\]</span></span></p>
+<p>其中，<span class="math inline">\(i\)</span> 是hidden state的维度索引，<span class="math inline">\(d\)</span> 是hidden state的总维度，<span class="math inline">\(\text{base}\)</span> 是一个预定义的常数，通常取值为10,000。base的作用是控制控制 RoPE 中各个维度旋转频率的尺度范围，简单来说就是:</p>
+<ul>
+<li><strong>base 大</strong>：更多低频，旋转更慢，更偏向长距离</li>
+<li><strong>base 小</strong>：更多高频，旋转更快，更偏向短距离</li>
+</ul>
+<p>在我们这个项目中，我们会使用默认的base值<strong>100,000</strong>来计算RoPE的位置编码，这样可以在处理不同长度的输入序列时都能够有较好的性能表现。</p>
+<p>我们来看一下如何用代码来实现:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>chat_llm/model/llm.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" data-filename="chat_llm/model/llm.py" data-code-line-numbers=""><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">def</span> apply_rotary_embedding(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb7-2"><a href="#cb7-2"></a>    <span class="co">"""</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co">    x = cos * x</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co">    """</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>    <span class="cf">assert</span> x.ndim <span class="op">==</span> <span class="dv">4</span>, <span class="st">"Input tensor must be of shape (batch_size, seq_len, num_heads, head_dim)"</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a>    <span class="cf">assert</span> cos.shape <span class="op">==</span> sin.shape, <span class="st">"Cosine and sine tensors must have the same shape"</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a>    <span class="cf">assert</span> cos.ndim <span class="op">==</span> <span class="dv">4</span> <span class="kw">and</span> sin.ndim <span class="op">==</span> <span class="dv">4</span>, (</span>
+<span id="cb7-8"><a href="#cb7-8"></a>        <span class="st">"Cosine and sine tensors must be of shape (1, seq_len, num_heads, head_dim // 2)"</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a>    )</span>
+<span id="cb7-10"><a href="#cb7-10"></a></span>
+<span id="cb7-11"><a href="#cb7-11"></a>    x1, x2 <span class="op">=</span> x.chunk(<span class="dv">2</span>, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb7-12"><a href="#cb7-12"></a>    y1 <span class="op">=</span> x1 <span class="op">*</span> cos <span class="op">+</span> x2 <span class="op">*</span> sin</span>
+<span id="cb7-13"><a href="#cb7-13"></a>    y2 <span class="op">=</span> x1 <span class="op">*</span> (<span class="op">-</span>sin) <span class="op">+</span> x2 <span class="op">*</span> cos</span>
+<span id="cb7-14"><a href="#cb7-14"></a>    <span class="cf">return</span> torch.cat([y1, y2], dim<span class="op">=-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>接下来，我们看一下如何计算cosine和sine的值，这些值是根据位置信息<span class="math inline">\(m\)</span>和hidden state的维度来计算的，具体代码如下：</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>chat_llm/model/llm.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb8" data-filename="chat_llm/model/llm.py" data-code-line-numbers=""><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">def</span> pre_compute_cos_sin(</span>
+<span id="cb8-2"><a href="#cb8-2"></a>    max_seq_len: <span class="bu">int</span>,</span>
+<span id="cb8-3"><a href="#cb8-3"></a>    head_dim: <span class="bu">int</span>,</span>
+<span id="cb8-4"><a href="#cb8-4"></a>    base: <span class="bu">int</span> <span class="op">=</span> <span class="dv">100_000</span>,</span>
+<span id="cb8-5"><a href="#cb8-5"></a>    device: torch.device <span class="op">=</span> torch.device(<span class="st">"cpu"</span>),</span>
+<span id="cb8-6"><a href="#cb8-6"></a>    dtype: torch.dtype <span class="op">=</span> torch.float32,</span>
+<span id="cb8-7"><a href="#cb8-7"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[torch.Tensor, torch.Tensor]:</span>
+<span id="cb8-8"><a href="#cb8-8"></a>    channel_range <span class="op">=</span> torch.arange(<span class="dv">0</span>, head_dim, <span class="dv">2</span>, device<span class="op">=</span>device, dtype<span class="op">=</span>torch.float32)</span>
+<span id="cb8-9"><a href="#cb8-9"></a>    inv_freq <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> (base <span class="op">**</span> (channel_range <span class="op">/</span> head_dim))</span>
+<span id="cb8-10"><a href="#cb8-10"></a>    pos_ids <span class="op">=</span> torch.arange(max_seq_len, device<span class="op">=</span>device, dtype<span class="op">=</span>torch.float32)</span>
+<span id="cb8-11"><a href="#cb8-11"></a></span>
+<span id="cb8-12"><a href="#cb8-12"></a>    freqs <span class="op">=</span> torch.einsum(<span class="st">"i,j-&gt;ij"</span>, pos_ids, inv_freq)  <span class="co"># (max_seq_len, head_dim // 2)</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a>    cos, sin <span class="op">=</span> freqs.cos(), freqs.sin()  <span class="co"># (max_seq_len, head_dim // 2)</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a>    cos, sin <span class="op">=</span> cos.to(dtype<span class="op">=</span>dtype), sin.to(dtype<span class="op">=</span>dtype)</span>
+<span id="cb8-15"><a href="#cb8-15"></a>    cos <span class="op">=</span> cos[<span class="va">None</span>, :, <span class="va">None</span>, :]  <span class="co"># (1, max_seq_len, 1, head_dim // 2)</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a>    sin <span class="op">=</span> sin[<span class="va">None</span>, :, <span class="va">None</span>, :]  <span class="co"># (1, max_seq_len, 1, head_dim // 2)</span></span>
+<span id="cb8-17"><a href="#cb8-17"></a>    <span class="cf">return</span> cos, sin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>chat_llm/model/llm.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="chat_llm/model/llm.py" data-code-line-numbers=""><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">class</span> LLMModel(nn.Module):</span>
+<span id="cb9-2"><a href="#cb9-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config: ModelConfig, padded_vocab_size: <span class="bu">int</span> <span class="op">=</span> <span class="dv">64</span>):</span>
+<span id="cb9-3"><a href="#cb9-3"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb9-4"><a href="#cb9-4"></a>        ...</span>
+<span id="cb9-5"><a href="#cb9-5"></a>        <span class="va">self</span>.rotary_seq_len <span class="op">=</span> config.max_seq_len <span class="op">*</span> <span class="dv">10</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a>        cos, sin <span class="op">=</span> pre_compute_cos_sin(</span>
+<span id="cb9-7"><a href="#cb9-7"></a>            max_seq_len<span class="op">=</span><span class="va">self</span>.rotary_seq_len, </span>
+<span id="cb9-8"><a href="#cb9-8"></a>            head_dim<span class="op">=</span>config.head_dim, </span>
+<span id="cb9-9"><a href="#cb9-9"></a>            device<span class="op">=</span>config.device, </span>
+<span id="cb9-10"><a href="#cb9-10"></a>            dtype<span class="op">=</span>config.dtype</span>
+<span id="cb9-11"><a href="#cb9-11"></a>        )</span>
+<span id="cb9-12"><a href="#cb9-12"></a>        <span class="va">self</span>.register_buffer(<span class="st">"cos"</span>, cos, persistent<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb9-13"><a href="#cb9-13"></a>        <span class="va">self</span>.register_buffer(<span class="st">"sin"</span>, sin, persistent<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb9-14"><a href="#cb9-14"></a>        ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>我们通过 <code>pre_compute_cos_sin</code> 函数来预计算cosine和sine的值，并将其注册为模型的buffer，这样在模型的训练和推理过程中，我们就可以直接使用这些预计算的值来进行RoPE的位置编码了。通过这种方式，我们可以高效地引入位置信息，提高模型的性能和表达能力。</p>
+<div class="note foldable is-open">
+<div class="note-header foldable-header">
+<p>NOTE: Different between code and math equation</p>
+</div>
+<div class="note-container foldable-content">
+<p>细心的读者可能会发现，我们代码的实现和我们上面给出的数学公式有一些不同，根据代码的实现方式，RoPE的配对方式是：<span class="math inline">\((x_0,x_{d/2}), (x_1,x_{d/2+1}), \dots, (x_{d/2-1},x_{d-1})\)</span>， 并且旋转的角度是<span class="math inline">\(\begin{pmatrix}
+\cos(m\theta_i) &amp; \sin(m\theta_i)\\
+-\sin(m\theta_i) &amp; \cos(m\theta_i)
+\end{pmatrix}\)</span>，而我们上面给出的数学公式中，配对方式是<span class="math inline">\((x_1,x_2), (x_3,x_4), \dots, (x_{d-1},x_d)\)</span>，并且旋转的角度是<span class="math inline">\(\begin{pmatrix}\cos(m\theta_i) &amp; \sin(m\theta_i)\\
+-\sin(m\theta_i) &amp; \cos(m\theta_i)
+\end{pmatrix}\)</span>。</p>
+<p><span class="math display">\[
+\mathrm{RoPE}_{\text{code}}(x,m)=
+\begin{pmatrix}
+x_1\\
+x_2\\
+x_3\\
+\vdots\\
+x_{d/2}\\
+x_{d/2+1}\\
+x_{d/2+2}\\
+x_{d/2+3}\\
+\vdots\\
+x_d
+\end{pmatrix}
+\otimes
+\begin{pmatrix}
+\cos m\theta_1\\
+\cos m\theta_2\\
+\cos m\theta_3\\
+\vdots\\
+\cos m\theta_{d/2}\\
+\cos m\theta_1\\
+\cos m\theta_2\\
+\cos m\theta_3\\
+\vdots\\
+\cos m\theta_{d/2}
+\end{pmatrix}
++
+\begin{pmatrix}
+x_{d/2+1}\\
+x_{d/2+2}\\
+x_{d/2+3}\\
+\vdots\\
+x_d\\
+-x_1\\
+-x_2\\
+-x_3\\
+\vdots\\
+-x_{d/2}
+\end{pmatrix}
+\otimes
+\begin{pmatrix}
+\sin m\theta_1\\
+\sin m\theta_2\\
+\sin m\theta_3\\
+\vdots\\
+\sin m\theta_{d/2}\\
+\sin m\theta_1\\
+\sin m\theta_2\\
+\sin m\theta_3\\
+\vdots\\
+\sin m\theta_{d/2}
+\end{pmatrix}
+\]</span></p>
+<p>这样实现的好处是： - 代码更加的简单 - 内存访问更加的连续，效率更高 - Fused Kernel的实现更加的简单</p>
+<p>至于为什么用逆时针来旋转，还是顺时针来旋转，这个其实并没有什么区别，主要是一个约定俗成的问题，RoPE的原论文<span class="citation" data-cites="RoFormerEnhancedTransformer2023su">(<a href="#ref-RoFormerEnhancedTransformer2023su" role="doc-biblioref">Su et al. 2023</a>)</span>中是使用逆时针旋转的，我们这里使用顺时针旋转的实现方式，主要是为了代码的简洁性和效率，毕竟在实际的实现中，这两种方式是等价的，并不会对模型的性能和表达能力产生实质性的影响。</p>
+</div>
+</div>
+<p>另外需要一个注意的点就是，我们把RoPE的位置编码的长度设置为 <code>config.max_seq_len * 10</code>，也就是说，我们预计算了10倍于最大序列长度的RoPE位置编码，这样做的主要目的是提前缓存更长范围的位置编码，从而避免在推理阶段处理更长上下文时重新计算 RoPE 参数；如果后续推理长度超过训练长度，也可以直接复用这部分预计算结果。不过，这并不意味着模型一定具备良好的长上下文外推能力。</p>
+</section>
+<section id="normalization" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="normalization"><span class="header-section-number">3.4</span> Normalization</h2>
+<p>在Transformer模型中，Normalization是一个非常重要的组件，它能够帮助模型更好地训练和收敛。传统的Transformer使用的是LayerNorm来进行Normalization，但是在现代的LLM中，我们通常会使用RMSNorm<span class="citation" data-cites="RootMeanSquare2019zhang">(<a href="#ref-RootMeanSquare2019zhang" role="doc-biblioref">Zhang and Sennrich 2019</a>)</span>来替代传统的LayerNorm，RMSNorm是一种基于均方根的Normalization方法，它通过计算输入的均方根来进行Normalization，从而提高模型的效率和性能。具体来说，RMSNorm的数学表达式如下：</p>
+<p><span id="eq-rmsnorm-mathematical-formula"><span class="math display">\[
+\mathrm{RMSNorm}(x) = \frac{x}{\sqrt{\frac{1}{d} \sum_{i=1}^{d} x_i^2 + \epsilon}}
+\tag{3}\]</span></span> 其中，<span class="math inline">\(x\)</span> 是输入的向量，<span class="math inline">\(d\)</span> 是输入向量的维度，<span class="math inline">\(\epsilon\)</span> 是一个小的常数，用于防止除以零。RMSNorm通过计算输入的均方根来进行Normalization，这样可以避免LayerNorm中计算均值和方差的开销，从而提高模型的效率和性能。并且我们丢掉了RMSNorm中的Learnable Parameters，因为在LLM的训练中， Norm 的主要任务是保持数值的稳定性，而不是学习表达能力，丢掉Learnable Parameters可以进一步减少模型的参数量和计算复杂度，从而提高模型的效率和性能。</p>
+<section id="pre-normalization" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="pre-normalization"><span class="header-section-number">3.4.1</span> Pre-Normalization</h3>
+<p>在 LLM 训练中，Normalization 的位置也是一个非常重要的设计选择，常见的方式主要有两种：</p>
+<ul>
+<li>Pre-Normalization（Pre-Norm）：在每个 Transformer 子层（如 Attention 或 MLP）输入之前进行 Normalization。</li>
+<li>Post-Normalization（Post-Norm）：在每个 Transformer 子层输出之后，并在 Residual Add 之后进行 Normalization。</li>
+</ul>
+<div id="fig-pre-norm-vs-post-norm.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pre-norm-vs-post-norm.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/pre-norm-vs-post-norm.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;3: "><img src="./assets/pre-norm-vs-post-norm.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-pre-norm-vs-post-norm.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
+</figcaption>
+</figure>
+</div>
+<p>在最初的 Transformer<span class="citation" data-cites="AttentionAllYou2023vaswani">(<a href="#ref-AttentionAllYou2023vaswani" role="doc-biblioref">Vaswani et al. 2023</a>)</span> 中，采用的是 Post-Norm 的设计；而在现代 LLM 中，更常见的是 Pre-Norm。这是因为 Pre-Norm 通常能够带来更好的训练稳定性，尤其是在模型层数较深时表现更明显。</p>
+<p>具体来说，Pre-Norm 会将每个子层写成：</p>
+<p><span id="eq-pre-norm-mathematical-formula"><span class="math display">\[
+x_{l+1} = x_l + F(\mathrm{Norm}(x_l))
+\tag{4}\]</span></span></p>
+<p>而 Post-Norm 的形式通常为： <span id="eq-post-norm-mathematical-formula"><span class="math display">\[
+x_{l+1} = \mathrm{Norm}(x_l + F(x_l))
+\tag{5}\]</span></span></p>
+<p>相比之下，Pre-Norm 的 Residual 路径更加“干净”，恒等映射 <span class="math inline">\(x_l \to x_{l+1}\)</span> 更容易保留下来，因此梯度可以更直接地沿着 Residual Connection 向前传播。这使得深层网络在训练时更不容易出现梯度消失或梯度爆炸的问题，也因此成为现代大规模语言模型中的主流选择。</p>
+</section>
+</section>
+<section id="attention-mechanism" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="attention-mechanism"><span class="header-section-number">3.5</span> Attention Mechanism</h2>
+<section id="globel-attention" class="level3" data-number="3.5.1">
+<h3 data-number="3.5.1" class="anchored" data-anchor-id="globel-attention"><span class="header-section-number">3.5.1</span> Globel Attention</h3>
+</section>
+<section id="sliding-window-attention" class="level3" data-number="3.5.2">
+<h3 data-number="3.5.2" class="anchored" data-anchor-id="sliding-window-attention"><span class="header-section-number">3.5.2</span> Sliding Window Attention</h3>
+</section>
+<section id="hybrid-attention" class="level3" data-number="3.5.3">
+<h3 data-number="3.5.3" class="anchored" data-anchor-id="hybrid-attention"><span class="header-section-number">3.5.3</span> Hybrid Attention</h3>
+<p>在LLM的训练中，我们通常会使用Global Attention和Sliding Window Attention的结合来提高模型的效率和性能。Global Attention能够捕捉输入序列中各个元素之间的全局依赖关系，而Sliding Window Attention能够捕捉输入序列中各个元素之间的局部依赖关系。通过结合Global Attention和Sliding Window Attention，我们可以同时捕捉输入序列中各个元素之间的全局依赖关系和局部依赖关系，从而提高模型的效率和性能。</p>
+</section>
+</section>
+<section id="feed-forward-network-ffn" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="feed-forward-network-ffn"><span class="header-section-number">3.6</span> Feed-Forward Network (FFN)</h2>
+<p>在模型中，另一个核心组件是 Feed-Forward Network (FFN)。它通常位于每个 Transformer Block 的 Attention 之后，对每个位置的表示独立地进行非线性变换，从而进一步提升模型的表达能力。</p>
+<p>在这里，我们使用的是现代 LLM 中非常常见的一种 FFN 变体，也就是 Gated MLP，更具体地说，可以看作是 SwiGLU 风格 的实现。相比传统 Transformer 中使用的两层 MLP：</p>
+<p><span id="eq-traditional-ffn-mathematical-formula"><span class="math display">\[
+\mathrm{FFN}(x) = W_2 \,\sigma(W_1 x)
+\tag{6}\]</span></span></p>
+<p>Gated MLP 会额外引入一个门控分支，通过门控机制动态控制信息流动，其形式可以写成：</p>
+<p><span id="eq-gated-mlp-mathematical-formula"><span class="math display">\[
+\mathrm{MLP}(x) = W_{\text{down}}\Big( \mathrm{silu}(W_{\text{gate}}x) \odot (W_{\text{up}}x) \Big)
+\tag{7}\]</span></span></p>
+<p>其中：</p>
+<ul>
+<li><span class="math inline">\(W_{\text{gate}}\)</span> 对应 gate_proj</li>
+<li><span class="math inline">\(W_{\text{up}}\)</span> 对应 up_proj</li>
+<li><span class="math inline">\(W_{\text{down}}\)</span> 对应 down_proj</li>
+<li><span class="math inline">\(\odot\)</span> 表示逐元素相乘</li>
+</ul>
+<div id="fig-gated-vs-mlp.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gated-vs-mlp.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/gated-vs-mlp.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;4: "><img src="./assets/gated-vs-mlp.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-gated-vs-mlp.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4
+</figcaption>
+</figure>
+</div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>chat_llm/model/llm.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" data-filename="chat_llm/model/llm.py" data-code-line-numbers=""><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1"></a><span class="kw">class</span> MLP(nn.Module):</span>
+<span id="cb10-2"><a href="#cb10-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config):</span>
+<span id="cb10-3"><a href="#cb10-3"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb10-4"><a href="#cb10-4"></a>        <span class="va">self</span>.gate_up_proj <span class="op">=</span> Linear(config.embed_dim, <span class="dv">2</span> <span class="op">*</span> config.d_ff, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-5"><a href="#cb10-5"></a>        <span class="va">self</span>.down_proj <span class="op">=</span> Linear(config.d_ff, config.embed_dim, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-6"><a href="#cb10-6"></a></span>
+<span id="cb10-7"><a href="#cb10-7"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb10-8"><a href="#cb10-8"></a>        gate, up <span class="op">=</span> <span class="va">self</span>.gate_up_proj(x).chunk(<span class="dv">2</span>, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb10-9"><a href="#cb10-9"></a>        <span class="cf">return</span> <span class="va">self</span>.down_proj(F.silu(gate) <span class="op">*</span> up)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>有一个需要注意的点就是，在这个实现中，我们将 gate_proj 和 up_proj 合并成了一个线性层 gate_up_proj，<span class="math inline">\([x_{\text{gate}}, x_{\text{up}}] = W_x\)</span>，这样可以减少一次矩阵乘法的计算。</p>
+</section>
+<section id="attention-residual" class="level2" data-number="3.7">
+<h2 data-number="3.7" class="anchored" data-anchor-id="attention-residual"><span class="header-section-number">3.7</span> Attention Residual</h2>
+</section>
+<section id="dummy-test" class="level2" data-number="3.8">
+<h2 data-number="3.8" class="anchored" data-anchor-id="dummy-test"><span class="header-section-number">3.8</span> Dummy Test</h2>
+</section>
+</section>
+<section id="optimizer" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Optimizer</h1>
+<section id="adamw" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="adamw"><span class="header-section-number">4.1</span> AdamW</h2>
+</section>
+<section id="muon" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="muon"><span class="header-section-number">4.2</span> Muon</h2>
+</section>
+<section id="zero-2" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="zero-2"><span class="header-section-number">4.3</span> ZeRO-2</h2>
+</section>
+</section>
+<section id="tokenizer" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Tokenizer</h1>
+</section>
+<section id="dataset-dataloader" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Dataset &amp; DataLoader</h1>
+</section>
+<section id="scaling-laws" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Scaling Laws</h1>
+</section>
+<section id="pre-training-evaluateion-metrics" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Pre-Training Evaluateion Metrics</h1>
+</section>
+<section id="pre-training" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Pre-Training</h1>
+<section id="mixed-precision-training" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="mixed-precision-training"><span class="header-section-number">9.1</span> Mixed Precision Training</h2>
+</section>
+<section id="gradient-accumulation" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="gradient-accumulation"><span class="header-section-number">9.2</span> Gradient Accumulation</h2>
+</section>
+</section>
+<section id="instruction-tuning-sft" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Instruction-Tuning (SFT)</h1>
+<p>在我们Pre-Training结束之后，我们得到了一个基础的LLM，这个语言模型可以做词语接龙，比如：</p>
+<div class="highlight">
+<p>猫猫是一个 猫猫是一个很 猫猫是一个很可 猫猫是一个很可爱…</p>
+</div>
+<p>这距离我们的ChatGPT-Style LLM的目标还有一段距离，我们需要让模型可以输出特定的格式，能够理解指令，并且能够对话生成。为此，我们需要进行Instruction-Tuning，也就是SFT（Supervised Fine-Tuning）。我们会使用一些公开的指令数据集，比如Alpaca、ShareGPT等，来对模型进行微调，让它能够更好地理解和执行各种指令。</p>
+<section id="dataset-preparation" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="dataset-preparation"><span class="header-section-number">10.1</span> Dataset Preparation</h2>
+<section id="basic-task" class="level3" data-number="10.1.1">
+<h3 data-number="10.1.1" class="anchored" data-anchor-id="basic-task"><span class="header-section-number">10.1.1</span> Basic Task</h3>
+</section>
+<section id="smoltalk" class="level3" data-number="10.1.2">
+<h3 data-number="10.1.2" class="anchored" data-anchor-id="smoltalk"><span class="header-section-number">10.1.2</span> SmolTalk</h3>
+</section>
+<section id="arc" class="level3" data-number="10.1.3">
+<h3 data-number="10.1.3" class="anchored" data-anchor-id="arc"><span class="header-section-number">10.1.3</span> Arc</h3>
+</section>
+<section id="mmlu" class="level3" data-number="10.1.4">
+<h3 data-number="10.1.4" class="anchored" data-anchor-id="mmlu"><span class="header-section-number">10.1.4</span> MMLU</h3>
+</section>
+<section id="gsm8k" class="level3" data-number="10.1.5">
+<h3 data-number="10.1.5" class="anchored" data-anchor-id="gsm8k"><span class="header-section-number">10.1.5</span> GSM8K</h3>
+</section>
+<section id="customized-instruction-dataset" class="level3" data-number="10.1.6">
+<h3 data-number="10.1.6" class="anchored" data-anchor-id="customized-instruction-dataset"><span class="header-section-number">10.1.6</span> Customized Instruction Dataset</h3>
+<p>除了上述的公开集，我们还可以自己构建一些</p>
+</section>
+</section>
+</section>
+<section id="post-training-grpo" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Post-Training (GRPO)</h1>
+</section>
+<section id="gradio-chat-interface" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Gradio Chat Interface</h1>
+</section>
+<section id="conclusion" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Conclusion</h1>
+</section>
+<section id="whats-next" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> What’s Next</h1>
+<p>完成了这个Project之后，我们真正的理解了如何从0训练一个ChatGPT-Style的LLM系统，基本上市面上所有的SOTA的模型，都是基于这一套技术。当然，学无止境，在这个项目的基础上，我们还有很多可以继续深入的方向：</p>
+<ul>
+<li>AutoResearch：Karpathy大神开源的AutoResearch工具，可以自动迭代模型结构、优化器、超参数等，来找到最优的训练方案。</li>
+<li>Multi-Modality LLM：目前我们训练的模型主要是基于文本的，但未来我们可以尝试训练一个多模态的LLM，能够处理图像、视频、音频等多种输入形式。</li>
+<li>Inference Optimization：优化模型的推理过程</li>
+<li>Reasoning Capabilities：尽管我们实现了GRPO的算法，但是模型的推理能力还有很大的提升空间，比如我们可以尝试新的推理算法，或者引入别的训练数据。</li>
+</ul>
+<section id="autoresearch" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="autoresearch"><span class="header-section-number">14.1</span> AutoResearch</h2>
+<p>在这个nanoChat项目之后，Karpathy大神有开源了一个叫做<a href="https://github.com/karpathy/autoresearch">AutoResearch</a>的神器（GitHub上的Stars比这个项目还高），它通过定义简单的三个文件：</p>
+<ul>
+<li><code>prepare.py</code>：数据准备脚本</li>
+<li><code>train.py</code>：训练脚本</li>
+<li><code>program.md</code>: 告诉Agent该怎么做</li>
+</ul>
+<p>通过这个方法，Agent自动迭代模型结构、优化器、超参数、训练循环、batch size、model size 等等，来找到最优的训练方案。不过我觉得最有创新的方法就是它可以通过git来回滚，保留好的结果，回滚坏的结果。通过这种方式，AutoResearch可以在没有人类干预的情况下自动进行实验和优化，并提高了模型的性能，如下图所示：</p>
+<div id="fig-auto-research.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-auto-research.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/auto-research.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;5: "><img src="./assets/auto-research.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-auto-research.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="multi-modality-llm" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="multi-modality-llm"><span class="header-section-number">14.2</span> Multi-Modality LLM</h2>
+<p>基于文本的LLM已经非常强大了，但未来我们可以尝试训练一个多模态的LLM，能够处理图像、视频、音频等多种输入形式。比如我们可以训练一个模型，输入一张图片，它能够生成对这张图片的描述，或者输入一段视频，它能够总结视频的内容，甚至输入一段音频，它能够转录成文本并进行分析。常见的MLLM的框架有：</p>
+<ul>
+<li>LLaVA</li>
+</ul>
+</section>
+<section id="inference-system" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="inference-system"><span class="header-section-number">14.3</span> Inference System</h2>
+</section>
+</section>
+<section id="in-the-end" class="level1" data-number="15">
+<h1 data-number="15"><span class="header-section-number">15</span> In the end</h1>
+<p>创作不易，如果你觉得内容对你有帮助，欢迎请我 <span class="hilite-teal">喝杯咖啡/支付宝红包</span>，支持我继续创作！你们的支持是我最大的动力！ :) <br></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="../../../style/AliPay.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="../../../style/AliPay.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img" width="400"></a></p>
+</figure>
+</div>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-MixedPrecisionTraining2018micikevicius" class="csl-entry" role="listitem">
+Micikevicius, Paulius, Sharan Narang, Jonah Alben, Gregory Diamos, Erich Elsen, David Garcia, Boris Ginsburg, et al. 2018. <span>“Mixed <span>Precision Training</span>.”</span> February 15, 2018. <a href="https://doi.org/10.48550/arXiv.1710.03740">https://doi.org/10.48550/arXiv.1710.03740</a>.
+</div>
+<div id="ref-RoFormerEnhancedTransformer2023su" class="csl-entry" role="listitem">
+Su, Jianlin, Yu Lu, Shengfeng Pan, Ahmed Murtadha, Bo Wen, and Yunfeng Liu. 2023. <span>“<span>RoFormer</span>: <span>Enhanced Transformer</span> with <span>Rotary Position Embedding</span>.”</span> November 8, 2023. <a href="https://doi.org/10.48550/arXiv.2104.09864">https://doi.org/10.48550/arXiv.2104.09864</a>.
+</div>
+<div id="ref-AttentionAllYou2023vaswani" class="csl-entry" role="listitem">
+Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. 2023. <span>“Attention <span>Is All You Need</span>.”</span> August 2, 2023. <a href="https://doi.org/10.48550/arXiv.1706.03762">https://doi.org/10.48550/arXiv.1706.03762</a>.
+</div>
+<div id="ref-RootMeanSquare2019zhang" class="csl-entry" role="listitem">
+Zhang, Biao, and Rico Sennrich. 2019. <span>“Root <span>Mean Square Layer Normalization</span>.”</span> October 16, 2019. <a href="https://doi.org/10.48550/arXiv.1910.07467">https://doi.org/10.48550/arXiv.1910.07467</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark_dimmed">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "YYZhang2025/YYZhang2025.github.io";
+    script.dataset.repoId = "R_kgDOQlDTcQ";
+    script.dataset.category = "General";
+    script.dataset.categoryId = "DIC_kwDOQlDTcc4C2MRz";
+    script.dataset.mapping = "title";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "top";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© CC-By Yuyang, 2025</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This page is built with ❤️ and <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+    <script type="text/javascript">
+    (function(d) {
+      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+        let pseudocodeOptions = {
+          indentSize: el.dataset.indentSize,
+          commentDelimiter: el.dataset.commentDelimiter,
+          lineNumber: el.dataset.lineNumber.toLowerCase() === "true",
+          lineNumberPunc: el.dataset.lineNumberPunc,
+          noEnd: el.dataset.noEnd.toLowerCase() === "true",
+          titlePrefix: el.dataset.captionPrefix
+        };
+        pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
+      });
+    })(document);
+    (function(d) {
+      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+        let captionSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
+        if (captionSpan !== null) {
+          let captionPrefix = el.dataset.captionPrefix + " ";
+          let captionNumber = "";
+          if (el.dataset.pseudocodeNumber) {
+            captionNumber = el.dataset.pseudocodeNumber + " ";
+            if (el.dataset.chapterLevel) {
+              captionNumber = el.dataset.chapterLevel + "." + captionNumber;
+            }
+          }
+          captionSpan.innerHTML = captionPrefix + captionNumber;
+        }
+      });
+    })(document);
+    </script>
+  
+<script>videojs(video_shortcode_videojs_video1);</script>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
+</body></html>

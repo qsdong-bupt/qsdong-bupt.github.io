@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Yuyang Zhang">
+<meta name="description" content="为什么LARGE language models在大规模上表现更好？Lecture 09和11介绍了Scaling Laws的基本概念和原理，探讨了模型规模、数据规模与计算资源之间的关系。内容涵盖了不同类型的Scaling Laws（如参数规模、数据规模和计算规模）以及它们对模型性能的影响。通过实际案例，展示了Scaling Laws在深度学习中的应用和重要性。">
+
+<title>Lecture 09 &amp; 11: Scaling Laws</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../../">
+<link href="../../../.././style/icon.avif" rel="icon">
+<script src="../../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../../site_libs/bootstrap/bootstrap-dark-44402bf054b1fe078bc4e7aebe64bce9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
+<script src="../../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.js"></script>
+<link href="../../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.css" rel="stylesheet">
+<script src="../../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-E8EJCZTZG1"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
+</script>
+<link href="https://fonts.cdnfonts.com/css/cmu-sans-serif" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<script>
+    MathJax = {
+        loader: {
+        load: ['[tex]/boldsymbol']
+        },
+        tex: {
+        tags: "all",
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']],
+        processEscapes: true,
+        processEnvironments: true,
+        packages: {
+            '[+]': ['boldsymbol']
+        }
+        }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) {
+        block.classList.toggle("is-open");
+      }
+    });
+
+    // 可访问性（键盘）
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
+      }
+    });
+  });
+});
+</script>
+    <style type="text/css">
+    .ps-root .ps-algorithm {
+      border-top: 2px solid;
+      border-bottom: 2px solid;
+    }
+    .pseudocode-container {
+      text-align: left;
+    }
+    </style>
+  
+      <style type="text/css">
+      .ps-algorithm > .ps-line {
+        text-align: left;
+      }
+      </style>
+    
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="Lecture 09 &amp; 11: Scaling Laws">
+<meta property="og:description" content="为什么LARGE language models在大规模上表现更好？Lecture 09和11介绍了Scaling Laws的基本概念和原理，探讨了模型规模、数据规模与计算资源之间的关系。内容涵盖了不同类型的Scaling Laws（如参数规模、数据规模和计算规模）以及它们对模型性能的影响。通过实际案例，展示了Scaling Laws在深度学习中的应用和重要性。">
+<meta property="og:image" content="./assets/scaling-law-kaplan.png">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../index.html"> 
+<span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/YYZhang2025"> 
+<span class="menu-text"><i class="fa-brands fa-github fa-xl"></i></span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.linkedin.com/in/zhang-yuyang/"> 
+<span class="menu-text"><i class="fa-brands fa-linkedin fa-xl"></i></span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../posts/Blogs/blogs_index.html"> 
+<span class="menu-text">Blogs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../posts/Projects/projects_index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../.././posts/100-PwC/100-pwc_index.qmd"> 
+<span class="menu-text">100-PwC</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-learning-notes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Learning Notes</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-learning-notes">    
+        <li>
+    <a class="dropdown-item" href="../../../.././posts/CS336/index.qmd">
+ <span class="dropdown-text">Stanford CS336 LLM From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../.././posts/CME296/index.qmd">
+ <span class="dropdown-text">Stanford CME296 Diffusion &amp; Large Vision Models</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title">Lecture 09 &amp; 11: Scaling Laws</h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-and-what-are-scaling-laws" id="toc-why-and-what-are-scaling-laws" class="nav-link active" data-scroll-target="#why-and-what-are-scaling-laws"><span class="header-section-number">1</span> Why and What are Scaling Laws?</a></li>
+  <li><a href="#neural-llm-scaling-laws" id="toc-neural-llm-scaling-laws" class="nav-link" data-scroll-target="#neural-llm-scaling-laws"><span class="header-section-number">2</span> Neural (LLM) Scaling Laws</a>
+  <ul>
+  <li><a href="#data-scaling-law" id="toc-data-scaling-law" class="nav-link" data-scroll-target="#data-scaling-law"><span class="header-section-number">2.1</span> Data Scaling Law</a>
+  <ul>
+  <li><a href="#mean-estimation-example" id="toc-mean-estimation-example" class="nav-link" data-scroll-target="#mean-estimation-example"><span class="header-section-number">2.1.1</span> Mean Estimation Example</a></li>
+  <li><a href="#data-composition" id="toc-data-composition" class="nav-link" data-scroll-target="#data-composition"><span class="header-section-number">2.1.2</span> Data Composition</a></li>
+  </ul></li>
+  <li><a href="#model-scaling-law" id="toc-model-scaling-law" class="nav-link" data-scroll-target="#model-scaling-law"><span class="header-section-number">2.2</span> Model Scaling Law</a>
+  <ul>
+  <li><a href="#model-architecture" id="toc-model-architecture" class="nav-link" data-scroll-target="#model-architecture"><span class="header-section-number">2.2.1</span> Model Architecture</a></li>
+  <li><a href="#optimizer" id="toc-optimizer" class="nav-link" data-scroll-target="#optimizer"><span class="header-section-number">2.2.2</span> Optimizer</a></li>
+  <li><a href="#depth-vs-width" id="toc-depth-vs-width" class="nav-link" data-scroll-target="#depth-vs-width"><span class="header-section-number">2.2.3</span> Depth vs Width</a></li>
+  <li><a href="#batch-size" id="toc-batch-size" class="nav-link" data-scroll-target="#batch-size"><span class="header-section-number">2.2.4</span> Batch Size</a></li>
+  <li><a href="#learning-rate" id="toc-learning-rate" class="nav-link" data-scroll-target="#learning-rate"><span class="header-section-number">2.2.5</span> Learning Rate</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#joint-data-model-scaling-law" id="toc-joint-data-model-scaling-law" class="nav-link" data-scroll-target="#joint-data-model-scaling-law"><span class="header-section-number">3</span> Joint Data-Model Scaling Law</a>
+  <ul>
+  <li><a href="#chinchilla-scaling-law" id="toc-chinchilla-scaling-law" class="nav-link" data-scroll-target="#chinchilla-scaling-law"><span class="header-section-number">3.1</span> Chinchilla Scaling Law</a>
+  <ul>
+  <li><a href="#minimum-over-runs" id="toc-minimum-over-runs" class="nav-link" data-scroll-target="#minimum-over-runs"><span class="header-section-number">3.1.1</span> Minimum over runs</a></li>
+  <li><a href="#isoflop-profiles" id="toc-isoflop-profiles" class="nav-link" data-scroll-target="#isoflop-profiles"><span class="header-section-number">3.1.2</span> IsoFLOP profiles</a></li>
+  <li><a href="#joint-fits" id="toc-joint-fits" class="nav-link" data-scroll-target="#joint-fits"><span class="header-section-number">3.1.3</span> Joint fits</a></li>
+  </ul></li>
+  <li><a href="#other-metrics" id="toc-other-metrics" class="nav-link" data-scroll-target="#other-metrics"><span class="header-section-number">3.2</span> Other Metrics</a></li>
+  </ul></li>
+  <li><a href="#diffusion-scaling-law" id="toc-diffusion-scaling-law" class="nav-link" data-scroll-target="#diffusion-scaling-law"><span class="header-section-number">4</span> Diffusion Scaling Law</a></li>
+  <li><a href="#scaling-law-case-study" id="toc-scaling-law-case-study" class="nav-link" data-scroll-target="#scaling-law-case-study"><span class="header-section-number">5</span> Scaling Law Case Study</a>
+  <ul>
+  <li><a href="#cerebras-gpt" id="toc-cerebras-gpt" class="nav-link" data-scroll-target="#cerebras-gpt"><span class="header-section-number">5.1</span> Cerebras-GPT</a></li>
+  <li><a href="#minicpm" id="toc-minicpm" class="nav-link" data-scroll-target="#minicpm"><span class="header-section-number">5.2</span> MiniCPM</a></li>
+  <li><a href="#deepseek-llm" id="toc-deepseek-llm" class="nav-link" data-scroll-target="#deepseek-llm"><span class="header-section-number">5.3</span> DeepSeek LLM</a></li>
+  <li><a href="#others" id="toc-others" class="nav-link" data-scroll-target="#others"><span class="header-section-number">5.4</span> Others</a></li>
+  </ul></li>
+  <li><a href="#mup-maximal-update-parameterization" id="toc-mup-maximal-update-parameterization" class="nav-link" data-scroll-target="#mup-maximal-update-parameterization"><span class="header-section-number">6</span> <span class="math inline">\(\mu\)</span>P Maximal Update Parameterization</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">7</span> Summary</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Lecture 09 &amp; 11: Scaling Laws</h1>
+</div>
+
+<div>
+  <div class="description">
+    为什么<strong>LARGE</strong> language models在大规模上表现更好？Lecture 09和11介绍了Scaling Laws的基本概念和原理，探讨了模型规模、数据规模与计算资源之间的关系。内容涵盖了不同类型的Scaling Laws（如参数规模、数据规模和计算规模）以及它们对模型性能的影响。通过实际案例，展示了Scaling Laws在深度学习中的应用和重要性。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Yuyang Zhang </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC-body" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-and-what-are-scaling-laws" id="toc-why-and-what-are-scaling-laws"><span class="header-section-number">1</span> Why and What are Scaling Laws?</a></li>
+  <li><a href="#neural-llm-scaling-laws" id="toc-neural-llm-scaling-laws"><span class="header-section-number">2</span> Neural (LLM) Scaling Laws</a>
+  <ul>
+  <li><a href="#data-scaling-law" id="toc-data-scaling-law"><span class="header-section-number">2.1</span> Data Scaling Law</a>
+  <ul>
+  <li><a href="#mean-estimation-example" id="toc-mean-estimation-example"><span class="header-section-number">2.1.1</span> Mean Estimation Example</a></li>
+  <li><a href="#data-composition" id="toc-data-composition"><span class="header-section-number">2.1.2</span> Data Composition</a></li>
+  </ul></li>
+  <li><a href="#model-scaling-law" id="toc-model-scaling-law"><span class="header-section-number">2.2</span> Model Scaling Law</a>
+  <ul>
+  <li><a href="#model-architecture" id="toc-model-architecture"><span class="header-section-number">2.2.1</span> Model Architecture</a></li>
+  <li><a href="#optimizer" id="toc-optimizer"><span class="header-section-number">2.2.2</span> Optimizer</a></li>
+  <li><a href="#depth-vs-width" id="toc-depth-vs-width"><span class="header-section-number">2.2.3</span> Depth vs Width</a></li>
+  <li><a href="#batch-size" id="toc-batch-size"><span class="header-section-number">2.2.4</span> Batch Size</a></li>
+  <li><a href="#learning-rate" id="toc-learning-rate"><span class="header-section-number">2.2.5</span> Learning Rate</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#joint-data-model-scaling-law" id="toc-joint-data-model-scaling-law"><span class="header-section-number">3</span> Joint Data-Model Scaling Law</a>
+  <ul>
+  <li><a href="#chinchilla-scaling-law" id="toc-chinchilla-scaling-law"><span class="header-section-number">3.1</span> Chinchilla Scaling Law</a>
+  <ul>
+  <li><a href="#minimum-over-runs" id="toc-minimum-over-runs"><span class="header-section-number">3.1.1</span> Minimum over runs</a></li>
+  <li><a href="#isoflop-profiles" id="toc-isoflop-profiles"><span class="header-section-number">3.1.2</span> IsoFLOP profiles</a></li>
+  <li><a href="#joint-fits" id="toc-joint-fits"><span class="header-section-number">3.1.3</span> Joint fits</a></li>
+  </ul></li>
+  <li><a href="#other-metrics" id="toc-other-metrics"><span class="header-section-number">3.2</span> Other Metrics</a></li>
+  </ul></li>
+  <li><a href="#diffusion-scaling-law" id="toc-diffusion-scaling-law"><span class="header-section-number">4</span> Diffusion Scaling Law</a></li>
+  <li><a href="#scaling-law-case-study" id="toc-scaling-law-case-study"><span class="header-section-number">5</span> Scaling Law Case Study</a>
+  <ul>
+  <li><a href="#cerebras-gpt" id="toc-cerebras-gpt"><span class="header-section-number">5.1</span> Cerebras-GPT</a></li>
+  <li><a href="#minicpm" id="toc-minicpm"><span class="header-section-number">5.2</span> MiniCPM</a></li>
+  <li><a href="#deepseek-llm" id="toc-deepseek-llm"><span class="header-section-number">5.3</span> DeepSeek LLM</a></li>
+  <li><a href="#others" id="toc-others"><span class="header-section-number">5.4</span> Others</a></li>
+  </ul></li>
+  <li><a href="#mup-maximal-update-parameterization" id="toc-mup-maximal-update-parameterization"><span class="header-section-number">6</span> <span class="math inline">\(\mu\)</span>P Maximal Update Parameterization</a></li>
+  <li><a href="#summary" id="toc-summary"><span class="header-section-number">7</span> Summary</a></li>
+  </ul>
+</nav>
+<p>当我们从头开始训练一个LLM的时候，我们要考虑很多因素：</p>
+<ul>
+<li>要用什么样的模型</li>
+<li>模型的参数数量要多少</li>
+<li>训练数据要多少</li>
+<li>手头上有多少计算资源</li>
+</ul>
+<p>等等。</p>
+<p>这些因素之间是相互关联的，我们需要找到一个平衡点，才能训练出一个性能优越的模型。但是，LLM的训练有一个难点就是：我们无法在训练之前就知道这些因素之间的关系，并且也没有办法用Grid Search或者Random Search来找到最优的组合，因为训练一个LLM需要消耗大量的计算资源和时间。因此我们就需要一些理论上的指导来帮助我们理解这些因素之间的关系，这就是Scaling Laws的作用，它告诉我们<u>在不同的模型规模、数据规模和计算资源下，我们可以预测模型的性能会如何变化</u>。Lecture 09将介绍Scaling Laws 的基本概念和原理，以及了解当Scaling不同的因素时，模型性能的变化趋势。Lecture 11将进一步探讨Scaling Laws在实际中的应用和重要性，以及什么是 <span class="math inline">\(\mu\)</span>P Maximal Update Parameterization。</p>
+<div class="note foldable is-open">
+<div class="note-header foldable-header">
+<p>NOTE</p>
+</div>
+<div class="note-container foldable-content">
+<p>这两节Lecture有些抽象，内容比较理论化，可能会有些难以理解，但是我觉得它们是非常重要的，因为它们可以帮助我们在训练LLM的时候，来选择合适的模型规模和数据规模，从而得到一个比较好的模型性能。虽然我们现在有很多预训练的模型可以直接使用，但是当我们真的需要从0开始训练一个LLM的时候，Scaling Laws是非常重要的，因为它可以帮助我们在有限的资源下做出更明智的决策，从而训练出一个性能更好的模型。</p>
+</div>
+</div>
+<section id="why-and-what-are-scaling-laws" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Why and What are Scaling Laws?</h1>
+<p>我们先来讨论一下，为什么需要Scaling Law，以及Scaling Law可以解决什么问题。 我们先来考虑一下这个问题：</p>
+<div class="highlight">
+<p>我们有1000个H100的GPUs，我们的目的是在1个月之内，训练出一个表现不错的LLM模型，我们该怎么做？选择什么样的模型，模型的参数数量要多少，训练数据要多少，等等。</p>
+</div>
+<p>传统的方法是：</p>
+<ol type="1">
+<li>直接训练一个模型（假设是Transformer LLM）</li>
+<li>大量的尝试不同的Learning Rate，Batch Size，model depth，model width等组合。</li>
+<li>观察模型的性能，调整参数，继续训练</li>
+</ol>
+<p>当模型规模比较小的时候，这种办法是可行的，但是当模型规模变大，训练时间变长的时候，这种办法就不太可行了，因为每次训练一个模型都需要消耗大量的计算资源和时间，我们无法在短时间内尝试不同的参数组合来找到最优的模型。因此我们需要一些理论上的指导来帮助我们理解这些因素之间的关系，这就是Scaling Laws。Scaling Laws 的<span class="hilite-teal">核心价值</span>就是：</p>
+<div class="highlight">
+<p>用“小实验”预测“大结果”，先训练一堆小模型，从小模型学规律，然后外推到大模型。</p>
+</div>
+<div class="note foldable is-open">
+<div class="note-header foldable-header">
+<p>NOTE: History of Scaling Law</p>
+</div>
+<div class="note-container foldable-content">
+<p>其实Scaling Law并不是一个很新的概念，最早的Scaling Law可以追溯到20世纪60年代，当时的研究者就发现了在某些物理系统中，系统的行为会随着系统规模的增加而发生变化，这就是所谓的Scaling Law。后来，这个概念被引入到了计算机科学领域，尤其是在深度学习领域，研究者们发现，在训练深度神经网络的时候，模型的性能会随着模型规模、数据规模和计算资源的增加而发生变化，这就是我们现在所说的Scaling Laws。</p>
+</div>
+</div>
+</section>
+<section id="neural-llm-scaling-laws" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Neural (LLM) Scaling Laws</h1>
+<p>接下来，我们来看一下Scaling Law如何在LLM中的应用，并且介绍不用类型的Scaling Laws：</p>
+<ul>
+<li><strong>Data Scaling Law</strong>：预测Data Size和模型性能之间的关系</li>
+<li><strong>Model Scaling Law</strong>：预测Model Size和模型性能之间的关系</li>
+</ul>
+<p>Scaling Law在LLM中的应用，首先是由Kaplan等人在2020年提出的<span class="citation" data-cites="ScalingLawsNeural2020kaplan">(<a href="#ref-ScalingLawsNeural2020kaplan" role="doc-biblioref">Kaplan et al. 2020</a>)</span>，他们的实验结果，可以浓缩成下面的图：</p>
+<div id="fig-scaling-law-kaplan" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-scaling-law-kaplan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/scaling-law-kaplan.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: 随着Compute， Dataset，Parameter的增加，模型的性能（Loss）在不断下降，并且这种下降是有规律可循的。"><img src="./assets/scaling-law-kaplan.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-scaling-law-kaplan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 随着Compute， Dataset，Parameter的增加，模型的性能（Loss）在不断下降，并且这种下降是有规律可循的。
+</figcaption>
+</figure>
+</div>
+<p>接下来我们来看看相对直观的Data Scaling Law。</p>
+<section id="data-scaling-law" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="data-scaling-law"><span class="header-section-number">2.1</span> Data Scaling Law</h2>
+<p>Data Scaling Law 就是一个简单的formula，来预测Data Size和模型性能之间的关系。<span class="citation" data-cites="DeepLearningScaling2017hestness">Hestness et al. (<a href="#ref-DeepLearningScaling2017hestness" role="doc-biblioref">2017</a>)</span> 做了实验，提出如下图所示的Data Scaling Law：</p>
+<div id="fig-data-scaling-law.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-data-scaling-law.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/data-scaling-law.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Data Scaling Law 是一条 Monotonic， Logistic-Like curve，随着Data Size的增加，模型的性能（Loss）在不断下降，并且这种下降是有规律可循的。"><img src="./assets/data-scaling-law.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-data-scaling-law.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Data Scaling Law 是一条 Monotonic， Logistic-Like curve，随着Data Size的增加，模型的性能（Loss）在不断下降，并且这种下降是有规律可循的。
+</figcaption>
+</figure>
+</div>
+<p>如<a href="#fig-data-scaling-law.png" class="quarto-xref">Figure&nbsp;2</a>所示，Data Scaling Law可以分成3个部分：</p>
+<ol type="1">
+<li>Small Data Region: 当Data Size比较小的时候，模型的性能（Loss）不会有太大的提升，因为模型没有足够的数据来学习。</li>
+<li>Power Law Region：当Data Size增加到一定程度的时候，模型的性能（Loss）会有一个明显的提升，并且这种提升是按照Power Law的规律进行的。</li>
+<li>Irreducible Loss Region：当Data Size继续增加的时候，模型的性能（Loss）会逐渐趋于一个不可降低的水平，这个水平就是Irreducible Loss。</li>
+</ol>
+<p>可以看到，模型的性能（Loss）和Data Size之间的关系是一个<strong>Power Law</strong>的关系，也就是说，模型的性能（Loss）会随着Data Size的增加而按照一个幂函数的规律进行下降。</p>
+<div class="note foldable is-open">
+<div class="note-header foldable-header">
+<p>NOTE: Power Law</p>
+</div>
+<div class="note-container foldable-content">
+<p>Power law指的是两个量之间满足这种关系： <span class="math display">\[
+y \propto x^\alpha
+\]</span></p>
+<p>也就是：</p>
+<p><span class="math display">\[
+y = Cx^\alpha
+\]</span></p>
+<p>其中，<span class="math inline">\(C\)</span>是一个常数，<span class="math inline">\(\alpha\)</span>是一个指数。当<span class="math inline">\(\alpha &lt; 0\)</span>的时候，y会随着x的增加而减少，这就是我们在Data Scaling Law中看到的情况。</p>
+</div>
+</div>
+<p>直觉来说，我们知道，随着Data Size的增加，模型的性能（Loss）会不断下降，但是我们想知道，这个下降的规律是什么样的？是线性的，还是指数的，还是幂函数的？为什么是这种规律？接下来我们通过一个简单的Mean Estimation 的例子来解释一下Data Scaling Law的原理。</p>
+<section id="mean-estimation-example" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="mean-estimation-example"><span class="header-section-number">2.1.1</span> Mean Estimation Example</h3>
+<p>我们有<span class="math inline">\(N\)</span>个input，<span class="math inline">\(x_1, \cdots, x_N \sim \mathcal{N}(\mu, \sigma^2)\)</span>，我们想要估计它们的平均值<span class="math inline">\(\mu\)</span>，我们可以使用一个简单的模型来进行估计：</p>
+<p><span id="eq-mean-estimation"><span class="math display">\[
+\hat{\mu} = \frac{1}{N} \sum_{i=1}^{N} x_i
+\tag{1}\]</span></span></p>
+<p>通过<strong>Monte Carlo</strong>的方式，我们可以得到一个<span class="math inline">\(\hat{\mu}\)</span>的估计值，那么这个估计值的误差（Loss）是什么样子的呢？我们可以通过计算来得到：</p>
+<p><span id="eq-mean-estimation-loss"><span class="math display">\[
+\begin{split}
+\mathbb{E}\big[(\hat{\mu}-\mu)^2\big]
+&amp;= \mathbb{E}\left[\left(\frac{1}{N}\sum_{i=1}^{N}(X_i-\mu)\right)^2\right] \\
+&amp;= \frac{1}{N^2}\,\mathbb{E}\left[\left(\sum_{i=1}^{N}(X_i-\mu)\right)^2\right] \\
+&amp;= \frac{1}{N^2}\,\mathbb{E}\left[\sum_{i=1}^{N}(X_i-\mu)^2 + \sum_{i\neq j}(X_i-\mu)(X_j-\mu)\right] \\
+&amp;= \frac{1}{N^2}\left(\sum_{i=1}^{N}\mathbb{E}\big[(X_i-\mu)^2\big] + \sum_{i\neq j}\mathbb{E}\big[(X_i-\mu)(X_j-\mu)\big]\right) \\
+&amp;= \frac{1}{N^2}\left(\sum_{i=1}^{N}\sigma^2 + \sum_{i\neq j}0\right) \\
+&amp;= \frac{1}{N^2}(N\sigma^2) \\
+&amp;= \frac{\sigma^2}{N}
+\end{split}
+\tag{2}\]</span></span></p>
+<p>可以看到，Mean Estimation的Loss和Data Size <span class="math inline">\(N\)</span>之间的关系也是一个<strong>Power Law</strong>的关系，也就是说，Loss会随着Data Size的增加而按照一个幂函数的规律进行下降, 当我们用对<a href="#eq-mean-estimation-loss" class="quarto-xref">Equation&nbsp;2</a>取log值，我们可以得到：</p>
+<p><span id="eq-mean-estimation-loss-log"><span class="math display">\[
+\log \mathbb{E}[(\hat{\mu} - \mu)^2] = \log \sigma^2 - \log N
+\tag{3}\]</span></span></p>
+<p>可以看到，Log Loss和Log Data Size之间的关系是一个线性关系，也就是说，Loss会随着Data Size的增加而按照一个幂函数的规律进行下降，这就是Data Scaling Law的原理。</p>
+<p>这种类型的情况在复杂一点的模型中也存在，比如：</p>
+<div id="fig-scaling-law-intriguing.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-scaling-law-intriguing.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/scaling-law-intriguing.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: 不同的数据类型（比如文本，图像，音频等）会有不同的Scaling Law的参数。"><img src="./assets/scaling-law-intriguing.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-scaling-law-intriguing.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: 不同的数据类型（比如文本，图像，音频等）会有不同的Scaling Law的参数。
+</figcaption>
+</figure>
+</div>
+<p>从图中可以看到，对于不同的数据类型，模型的性能和Data Size 之间的关系呈现一个Power Law的关系。但是，其对应的参数是（红色框）是不同的，这说明不同的数据类型会有不同的Scaling Law的参数，这也是我们在训练LLM的时候需要考虑的因素之一。</p>
+<p>接下来我们通过一个简单的例子来解释一下为什么不同的数据类型会有不同的Scaling Law的参数。 神经网络能拟合“几乎任意函数”，我们把它变成一个具体例子来算误差怎么随数据量变化。我们先来思考一下这个问题：</p>
+<div class="highlight">
+<p><span class="math inline">\(x_1, \cdots, x_N \sim \mathcal{U}([0, 1]^2)\)</span> ，并且 <span class="math inline">\(y_i = f(x_i) + \mathcal{N}(0, 1)\)</span>, 我们想要训练一个模型<span class="math inline">\(f_\theta\)</span>来拟合这个函数，我们该怎么做？</p>
+</div>
+<p>最直接的方法是就是将这个 2D 的space切成不同的小块，每个小块的长度是 <span class="math inline">\(n^{-\frac{1}{4}}\)</span>。通过这种方式，我们可以得到 <span class="math inline">\(\sqrt{N}\)</span> boxes， 每个box里面有 <span class="math inline">\(\sqrt{N}\)</span>个点，在每个格子里，我们用该格子内样本的平均值作为预测。这个估计误差主要由两部分组成。第一部分是由于我们用平均值来估计每个格子内的点的值，这个误差是 <span class="math inline">\(\frac{1}{\sqrt{N}}\)</span>，第二部分是由于我们用一个格子内的点来估计该格子内所有点的值，这个误差是由格子的大小决定的，也就是 <span class="math inline">\(n^{-\frac{1}{4}}\)</span>。因此，我们可以得到下面的公式：</p>
+<p><span id="eq-error-boxes"><span class="math display">\[
+Error \approx \frac{1}{\sqrt{N}} + n^{-\frac{1}{4}}
+\tag{4}\]</span></span></p>
+<div id="fig-curse-of-dimensionality.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-curse-of-dimensionality.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/curse-of-dimensionality.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: "><img src="./assets/curse-of-dimensionality.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-curse-of-dimensionality.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4
+</figcaption>
+</figure>
+</div>
+<p>通过这个简单的例子，我们可以看出，就算不断的增加数据，误差的下降速度也会变慢，这就是所谓的“Curse of Dimensionality”。并且，在 <span class="math inline">\(d\)</span>-dimensional space中，这个误差就变成了 <span class="math inline">\(Error = n^{\frac{-1}{d}}\)</span>，当我们取 <span class="math inline">\(\log\)</span> 之后，就可以得到线性关系，也就是说，随着数据维度的增加，误差的下降速度会变慢，这就是所谓的“Curse of Dimensionality”，这也是为什么不同的数据类型会有不同的Scaling Law的参数的原因之一。</p>
+<p>上面这个简单的例子说明了，当<strong>intrinsic dimension</strong>很高时，我们看到scaling law的指数很小。</p>
+</section>
+<section id="data-composition" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="data-composition"><span class="header-section-number">2.1.2</span> Data Composition</h3>
+<p>之前我们讨论的Data Scaling Law是基于一个假设的前提条件的，那就是我们的<u>数据是从一个Distribution中采样的</u>. 但是在实际中，我们的数据可能来自不同的Distribution，这时候我们就需要考虑Data Composition的问题了。Data Composition 就是指当我们有多个不同类型的数据的时候，我们该如何进行Scaling Law的分析呢？这个scaling law也叫做 distribution shift scaling law.</p>
+<div id="fig-dis-shift-scaling-law.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dis-shift-scaling-law.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/dis-shift-scaling-law.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: "><img src="./assets/dis-shift-scaling-law.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-dis-shift-scaling-law.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5
+</figcaption>
+</figure>
+</div>
+<p>我们可以看到，不同的data composition，只影响了scaling law的offset，这有个好处就是，我们可以通过在小模型上做实现验来估计这个offset，然后通过这个offset来预测大模型的性能。我们还可以通过这种方法来训练一个简单的模型（比如linear model）来预测不同data composition下的模型性能，这样我们就可以在训练大模型之前，来选出一个比较好的data composition来进行训练。</p>
+<p>下一个问题就是，随着模型训练的规模增大，unique的data变得越来越小，在这种情况下，如果我们重复data，还会有一样的scaling law吗？这个也就是data repetition scaling law.</p>
+<div id="fig-scaling-law-datarepetition.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-scaling-law-datarepetition.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/scaling-law-datarepetition.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;6: "><img src="./assets/scaling-law-datarepetition.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-scaling-law-datarepetition.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6
+</figcaption>
+</figure>
+</div>
+<p>在这种情况下，scaling law会有以下的形式：</p>
+<p><span id="eq-data-repetition-scaling-law"><span class="math display">\[
+D' = U_D + U_DR^{*}_D(1 - e^{\frac{-R_D}{R^{*}_D}})
+\tag{5}\]</span></span></p>
+<p>我们是要重复数据，还是要增加unique的数据，但是质量比较低。</p>
+<div id="fig-data-selection-data-repetition.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-data-selection-data-repetition.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/data-selection-data-repetition.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;7: "><img src="./assets/data-selection-data-repetition.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-data-selection-data-repetition.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="model-scaling-law" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="model-scaling-law"><span class="header-section-number">2.2</span> Model Scaling Law</h2>
+<p>接下来我们来看一下Model Scaling Law，现在模型的规模越来越大，模型的类型也会来越多，如果从头开始训练的话，我们该怎么选择模型的规模和类型呢？在这一小节，会从以下几个方面来讨论：</p>
+<ul>
+<li>Model Architecture</li>
+<li>Optimizer</li>
+<li>Aspect Ratio / Depth</li>
+<li>Batch Size</li>
+</ul>
+<section id="model-architecture" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="model-architecture"><span class="header-section-number">2.2.1</span> Model Architecture</h3>
+<p>首先来看一下Model Architecture，我们熟知的Sequence Model有，Transformer 和 LSTM等, 要如何选择？</p>
+<div id="fig-transformer-lstm.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-transformer-lstm.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/transformer-lstm.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;8: "><img src="./assets/transformer-lstm.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-transformer-lstm.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8
+</figcaption>
+</figure>
+</div>
+<p>通过上面这个图，不管我们叠多少层LSTM，模型的性能都无法达到Transformer的水平，这说明在LLM的训练中，Transformer是一个更好的选择。</p>
+</section>
+<section id="optimizer" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="optimizer"><span class="header-section-number">2.2.2</span> Optimizer</h3>
+<p>接下来，如果我们选择了Transformer作为我们的模型架构，那么我们该选择什么样的Optimizer呢？</p>
+<div id="fig-optimizer-choice.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-optimizer-choice.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/optimizer-choice.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;9: "><img src="./assets/optimizer-choice.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-optimizer-choice.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9
+</figcaption>
+</figure>
+</div>
+<p>上面这张图说明了，Adam的性能总体上要比SGD好很多，尤其是在模型规模比较大的时候，这也是为什么在LLM的训练中，Adam是一个更好的选择。</p>
+</section>
+<section id="depth-vs-width" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="depth-vs-width"><span class="header-section-number">2.2.3</span> Depth vs Width</h3>
+<p>Transformer的模型规模可以通过增加Depth或者Width来进行扩展，那么我们该选择增加Depth还是Width呢？</p>
+<div id="fig-depth-width.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-depth-width.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/depth-width.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;10: "><img src="./assets/depth-width.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-depth-width.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10
+</figcaption>
+</figure>
+</div>
+<p>从图中可以看到：</p>
+<ul>
+<li>在 1 layer和2 layer之间，模型的性能提升非常大</li>
+<li>当模型的参数提升到了 <span class="math inline">\(10^7\)</span> 之后（width 增加了），增加Depth的效果就不太明显了</li>
+</ul>
+<p>有一个点需要注意的就是，在Transformer模型中，不是所有的参数都是equal的：</p>
+<div id="fig-depth-width-embedding.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-depth-width-embedding.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/depth-width-embedding.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;11: "><img src="./assets/depth-width-embedding.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-depth-width-embedding.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11
+</figcaption>
+</figure>
+</div>
+<p>从图中可以看到，当我们将embedding的参数也纳入考虑的范围时，得到的结果就不太一样了。</p>
+<p>接下来，我们来了解一下如果选择Aspect Ratio。下图展示了不同Aspect Ratio下模型的性能：</p>
+<div id="fig-aspect-ratio.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-aspect-ratio.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/aspect-ratio.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;12: "><img src="./assets/aspect-ratio.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-aspect-ratio.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12
+</figcaption>
+</figure>
+</div>
+<p>从中间的图中，我们可以看出，不管是什么样参数的模型，Aspect Ratio的与Loss的关系都是一样的，呈现一个U型的关系，而且在最低点都在一个range里面，这也就说明，只要在这个range里，我们就可以得到一个比较好的模型性能。</p>
+</section>
+<section id="batch-size" class="level3" data-number="2.2.4">
+<h3 data-number="2.2.4" class="anchored" data-anchor-id="batch-size"><span class="header-section-number">2.2.4</span> Batch Size</h3>
+<p>最后，我们来讨论一下Batch Size和Learning Rate的选择，在LLM的训练中，Batch Size和Learning Rate的选择也是非常重要的，因为它们会直接影响到模型的性能和训练的效率。不同的Batch Size 对应这不同的“最优” Learning Rate。</p>
+<div id="fig-batch-size-pre-trained-model.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-batch-size-pre-trained-model.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/batch-size-pre-trained-model.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;13: "><img src="./assets/batch-size-pre-trained-model.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-batch-size-pre-trained-model.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13
+</figcaption>
+</figure>
+</div>
+<p>从上图可以看到，当Batch Size比较小的时候，模型的Loss会，这就是引出来了critical batch size的概念：</p>
+</section>
+<section id="learning-rate" class="level3" data-number="2.2.5">
+<h3 data-number="2.2.5" class="anchored" data-anchor-id="learning-rate"><span class="header-section-number">2.2.5</span> Learning Rate</h3>
+<p>Optimal Learning Rate 会根据模型的规模和Batch Size的不同而有所不同，通常来说，随着模型规模的增加，Optimal Learning Rate也会增加，但是当Batch Size增加到一定程度的时候，Optimal Learning Rate就会趋于一个稳定的水平，这也就是为什么在LLM的训练中，我们需要根据模型规模和Batch Size来选择合适的Learning Rate。概念提出 <span class="math inline">\(\mu\)</span>P scaling aware initialization, 通过这种方法，我们可以在不同的模型规模和Batch Size下，来选择合适的Learning Rate，从而得到一个比较好的模型性能。</p>
+<p>看到了这里，我们了解到，所有的scaling law都是基于 neg-log-perplexity的，也就是说，我们是通过观察模型的Loss来进行分析的，但是当down-stream有不同的指标时，模型就不能有很好的预测，</p>
+</section>
+</section>
+</section>
+<section id="joint-data-model-scaling-law" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Joint Data-Model Scaling Law</h1>
+<p>了解了Data Scaling Law和Model Scaling Law之后，我们就可以将它们结合起来，来得到一个Joint Data-Model Scaling Law，这个Scaling Law可以帮助我们在训练LLM的时候，来选择合适的模型规模和数据规模，从而得到一个比较好的模型性能。基本的Joint Data Model Scaling Law 有两种形式：</p>
+<p>Rosenfeld等人提出的Joint Data-Model Scaling Law：</p>
+<p><span id="eq-rosenfeld-joint-scaling-law"><span class="math display">\[
+Error = n^{-\alpha} + m^{-\beta} + C
+\tag{6}\]</span></span></p>
+<p>Kaplan等人提出的Joint Data-Model Scaling Law： <span id="eq-kaplan-joint-scaling-law"><span class="math display">\[
+Error = [m^{-\alpha} + n^{-1}]^{\beta}
+\tag{7}\]</span></span></p>
+<p>从上面的两个公式可以看出，Joint Data-Model Scaling Law的形式是比较复杂的，但是它们都能够很好地预测模型的性能，并且在实际中也得到了验证。通过Joint Data-Model Scaling Law，我们可以在训练LLM的时候，来选择合适的模型规模和数据规模，从而得到一个比较好的模型性能。</p>
+<div id="fig-joit-data-model.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-joit-data-model.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/joit-data-model.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14" title="Figure&nbsp;14: "><img src="./assets/joit-data-model.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-joit-data-model.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14
+</figcaption>
+</figure>
+</div>
+<section id="chinchilla-scaling-law" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="chinchilla-scaling-law"><span class="header-section-number">3.1</span> Chinchilla Scaling Law</h2>
+<p>Kaplan等人提出的Joint Data-Model Scaling Law在实际中得到了验证，但是在实际中，我们发现，当模型规模增加到一定程度的时候，模型的性能就会趋于一个稳定的水平，这也就是为什么在LLM的训练中，我们需要根据模型规模和数据规模来选择合适的模型规模和数据规模，从而得到一个比较好的模型性能。Chinchilla Scaling Law 就是基于Kaplan等人提出的Joint Data-Model Scaling Law的基础上，提出的一种新的Scaling Law，这个Scaling Law可以帮助我们在训练LLM的时候，来选择合适的模型规模和数据规模，从而得到一个比较好的模型性能。她提出了三种不同的Scaling Law：</p>
+<ul>
+<li>Minimum over training curves</li>
+<li>IsoFLOP profiles</li>
+<li>Joint fits</li>
+</ul>
+<p>他们的核心结论是：</p>
+<div class="highlight">
+<p>在固定训练算力（compute budget）下，很多大模型其实“参数太多、数据太少”了。更好的做法往往是：模型小一点，但训练数据更多一点。</p>
+</div>
+<section id="minimum-over-runs" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="minimum-over-runs"><span class="header-section-number">3.1.1</span> Minimum over runs</h3>
+<div id="fig-chinchilla-training-curve-envelope.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chinchilla-training-curve-envelope.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/chinchilla-training-curve-envelope.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" title="Figure&nbsp;15: (Image Source [@TrainingComputeOptimalLarge2022hoffmann])"><img src="./assets/chinchilla-training-curve-envelope.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chinchilla-training-curve-envelope.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15: (Image Source <span class="citation" data-cites="TrainingComputeOptimalLarge2022hoffmann">(<a href="#ref-TrainingComputeOptimalLarge2022hoffmann" role="doc-biblioref">Hoffmann et al. 2022</a>)</span>)
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="isoflop-profiles" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="isoflop-profiles"><span class="header-section-number">3.1.2</span> IsoFLOP profiles</h3>
+<blockquote class="blockquote">
+<p>This allows us to directly answer the question: For a given FLOP budget, what is the optimal parameter count?</p>
+</blockquote>
+<p>IsoFLOPs的意思就是：相同训练计算量（same FLOPs budget）下的比较，来看看不同模型规模和数据规模下的模型性能。其中数据规模，也就是tokens的数量，是根据模型的规模（Number of Parameters）和训练计算量（FLOPs）来计算的。通过IsoFLOP profiles，我们可以直接回答这个问题：对于一个给定的FLOPs预算，什么样的参数数量是最优的？</p>
+<p>训练一个模型的计算量（FLOPs）可以通过下面的公式来计算：</p>
+<p><span id="eq-iso-flops"><span class="math display">\[
+C \propto N \cdot D
+\tag{8}\]</span></span></p>
+<p>其中，<span class="math inline">\(C\)</span>是训练一个模型的计算量（FLOPs），<span class="math inline">\(N\)</span>是模型的参数数量，<span class="math inline">\(D\)</span>是训练数据的规模（tokens的数量）。如果我们固定<span class="math inline">\(C\)</span>, 并且调整不同的（<span class="math inline">\(N\)</span>, <span class="math inline">\(D\)</span>）组合，我们就可以得到不同的模型性能（Loss），通过比较这些模型性能，我们就可以找到一个最优的（<span class="math inline">\(N\)</span>, <span class="math inline">\(D\)</span>）组合，从而得到一个比较好的模型性能，如下图所示：</p>
+<div id="fig-chinchilla-isoFlop-curve.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chinchilla-isoFlop-curve.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/chinchilla-isoFlop-curve.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" title="Figure&nbsp;16: "><img src="./assets/chinchilla-isoFlop-curve.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-chinchilla-isoFlop-curve.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="joint-fits" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="joint-fits"><span class="header-section-number">3.1.3</span> Joint fits</h3>
+<p>最后一个方法就是Joint fits，它是基于前面两种方法的基础上，提出的一种新的方法，根据前面的两种方法的实验，可以得到一个比较好的模型性能（Loss）和模型规模（Number of Parameters）以及数据规模（tokens的数量）之间的关系，这个关系可以通过下面的公式来表示：</p>
+<p><span id="eq-chinchilla-joint-fit"><span class="math display">\[
+\hat{L}(N, D) \triangleq E + \frac{A}{N^\alpha} + \frac{B}{D^\beta}
+\tag{9}\]</span></span></p>
+<div id="fig-chinchilla-joint-fit.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chinchilla-joint-fit.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/chinchilla-joint-fit.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17" title="Figure&nbsp;17: "><img src="./assets/chinchilla-joint-fit.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-chinchilla-joint-fit.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17
+</figcaption>
+</figure>
+</div>
+<p>不过，这个具体的公式<a href="#eq-chinchilla-joint-fit" class="quarto-xref">Equation&nbsp;9</a>的形式，之后被指出有一些问题<span class="citation" data-cites="ChinchillaScalingReplication2024besiroglu">(<a href="#ref-ChinchillaScalingReplication2024besiroglu" role="doc-biblioref">Besiroglu et al. 2024</a>)</span></p>
+<div id="fig-chinchilla-correction.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chinchilla-correction.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/chinchilla-correction.png" class="lightbox" data-gallery="quarto-lightbox-gallery-18" title="Figure&nbsp;18: "><img src="./assets/chinchilla-correction.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-chinchilla-correction.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="other-metrics" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="other-metrics"><span class="header-section-number">3.2</span> Other Metrics</h2>
+<p>Chinchilla 给出的“最优”其实是“训练阶段最优”，但现实里你真正想要的，未必只是训练最优。比如在真正的应用中，我们可能会更关心Inference的性能：如果一个模型将来会被大量调用，那么推理成本会远远超过一次性的训练成本。这个时候，你可能不想严格按照 Chinchilla 的“train-optimal”方案来做，而是会选择：</p>
+<ul>
+<li>模型更小一些</li>
+<li>训练更久一些</li>
+<li>也就是让每个参数看更多 token，进行某种程度的 overtrain / overtraining</li>
+</ul>
+<p>这样做的好处是：</p>
+<ul>
+<li>前期训练更贵一点</li>
+<li>但部署后每次推理更便宜</li>
+<li>如果未来使用量很大，总体反而更划算</li>
+</ul>
+<p>比如：</p>
+<ul>
+<li>GPT-3：每个参数只看约 2 tokens</li>
+<li>Chinchilla：约 20 tokens / param</li>
+<li>LLaMA 65B：约 22</li>
+<li>Llama 2 70B：约 29</li>
+<li>Mistral 7B：约 110</li>
+<li>Llama 3 70B：约 215</li>
+</ul>
+</section>
+</section>
+<section id="diffusion-scaling-law" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Diffusion Scaling Law</h1>
+<div id="fig-diffusion-flop.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-diffusion-flop.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/diffusion-flop.png" class="lightbox" data-gallery="quarto-lightbox-gallery-19" title="Figure&nbsp;19: "><img src="./assets/diffusion-flop.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-diffusion-flop.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;19
+</figcaption>
+</figure>
+</div>
+<p>目前为止，我们讨论的Scaling Law都是针对Auto-Regressive Models的，但是在实际中，我们还有很多其他类型的模型，比如Diffusion Models，这些模型的Scaling Law也是非常重要的，因为它们可以帮助我们在训练这些模型的时候，来选择合适的模型规模和数据规模，从而得到一个比较好的模型性能。Diffusion Scaling Law 就是针对Diffusion Models提出的一种新的Scaling Law，这个Scaling Law可以帮助我们在训练Diffusion Models的时候，来选择合适的模型规模和数据规模，从而得到一个比较好的模型性能。Diffusion Scaling Law提出了不同的Scaling Law，但这种形式，并不一定是我们想要的，比如在现在的Diffusion Models中，我们想要提升Inference的速度，换句话说，要有不同的token/params的比例。</p>
+<hr>
+<p>了解了不同的Scaling Law之后，我们来看一下Scaling Law在实际应用中的重要性，来看看真实的大模型训练中，Scaling Law是如何被应用的，这也就是Lecture 11的内容了：</p>
+<ul>
+<li>Scaling Law Case Study：
+<ul>
+<li>Cerebras</li>
+<li>MiniCPM</li>
+<li>DeepSeek</li>
+</ul></li>
+<li><span class="math inline">\(\mu\)</span>P Maximal Update Parameterization</li>
+</ul>
+</section>
+<section id="scaling-law-case-study" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Scaling Law Case Study</h1>
+<p>Chinchilla 之后，大厂对 scaling 策略越来越保密，所以公开资料很少。比较有代表性的就是 Cerebras，MiniCPM，DeepSeek 这三个模型的训练过程了。接下来一个一个来看一下：</p>
+<section id="cerebras-gpt" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="cerebras-gpt"><span class="header-section-number">5.1</span> Cerebras-GPT</h2>
+<p>Cerebras-GPT <span class="citation" data-cites="CerebrasGPTOpenComputeOptimal2023dey">(<a href="#ref-CerebrasGPTOpenComputeOptimal2023dey" role="doc-biblioref">Dey et al. 2023</a>)</span></p>
+<blockquote class="blockquote">
+<p>We study recent research advances that improve large language models through efficient pretraining and scaling, and open datasets and tools. We combine these advances to introduce Cerebras-GPT, a family of open compute-optimal language models scaled from 111M to 13B parameters. We train Cerebras-GPT models on the Eleuther Pile dataset following DeepMind Chinchilla scaling rules for efficient pre-training (highest accuracy for a given compute budget). We characterize the predictable power-law scaling and compare CerebrasGPT with other publicly-available models to show all Cerebras-GPT models have state-ofthe-art training efficiency on both pre-training and downstream objectives. We describe our learnings including how Maximal Update Parameterization (µP) can further improve large model scaling, improving accuracy and hyperparameter predictability at scale. <cite> Cerebras-GPT: Open Compute-Optimal Language Models Trained on the Cerebras Wafer-Scale Cluster </cite></p>
+</blockquote>
+<div id="fig-cerebras-gpt-pre-training-flops.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cerebras-gpt-pre-training-flops.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/cerebras-gpt-pre-training-flops.png" class="lightbox" data-gallery="quarto-lightbox-gallery-20" title="Figure&nbsp;20: "><img src="./assets/cerebras-gpt-pre-training-flops.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-cerebras-gpt-pre-training-flops.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20
+</figcaption>
+</figure>
+</div>
+<p>他们预测了不用规模下的性能：</p>
+<div id="fig-cerebras-gpt-training-flops.png" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cerebras-gpt-training-flops.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/cerebras-gpt-training-flops.png" class="lightbox" data-gallery="quarto-lightbox-gallery-21" title="Figure&nbsp;21: "><img src="./assets/cerebras-gpt-training-flops.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-cerebras-gpt-training-flops.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="minicpm" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="minicpm"><span class="header-section-number">5.2</span> MiniCPM</h2>
+<p>MiniCPM <span class="citation" data-cites="MiniCPMUnveilingPotential2024hu">(<a href="#ref-MiniCPMUnveilingPotential2024hu" role="doc-biblioref">Hu et al. 2024</a>)</span></p>
+</section>
+<section id="deepseek-llm" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="deepseek-llm"><span class="header-section-number">5.3</span> DeepSeek LLM</h2>
+<p>DeepSeek LLM<span class="citation" data-cites="DeepSeekLLMScaling2024deepseek-ai">(<a href="#ref-DeepSeekLLMScaling2024deepseek-ai" role="doc-biblioref">DeepSeek-AI et al. 2024</a>)</span></p>
+</section>
+<section id="others" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="others"><span class="header-section-number">5.4</span> Others</h2>
+<p>当然，除了以上这几个，还有很多其他的模型也在使用Scaling Law来指导他们的训练过程，比如：</p>
+<ul>
+<li>LLaMA3</li>
+<li>Hunyuan-1</li>
+<li>MiniMax 等</li>
+</ul>
+</section>
+</section>
+<section id="mup-maximal-update-parameterization" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> <span class="math inline">\(\mu\)</span>P Maximal Update Parameterization</h1>
+<p>在课程的最后，我们来了解一下<span class="math inline">\(\mu\)</span>P Maximal Update Parameterization，这是一种新的Parameterization方法，可以帮助我们在训练LLM的时候，来选择合适的模型规模和数据规模，从而得到一个比较好的模型性能。<span class="math inline">\(\mu\)</span>P Maximal Update Parameterization提出了一种新的Parameterization方法，这种方法可以帮助我们在训练LLM的时候，来选择合适的模型规模和数据规模，从而得到一个比较好的模型性能。<span class="math inline">\(\mu\)</span>P Maximal Update Parameterization提出了不同的Parameterization方法，但这种形式，并不一定是我们想要的，比如在现在的LLM中，我们想要提升Inference的速度，换句话说，要有不同的token/params的比例。</p>
+</section>
+<section id="summary" class="level1" data-number="7">
+
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">7 Summary</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-ChinchillaScalingReplication2024besiroglu" class="csl-entry" role="listitem">
+Besiroglu, Tamay, Ege Erdil, Matthew Barnett, and Josh You. 2024. <span>“Chinchilla <span>Scaling</span>: <span>A</span> Replication Attempt.”</span> May 15, 2024. <a href="https://doi.org/10.48550/arXiv.2404.10102">https://doi.org/10.48550/arXiv.2404.10102</a>.
+</div>
+<div id="ref-DeepSeekLLMScaling2024deepseek-ai" class="csl-entry" role="listitem">
+DeepSeek-AI, Xiao Bi, Deli Chen, Guanting Chen, Shanhuang Chen, Damai Dai, Chengqi Deng, et al. 2024. <span>“<span>DeepSeek LLM</span>: <span>Scaling Open-Source Language Models</span> with <span>Longtermism</span>.”</span> January 5, 2024. <a href="https://doi.org/10.48550/arXiv.2401.02954">https://doi.org/10.48550/arXiv.2401.02954</a>.
+</div>
+<div id="ref-CerebrasGPTOpenComputeOptimal2023dey" class="csl-entry" role="listitem">
+Dey, Nolan, Gurpreet Gosal, Zhiming, Chen, Hemant Khachane, William Marshall, Ribhu Pathria, Marvin Tom, and Joel Hestness. 2023. <span>“Cerebras-<span>GPT</span>: <span>Open Compute-Optimal Language Models Trained</span> on the <span>Cerebras Wafer-Scale Cluster</span>.”</span> April 6, 2023. <a href="https://doi.org/10.48550/arXiv.2304.03208">https://doi.org/10.48550/arXiv.2304.03208</a>.
+</div>
+<div id="ref-DeepLearningScaling2017hestness" class="csl-entry" role="listitem">
+Hestness, Joel, Sharan Narang, Newsha Ardalani, Gregory Diamos, Heewoo Jun, Hassan Kianinejad, Md Mostofa Ali Patwary, Yang Yang, and Yanqi Zhou. 2017. <span>“Deep <span>Learning Scaling</span> Is <span>Predictable</span>, <span>Empirically</span>.”</span> December 1, 2017. <a href="https://doi.org/10.48550/arXiv.1712.00409">https://doi.org/10.48550/arXiv.1712.00409</a>.
+</div>
+<div id="ref-TrainingComputeOptimalLarge2022hoffmann" class="csl-entry" role="listitem">
+Hoffmann, Jordan, Sebastian Borgeaud, Arthur Mensch, Elena Buchatskaya, Trevor Cai, Eliza Rutherford, Diego de Las Casas, et al. 2022. <span>“Training <span>Compute-Optimal Large Language Models</span>.”</span> March 29, 2022. <a href="https://doi.org/10.48550/arXiv.2203.15556">https://doi.org/10.48550/arXiv.2203.15556</a>.
+</div>
+<div id="ref-MiniCPMUnveilingPotential2024hu" class="csl-entry" role="listitem">
+Hu, Shengding, Yuge Tu, Xu Han, Chaoqun He, Ganqu Cui, Xiang Long, Zhi Zheng, et al. 2024. <span>“<span>MiniCPM</span>: <span>Unveiling</span> the <span>Potential</span> of <span>Small Language Models</span> with <span>Scalable Training Strategies</span>.”</span> June 3, 2024. <a href="https://doi.org/10.48550/arXiv.2404.06395">https://doi.org/10.48550/arXiv.2404.06395</a>.
+</div>
+<div id="ref-ScalingLawsNeural2020kaplan" class="csl-entry" role="listitem">
+Kaplan, Jared, Sam McCandlish, Tom Henighan, Tom B. Brown, Benjamin Chess, Rewon Child, Scott Gray, Alec Radford, Jeffrey Wu, and Dario Amodei. 2020. <span>“Scaling <span>Laws</span> for <span>Neural Language Models</span>.”</span> January 23, 2020. <a href="https://doi.org/10.48550/arXiv.2001.08361">https://doi.org/10.48550/arXiv.2001.08361</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark_dimmed">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "YYZhang2025/YYZhang2025.github.io";
+    script.dataset.repoId = "R_kgDOQlDTcQ";
+    script.dataset.category = "General";
+    script.dataset.categoryId = "DIC_kwDOQlDTcc4C2MRz";
+    script.dataset.mapping = "title";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "top";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© CC-By Yuyang, 2025</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This page is built with ❤️ and <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+    <script type="text/javascript">
+    (function(d) {
+      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+        let pseudocodeOptions = {
+          indentSize: el.dataset.indentSize,
+          commentDelimiter: el.dataset.commentDelimiter,
+          lineNumber: el.dataset.lineNumber.toLowerCase() === "true",
+          lineNumberPunc: el.dataset.lineNumberPunc,
+          noEnd: el.dataset.noEnd.toLowerCase() === "true",
+          titlePrefix: el.dataset.captionPrefix
+        };
+        pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
+      });
+    })(document);
+    (function(d) {
+      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+        let captionSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
+        if (captionSpan !== null) {
+          let captionPrefix = el.dataset.captionPrefix + " ";
+          let captionNumber = "";
+          if (el.dataset.pseudocodeNumber) {
+            captionNumber = el.dataset.pseudocodeNumber + " ";
+            if (el.dataset.chapterLevel) {
+              captionNumber = el.dataset.chapterLevel + "." + captionNumber;
+            }
+          }
+          captionSpan.innerHTML = captionPrefix + captionNumber;
+        }
+      });
+    })(document);
+    </script>
+  
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="../../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
+</body></html>

@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Yuyang Zhang">
+<meta name="description" content="Lecture15主要梳理 LLM 的后训练（Post-Training）主线：从监督微调（SFT）的数据与目标函数出发，解释为何SFT可以让模型获得一定的Instruct Following的能力，并系统介绍 RLHF 的奖励模型训练与 PPO 更新流程，进一步对比 DPO/SimPO 等将 RL 简化为监督学习的替代方案。最后总结 RLHF 的关键风险（reward hacking、model collapse），并说明为何需要走向可验证奖励的 RLVR 来提升推理能力与训练稳定性。">
+
+<title>Lecture 15: LLM Alignment SFT &amp; RLHF(PPO, DPO)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../../">
+<link href="../../../.././style/icon.avif" rel="icon">
+<script src="../../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../../site_libs/bootstrap/bootstrap-dark-44402bf054b1fe078bc4e7aebe64bce9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
+<script src="../../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.js"></script>
+<link href="../../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.css" rel="stylesheet">
+<script src="../../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-E8EJCZTZG1"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
+</script>
+<link href="https://fonts.cdnfonts.com/css/cmu-sans-serif" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<script>
+    MathJax = {
+        loader: {
+        load: ['[tex]/boldsymbol']
+        },
+        tex: {
+        tags: "all",
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']],
+        processEscapes: true,
+        processEnvironments: true,
+        packages: {
+            '[+]': ['boldsymbol']
+        }
+        }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) {
+        block.classList.toggle("is-open");
+      }
+    });
+
+    // 可访问性（键盘）
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
+      }
+    });
+  });
+});
+</script>
+    <style type="text/css">
+    .ps-root .ps-algorithm {
+      border-top: 2px solid;
+      border-bottom: 2px solid;
+    }
+    .pseudocode-container {
+      text-align: left;
+    }
+    </style>
+  
+      <style type="text/css">
+      .ps-algorithm > .ps-line {
+        text-align: left;
+      }
+      </style>
+    
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="Lecture 15: LLM Alignment SFT &amp; RLHF(PPO, DPO)">
+<meta property="og:description" content="Lecture15主要梳理 LLM 的后训练（Post-Training）主线：从监督微调（SFT）的数据与目标函数出发，解释为何SFT可以让模型获得一定的Instruct Following的能力，并系统介绍 RLHF 的奖励模型训练与 PPO 更新流程，进一步对比 DPO/SimPO 等将 RL 简化为监督学习的替代方案。最后总结 RLHF 的关键风险（reward hacking、model collapse），并说明为何需要走向可验证奖励的 RLVR 来提升推理能力与训练稳定性。">
+<meta property="og:image" content="assets/lec15-overview-post-training.png">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../index.html"> 
+<span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/YYZhang2025"> 
+<span class="menu-text"><i class="fa-brands fa-github fa-xl"></i></span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.linkedin.com/in/zhang-yuyang/"> 
+<span class="menu-text"><i class="fa-brands fa-linkedin fa-xl"></i></span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../posts/Blogs/blogs_index.html"> 
+<span class="menu-text">Blogs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../posts/Projects/projects_index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../.././posts/100-PwC/100-pwc_index.qmd"> 
+<span class="menu-text">100-PwC</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-learning-notes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Learning Notes</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-learning-notes">    
+        <li>
+    <a class="dropdown-item" href="../../../.././posts/CS336/index.qmd">
+ <span class="dropdown-text">Stanford CS336 LLM From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../.././posts/CME296/index.qmd">
+ <span class="dropdown-text">Stanford CME296 Diffusion &amp; Large Vision Models</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title">Lecture 15: LLM Alignment SFT &amp; RLHF(PPO, DPO)</h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#sft" id="toc-sft" class="nav-link active" data-scroll-target="#sft"><span class="header-section-number">1</span> SFT</a>
+  <ul>
+  <li><a href="#dataset" id="toc-dataset" class="nav-link" data-scroll-target="#dataset"><span class="header-section-number">1.1</span> Dataset</a>
+  <ul>
+  <li><a href="#flan" id="toc-flan" class="nav-link" data-scroll-target="#flan"><span class="header-section-number">1.1.1</span> FLAN</a></li>
+  <li><a href="#alpaca" id="toc-alpaca" class="nav-link" data-scroll-target="#alpaca"><span class="header-section-number">1.1.2</span> Alpaca</a></li>
+  <li><a href="#openassistant" id="toc-openassistant" class="nav-link" data-scroll-target="#openassistant"><span class="header-section-number">1.1.3</span> OpenAssistant</a></li>
+  <li><a href="#self-annotated-dataset" id="toc-self-annotated-dataset" class="nav-link" data-scroll-target="#self-annotated-dataset"><span class="header-section-number">1.1.4</span> Self-Annotated Dataset</a></li>
+  </ul></li>
+  <li><a href="#algorithm" id="toc-algorithm" class="nav-link" data-scroll-target="#algorithm"><span class="header-section-number">1.2</span> Algorithm</a>
+  <ul>
+  <li><a href="#mid-training" id="toc-mid-training" class="nav-link" data-scroll-target="#mid-training"><span class="header-section-number">1.2.1</span> Mid-Training</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#rlhf" id="toc-rlhf" class="nav-link" data-scroll-target="#rlhf"><span class="header-section-number">2</span> RLHF</a>
+  <ul>
+  <li><a href="#rlhf-data" id="toc-rlhf-data" class="nav-link" data-scroll-target="#rlhf-data"><span class="header-section-number">2.1</span> RLHF Data</a></li>
+  <li><a href="#rlhf-algorithms" id="toc-rlhf-algorithms" class="nav-link" data-scroll-target="#rlhf-algorithms"><span class="header-section-number">2.2</span> RLHF Algorithms</a></li>
+  <li><a href="#ppo" id="toc-ppo" class="nav-link" data-scroll-target="#ppo"><span class="header-section-number">2.3</span> PPO</a>
+  <ul>
+  <li><a href="#reinforce" id="toc-reinforce" class="nav-link" data-scroll-target="#reinforce"><span class="header-section-number">2.3.1</span> REINFORCE</a></li>
+  <li><a href="#variance-reduction-with-advantage-function" id="toc-variance-reduction-with-advantage-function" class="nav-link" data-scroll-target="#variance-reduction-with-advantage-function"><span class="header-section-number">2.3.2</span> Variance Reduction with Advantage Function</a></li>
+  <li><a href="#off-policy-updates" id="toc-off-policy-updates" class="nav-link" data-scroll-target="#off-policy-updates"><span class="header-section-number">2.3.3</span> Off-Policy Updates</a></li>
+  <li><a href="#proximal-policy-optimization-ppo" id="toc-proximal-policy-optimization-ppo" class="nav-link" data-scroll-target="#proximal-policy-optimization-ppo"><span class="header-section-number">2.3.4</span> Proximal Policy Optimization (PPO)</a></li>
+  </ul></li>
+  <li><a href="#dpo" id="toc-dpo" class="nav-link" data-scroll-target="#dpo"><span class="header-section-number">2.4</span> DPO</a></li>
+  <li><a href="#反解得到-implied-rewardreward-log-ratio差一个常数" id="toc-反解得到-implied-rewardreward-log-ratio差一个常数" class="nav-link" data-scroll-target="#反解得到-implied-rewardreward-log-ratio差一个常数"><span class="header-section-number">2.5</span> 反解”得到 implied reward：reward ≈ log-ratio（差一个常数）</a></li>
+  <li><a href="#others" id="toc-others" class="nav-link" data-scroll-target="#others"><span class="header-section-number">2.6</span> Others</a>
+  <ul>
+  <li><a href="#length-normalized-dpo" id="toc-length-normalized-dpo" class="nav-link" data-scroll-target="#length-normalized-dpo"><span class="header-section-number">2.6.1</span> Length Normalized DPO</a></li>
+  </ul></li>
+  <li><a href="#ppo-vs.-dpo" id="toc-ppo-vs.-dpo" class="nav-link" data-scroll-target="#ppo-vs.-dpo"><span class="header-section-number">2.7</span> PPO vs.&nbsp;DPO</a></li>
+  </ul></li>
+  <li><a href="#things-to-watch-out-for-in-rlhf" id="toc-things-to-watch-out-for-in-rlhf" class="nav-link" data-scroll-target="#things-to-watch-out-for-in-rlhf"><span class="header-section-number">3</span> Things to watch out for in RLHF</a>
+  <ul>
+  <li><a href="#over-optimization" id="toc-over-optimization" class="nav-link" data-scroll-target="#over-optimization"><span class="header-section-number">3.1</span> Over-optimization</a></li>
+  <li><a href="#model-collapse" id="toc-model-collapse" class="nav-link" data-scroll-target="#model-collapse"><span class="header-section-number">3.2</span> Model Collapse</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">4</span> Summary</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Lecture 15: LLM Alignment SFT &amp; RLHF(PPO, DPO)</h1>
+</div>
+
+<div>
+  <div class="description">
+    Lecture15主要梳理 LLM 的后训练（<strong>Post-Training</strong>）主线：从监督微调（<strong>SFT</strong>）的数据与目标函数出发，解释为何SFT可以让模型获得一定的Instruct Following的能力，并系统介绍 RLHF 的奖励模型训练与 <strong>PPO</strong> 更新流程，进一步对比 <strong>DPO</strong>/<strong>SimPO</strong> 等将 RL 简化为监督学习的替代方案。最后总结 RLHF 的关键风险（<strong>reward hacking</strong>、<strong>model collapse</strong>），并说明为何需要走向可验证奖励的 RLVR 来提升推理能力与训练稳定性。
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Yuyang Zhang </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC-body" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#sft" id="toc-sft"><span class="header-section-number">1</span> SFT</a>
+  <ul>
+  <li><a href="#dataset" id="toc-dataset"><span class="header-section-number">1.1</span> Dataset</a>
+  <ul>
+  <li><a href="#flan" id="toc-flan"><span class="header-section-number">1.1.1</span> FLAN</a></li>
+  <li><a href="#alpaca" id="toc-alpaca"><span class="header-section-number">1.1.2</span> Alpaca</a></li>
+  <li><a href="#openassistant" id="toc-openassistant"><span class="header-section-number">1.1.3</span> OpenAssistant</a></li>
+  <li><a href="#self-annotated-dataset" id="toc-self-annotated-dataset"><span class="header-section-number">1.1.4</span> Self-Annotated Dataset</a></li>
+  </ul></li>
+  <li><a href="#algorithm" id="toc-algorithm"><span class="header-section-number">1.2</span> Algorithm</a>
+  <ul>
+  <li><a href="#mid-training" id="toc-mid-training"><span class="header-section-number">1.2.1</span> Mid-Training</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#rlhf" id="toc-rlhf"><span class="header-section-number">2</span> RLHF</a>
+  <ul>
+  <li><a href="#rlhf-data" id="toc-rlhf-data"><span class="header-section-number">2.1</span> RLHF Data</a></li>
+  <li><a href="#rlhf-algorithms" id="toc-rlhf-algorithms"><span class="header-section-number">2.2</span> RLHF Algorithms</a></li>
+  <li><a href="#ppo" id="toc-ppo"><span class="header-section-number">2.3</span> PPO</a>
+  <ul>
+  <li><a href="#reinforce" id="toc-reinforce"><span class="header-section-number">2.3.1</span> REINFORCE</a></li>
+  <li><a href="#variance-reduction-with-advantage-function" id="toc-variance-reduction-with-advantage-function"><span class="header-section-number">2.3.2</span> Variance Reduction with Advantage Function</a></li>
+  <li><a href="#off-policy-updates" id="toc-off-policy-updates"><span class="header-section-number">2.3.3</span> Off-Policy Updates</a></li>
+  <li><a href="#proximal-policy-optimization-ppo" id="toc-proximal-policy-optimization-ppo"><span class="header-section-number">2.3.4</span> Proximal Policy Optimization (PPO)</a></li>
+  </ul></li>
+  <li><a href="#dpo" id="toc-dpo"><span class="header-section-number">2.4</span> DPO</a></li>
+  <li><a href="#反解得到-implied-rewardreward-log-ratio差一个常数" id="toc-反解得到-implied-rewardreward-log-ratio差一个常数"><span class="header-section-number">2.5</span> 反解”得到 implied reward：reward ≈ log-ratio（差一个常数）</a></li>
+  <li><a href="#others" id="toc-others"><span class="header-section-number">2.6</span> Others</a>
+  <ul>
+  <li><a href="#length-normalized-dpo" id="toc-length-normalized-dpo"><span class="header-section-number">2.6.1</span> Length Normalized DPO</a></li>
+  </ul></li>
+  <li><a href="#ppo-vs.-dpo" id="toc-ppo-vs.-dpo"><span class="header-section-number">2.7</span> PPO vs.&nbsp;DPO</a></li>
+  </ul></li>
+  <li><a href="#things-to-watch-out-for-in-rlhf" id="toc-things-to-watch-out-for-in-rlhf"><span class="header-section-number">3</span> Things to watch out for in RLHF</a>
+  <ul>
+  <li><a href="#over-optimization" id="toc-over-optimization"><span class="header-section-number">3.1</span> Over-optimization</a></li>
+  <li><a href="#model-collapse" id="toc-model-collapse"><span class="header-section-number">3.2</span> Model Collapse</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary"><span class="header-section-number">4</span> Summary</a></li>
+  </ul>
+</nav>
+<p>在之前的课程中，我们通过训练（Pre-Training）获得了一个可以自动补全的LLM。但是，这个显然和我们现在使用的ChatGPT，Gemini有很大的区别，如何从这个GPT变成ChatGPT，将是我们接下去要学习的内容。也就是所谓的Post-Training，通过Post-Training，模型可以输出制定的内容，并且变得更加安全。在这节Lecture中，我们首先会学习：</p>
+<ul>
+<li>什么是SFT，如何构建Dataset</li>
+<li>什么是RLHF</li>
+</ul>
+<div id="fig-post-training-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-post-training-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="assets/lec15-overview-post-training.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: 该图展示了 RLHF 的整体训练流程：首先由我们为给定Prompt示范高质量答案，对模型进行监督微调（SFT）；接着针对同一提示生成多条模型输出，由人对这些回答进行从好到坏的排序，用于训练一个奖励模型（Reward Model）；最后在实际训练中，模型针对新提示生成回答，奖励模型对其打分，并通过 PPO 等强化学习算法不断更新模型参数，使模型逐步倾向于产出更符合人类偏好的结果。"><img src="assets/lec15-overview-post-training.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-post-training-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 该图展示了 RLHF 的整体训练流程：首先由我们为给定Prompt示范高质量答案，对模型进行监督微调（SFT）；接着针对同一提示生成多条模型输出，由人对这些回答进行从好到坏的排序，用于训练一个奖励模型（Reward Model）；最后在实际训练中，模型针对新提示生成回答，奖励模型对其打分，并通过 PPO 等强化学习算法不断更新模型参数，使模型逐步倾向于产出更符合人类偏好的结果。
+</figcaption>
+</figure>
+</div>
+<section id="sft" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> SFT</h1>
+<p>我们知道，训练一个模型，避不开的两件事就是：<strong>数据</strong>和<strong>算法</strong>，接下来我们就通过这两个方面来看看SFT</p>
+<section id="dataset" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="dataset"><span class="header-section-number">1.1</span> Dataset</h2>
+<p>SFT（监督微调）阶段用的数据量通常 <strong>远小于预训练</strong>，但它对模型行为的影响却极大，所以：</p>
+<ul>
+<li>数据里的“细节”会被模型强烈放大：风格、长度、格式、口吻、是否爱列点、是否爱加引用、是否爱 emoji……都会被学成“默认行为”。</li>
+<li>SFT 更擅长教会模型输出的“类型签名”（type signature）：像不像聊天、是不是有结构、有没有礼貌、会不会拒绝。</li>
+<li>但 SFT 不一定可靠地教会“新知识”，甚至会引入捷径行为（比如为了符合“专家答案的形式”，去编造引用/事实）。</li>
+</ul>
+<p>接下来我们来看看几个SFT数据的例子：</p>
+<section id="flan" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="flan"><span class="header-section-number">1.1.1</span> FLAN</h3>
+<p>FLAN<span class="citation" data-cites="FlanCollectionDesigning2023longpre">(<a href="#ref-FlanCollectionDesigning2023longpre" role="doc-biblioref">Longpre et al. 2023</a>)</span> 数据是把很多 NLP 任务用“自然语言指令模板”表达出来，然后把模型在这些任务上做 <strong>instruction tuning（指令微调）</strong>，从而提升<strong>零样本泛化</strong> FLAN 系列的关键不是原始任务，而是： - 把每个任务写成若干种 <strong>自然语言模板</strong>（instruction + input + output） - 模型训练时看到的是“像聊天指令一样的文本”，但背后很多是分类/抽取/QA/生成等传统任务</p>
+<p>论文把它称为 “tasks formatted with instructions” 的 instruction tuning</p>
+<div id="fig-" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig--caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/flan-example-data.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: FLAN 数据示例：把分类任务写成“指令 + 输入 + 输出”的形式"><img src="./assets/flan-example-data.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig--caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: FLAN 数据示例：把分类任务写成“指令 + 输入 + 输出”的形式
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="alpaca" class="level3" data-number="1.1.2">
+<h3 data-number="1.1.2" class="anchored" data-anchor-id="alpaca"><span class="header-section-number">1.1.2</span> Alpaca</h3>
+<p><a href="https://huggingface.co/datasets/tatsu-lab/alpaca"><strong>Alpaca</strong></a> 是斯坦福 CRFM / Tatsu-lab 在 2023 年提出的一个可复现路线：<br>
+用 <strong>LLaMA-7B</strong> 做基座，拿一份<strong>由更强模型生成的指令跟随数据（52K）</strong>做 SFT，从而得到一个“像 ChatGPT 一样更会听指令”的模型。</p>
+<p>它的数据类似于：</p>
+<div id="fig-" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig--caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="assets/lec15-alpaca-example.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: Alpaca 数据示例：给定指令，生成对应回答"><img src="assets/lec15-alpaca-example.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig--caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Alpaca 数据示例：给定指令，生成对应回答
+</figcaption>
+</figure>
+</div>
+<p>下面是Alpaca的Prompt Template</p>
+<div class="sourceCode" id="cb1" data-code-line-numbers=""><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb1-1"><a href="#cb1-1"></a>Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.</span>
+<span id="cb1-2"><a href="#cb1-2"></a></span>
+<span id="cb1-3"><a href="#cb1-3"></a>### Instruction:</span>
+<span id="cb1-4"><a href="#cb1-4"></a>{instruction}</span>
+<span id="cb1-5"><a href="#cb1-5"></a></span>
+<span id="cb1-6"><a href="#cb1-6"></a>### Input:</span>
+<span id="cb1-7"><a href="#cb1-7"></a>{input}</span>
+<span id="cb1-8"><a href="#cb1-8"></a></span>
+<span id="cb1-9"><a href="#cb1-9"></a>### Response:</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>通过这种方式，模型学会了“看到 instruction + input 后，应该生成什么样的 response”。</p>
+<p>Alpaca 的数据生成基本沿着 <strong>Self-Instruct</strong> 的思路走：</p>
+<ul>
+<li><strong>起点：175 条人工写的 seed instruction-output pairs</strong>（来自 Self-Instruct 的 seed set）<br>
+</li>
+<li>用 <strong>text-davinci-003</strong>（当时非常强的 teacher）：
+<ol type="1">
+<li><strong>生成更多指令</strong>（用 seed 做 in-context 示例，让 teacher 扩写/变换出新 instruction）</li>
+<li>再让 teacher <strong>为这些指令生成回答</strong>，得到“instruction-following demonstrations”<br>
+最终形成大约 <strong>52K</strong> 条数据。</li>
+</ol></li>
+</ul>
+<p>所以 Alpaca 的本质是：<strong>用强模型当“数据工厂”，低成本造出大批 instruction→response 的 SFT 样本</strong>。</p>
+<div id="fig-alpaca-self-instruct" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-alpaca-self-instruct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="assets/lec15-self-instruct.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: Alpaca 数据生成流程示意：用强模型（text-davinci-003）基于少量人工示范，自动生成大规模的指令-回答对，用于微调基础模型（LLaMA-7B）。这种方法显著降低了高质量 SFT 数据的获取成本。Image source Self-Instruct: Aligning LM with Self Generated Instructions"><img src="assets/lec15-self-instruct.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alpaca-self-instruct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Alpaca 数据生成流程示意：用强模型（text-davinci-003）基于少量人工示范，自动生成大规模的指令-回答对，用于微调基础模型（LLaMA-7B）。这种方法显著降低了高质量 SFT 数据的获取成本。Image source <a href="https://github.com/yizhongw/self-instruct">Self-Instruct: Aligning LM with Self Generated Instructions</a>
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="openassistant" class="level3" data-number="1.1.3">
+<h3 data-number="1.1.3" class="anchored" data-anchor-id="openassistant"><span class="header-section-number">1.1.3</span> OpenAssistant</h3>
+<p><strong>OpenAssistant Conversations (OASST1)</strong><span class="citation" data-cites="OpenAssistantConversationsDemocratizing2023kopf">(<a href="#ref-OpenAssistantConversationsDemocratizing2023kopf" role="doc-biblioref">Köpf et al. 2023</a>)</span> 是 LAION 组织的全球众包项目产出的一个 <strong>“助手风格（assistant-style）对话语料”</strong>，目标是把对齐（SFT / RLHF）研究“民主化”：把原本经常被大厂私有化的高质量偏好/对话数据开源出来。它包含 <strong>161,443 条消息、35 种语言、超过 10,000 棵完整标注的对话树</strong>，并附带大量质量评分。</p>
+<p>简要来说，整个数据集由一系列对话树（Conversation Tree, CT）组成。每一棵树的根节点表示一个初始提示（prompt），由“prompter”角色给出；在对话中只区分两种角色：<strong>prompter（提问方）</strong>和 assistant（回答方），而“user”这个词仅用来指参与数据标注或贡献内容的人类，以避免角色概念混淆。需要注意的是，这两种角色在原则上既可以由人类完成，也可以由模型生成。</p>
+<p>在对话树中： - 每个节点代表一条书面消息，并明确标注其角色（prompter 或 assistant）。 - 每个节点可以有多个子节点，且子节点的角色一定与父节点相反，表示同一轮对话下的不同可能回复。 - 从根节点到树中任意节点的一条路径称为一个 thread，它对应一段合法的完整对话，体现提问方与助手轮流发言的过程。 - 每个节点都会附带额外标注信息，例如人工标签、元数据（采集时间、语言等）。 - assistant 节点还包含排序信息（rank），用于表示在同一父 prompt 下，多条候选回复之间的人类偏好顺序，这是后续偏好学习和奖励建模的重要信号。</p>
+<p>整体上，这种对话树结构不仅能表示多轮对话，还能自然地支持一问多答 + 人类偏好排序，非常适合用于指令微调、奖励模型训练以及对齐研究。</p>
+<p>下图是OpenAssistant数据集的一个对话树示例：</p>
+<div id="fig-openassistant-conversation-tree" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-openassistant-conversation-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/OpenAssistatn-example.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: OpenAssistant 数据集中的一个对话树示例，展示了从初始提示（prompt）到多轮交互的完整对话结构。每个节点代表一条消息，并标注了角色（prompter 或 assistant）及其对应的回复选项和偏好排序信息。"><img src="./assets/OpenAssistatn-example.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-openassistant-conversation-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: OpenAssistant 数据集中的一个对话树示例，展示了从初始提示（prompt）到多轮交互的完整对话结构。每个节点代表一条消息，并标注了角色（prompter 或 assistant）及其对应的回复选项和偏好排序信息。
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="self-annotated-dataset" class="level3" data-number="1.1.4">
+<h3 data-number="1.1.4" class="anchored" data-anchor-id="self-annotated-dataset"><span class="header-section-number">1.1.4</span> Self-Annotated Dataset</h3>
+<p>在课堂上，还一起Label了几个Prompts， 但是从这些Prompts的例子中，明显可以看出有几个问题：</p>
+<ul>
+<li>质量方差极大（high variance）: 同一个 prompt，有人认真写长文、有人一句话、有人直接套 ChatGPT 模板。SFT 会把这种风格差异当成“都对”的示范学进去，导致模型输出风格不稳定。</li>
+<li>“写长、写好”很难 → 数据会偏短或偏模板: 大多数人写不出持续高质量长回答；要么很短，要么用套话填充。模型学到的往往是“模板化结构”，不一定是更有用的内容。</li>
+<li>容易产生“风格&gt;正确性”的偏置（length/list bias: 人类写作天然倾向于列点、写得更长显得更“像答案”。模型学到的可能是“多写、列点、客气”这种类型签名，而不是“简洁且准确”。</li>
+</ul>
+</section>
+</section>
+<section id="algorithm" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="algorithm"><span class="header-section-number">1.2</span> Algorithm</h2>
+<p>在了解了SFT的Dataset之后，我们可以训练模型了。其实SFT的算法很简单，与Pre-Training的Object一样，都是<strong>Next-Token-Prediction</strong>，其基本的代码框架是：token-level NLL）</p>
+<p><span id="eq-sft-obj"><span class="math display">\[
+\underset{\theta}{\max} \log p_{\theta}(y | x)
+\tag{1}\]</span></span></p>
+<p>从代码来看，就是简单的几步：</p>
+<div id="3769001b" class="cell">
+<details open="" class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb2" data-source-line-numbers="nil" data-code-line-numbers="8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(train_steps):</span>
+<span id="cb2-2"><a href="#cb2-2"></a>    batch <span class="op">=</span> <span class="bu">next</span>(train_dataloader)</span>
+<span id="cb2-3"><a href="#cb2-3"></a>    </span>
+<span id="cb2-4"><a href="#cb2-4"></a>    input_ids <span class="op">=</span> batch[<span class="st">'input_ids'</span>]</span>
+<span id="cb2-5"><a href="#cb2-5"></a>    labels <span class="op">=</span> batch[<span class="st">'labels'</span>]</span>
+<span id="cb2-6"><a href="#cb2-6"></a>    response_mask <span class="op">=</span> batch[<span class="st">'response_mask'</span>]</span>
+<span id="cb2-7"><a href="#cb2-7"></a>    </span>
+<span id="cb2-8"><a href="#cb2-8"></a>    output <span class="op">=</span> model(input_ids) </span>
+<span id="cb2-9"><a href="#cb2-9"></a>    </span>
+<span id="cb2-10"><a href="#cb2-10"></a>    loss <span class="op">=</span> loss_fn(output, input_ids, response_mask)</span>
+<span id="cb2-11"><a href="#cb2-11"></a>    loss.backward()</span>
+<span id="cb2-12"><a href="#cb2-12"></a>    </span>
+<span id="cb2-13"><a href="#cb2-13"></a>    optimizer.step()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>我们可以看到，基本上与Pre-Training的Loss 类似，只不过就是多了一个Response Mask.</p>
+<div class="question foldable">
+<div class="question-header foldable-header">
+<p>Question：为什么要 mask prompt？</p>
+</div>
+<div class="question-container foldable-content">
+<p>因为我们希望模型学的是：“看到 prompt 后，应该怎么答”, 而不是：“把 prompt 也背下来复现一遍”。 通过mask掉 prompt 部分的 loss，我们只让模型在 response 部分学习预测， 并且避免模型过拟合 prompt 内容。</p>
+</div>
+</div>
+<section id="mid-training" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="mid-training"><span class="header-section-number">1.2.1</span> Mid-Training</h3>
+<p>既然SFT和Pre-Training的训练目标一致，那么我们可不可以将SFT的训练混合到Pre-Training当中呢？答案是可以的，这也就是所谓的<strong>Mid-Training</strong>/<strong>Two-Phase Training</strong></p>
+<p>在这个训练过程中，主要做3件事：</p>
+<ol type="1">
+<li>先正常做预训练（Pre-train on web/pretraining data） 在Common Crawl / books / code / papers 等大规模语料中训练，目标是 next-token prediction。</li>
+<li>在预训练的后半段，把 instruction-tuning 数据混进去（Mix in instruction-tuning data into pre-training）关键点是：
+<ul>
+<li>不是等预训练结束再单独 SFT</li>
+<li>当模型已经有一定能力、学习率开始下降（进入 decay / anneal 阶段）时， 继续用“预训练数据”保持通用能力</li>
+<li>同时加大“高质量/指令/对话/推理”数据的比例，让模型在还处在“预训练优化状态”时就逐渐学会指令跟随的分布</li>
+<li>这一步本质上：还是 next-token loss，只是数据分布变了。</li>
+</ul></li>
+<li>最后再做一个很短的真正 instruction tuning：由于第二步已经把“指令分布”深度融进模型了，最后的纯 SFT 往往可以更短、更像“校准/收尾”。</li>
+</ol>
+<p>通过这个做法的好处就是：<u>让模型能在不严重灾难性遗忘（catastrophic forgetting）的情况下，把 instruction tuning 扩大规模.</u></p>
+<p>我们来对比一下传统 SFT 和 Mid-Training 的区别：</p>
+<ul>
+<li><strong>传统做法：先预训练完，再 SFT</strong> ：SFT 数据量虽然小，但梯度信号很集中、风格强，会把模型“拉”到很窄的分布上。<br>
+如果你 SFT 过拟合（学习率大/步数多/数据分布太偏），就容易：
+<ul>
+<li>通用能力下降（遗忘预训练里学到的广泛知识/语言能力）</li>
+<li>过拟合某种风格（更啰嗦、更爱列点、更爱模板化）</li>
+</ul></li>
+<li><strong>Mid-Training：预训练后期逐步加指令数据</strong> ：因为预训练数据还在、学习率也在 decay，模型被“温和地”引导到指令分布，
+<ul>
+<li><strong>不会一下子被 SFT 的强分布冲刷</strong>。<br>
+</li>
+<li>同时可以把 instruction 数据规模做大（甚至到“像预训练一样大”），而不用担心彻底把模型训偏。</li>
+</ul></li>
+</ul>
+<p>通过这种方法，我们只需要在训练的时候，<strong>修改不同阶段的数据比例</strong>即可，比如：</p>
+<ul>
+<li>训练进度前 70%：几乎全是预训练数据</li>
+<li>后 30%（学习率开始衰减）：逐步提高 instruction/高质量数据占比：例如从 0% → 10% → 30% → 50%</li>
+<li>训练末尾：再做少量纯 SFT（更像“对齐收尾”）</li>
+</ul>
+<div id="fig-mid-training-data-dist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mid-training-data-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="assets/mid-training-data-dist.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;6: 这张图说明很多模型会把“指令微调数据”提前混进预训练的后期（decay/mid-training），让数据配方从“纯网页预训练”（左图）逐步变成“预训练语料 + 各类SFT/高质量指令数据的混合”（右图），从而更规模化地获得指令跟随能力并减少灾难性遗忘。"><img src="assets/mid-training-data-dist.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mid-training-data-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: 这张图说明很多模型会把“指令微调数据”提前混进预训练的后期（decay/mid-training），让数据配方从“纯网页预训练”（左图）逐步变成“预训练语料 + 各类SFT/高质量指令数据的混合”（右图），从而更规模化地获得指令跟随能力并减少灾难性遗忘。
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+</section>
+<section id="rlhf" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> RLHF</h1>
+<p>在前半段，我们学习了SFT，回顾一下SFT，就是你有（prompt, ideal response）示范数据，本质是在做，最大化Next-Token-Prediction的目标 <a href="#eq-sft-obj" class="quarto-xref">Equation&nbsp;1</a>。</p>
+<p>在强化学习中，这叫也叫做做<strong>Imitation Learning</strong>。</p>
+<div class="tip foldable is-open">
+<div class="tip-header foldable-header">
+<p>TIP: What is Imitation Learning?</p>
+</div>
+<div class="tip-container foldable-content">
+<p>Imitation Learnings 是通过学习专家示范数据（state/action 或 prompt/response），直接拟合“应该怎么做”，而不是通过试错来优化奖励。简单来说，我们有专家示范数据 <span class="math inline">\(\mathcal{D} = \{(s_1, a_1), (s_2, a_2), \ldots (s_n, a_n)\}\)</span>，目标是最大化： <span class="math display">\[
+\underset{\theta}{\max} \sum_{(s, a) \in \mathcal{D}} \log \pi_{\theta}(a | s)
+\]</span></p>
+</div>
+</div>
+<p>我们也提到了这种方法存在明显的几个问题，其中包括Dataset的难以收集，偏置会被放大（style/length/list bias）等。因此我们就从SFT（Imitation Learning）走向了Reinforcement Learning（Optimization）。 具体来说，我们把LM当作一个Policy <span class="math inline">\(\pi_{\theta}( y| x)\)</span>, 目标是最大化：</p>
+<p><span id="eq-rlhf-obj"><span class="math display">\[
+\underset{\theta}{\max} \mathbb{E}_{y \sim \pi_{\theta}( \cdot | x)}[r(x, y)]
+\tag{2}\]</span></span></p>
+<p>通过改变我们的训练目标，我们不再需要每个 prompt 的标准答案，而是收集：</p>
+<ul>
+<li>给同一个 prompt <span class="math inline">\(x\)</span>，模型生成多个回答 <span class="math inline">\(y_1, y_2\)</span>（rollouts）</li>
+<li>标注者只做判断：哪个更好(pairwise preference), <span class="math inline">\(y^+ \succ y^-\)</span></li>
+</ul>
+<p>通过这种训练目标的改变，我们可以节省许多的费用。</p>
+<p>并且，这种方法也更符合人类的认知习惯，<strong>G-V gap (Generation-Validation gap)</strong> 就是一个很好的例子：</p>
+<div id="fig-gv-gap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gv-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="assets/lec15-gv-gap.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;7: 图里每个 annotator 的偏好条形图显示：有人明显更偏向 Instruct Davinci summaries，而总体偏好接近 50/50，且一致性 \alpha 很低，说明偏好差异/自我不一致很明显。"><img src="assets/lec15-gv-gap.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gv-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: 图里每个 annotator 的偏好条形图显示：有人明显更偏向 <strong>Instruct Davinci summaries</strong>，而总体偏好接近 50/50，且一致性 <span class="math inline">\(\alpha\)</span> 很低，说明偏好差异/自我不一致很明显。
+</figcaption>
+</figure>
+</div>
+<p>用一句话总结就是： <strong>“生成”一个高质量答案很难且不稳定，但“验证/比较”哪个更好相对容易</strong>，因此 RLHF 通过偏好比较来优化模型更符合人类真正的偏好。</p>
+<p>接下来，我们来具体看看RLHF是个什么东西，与SFT类似，我们主要还是通过两个方面：<strong>数据</strong>和<strong>算法</strong>，并且在最后看看RLHF存在什么缺点</p>
+<section id="rlhf-data" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="rlhf-data"><span class="header-section-number">2.1</span> RLHF Data</h2>
+<p>课上提到 InstructGPT 的标注准则很经典：<strong>helpful、truthful、harmless</strong>。<br>
+实际标注界面通常就是：</p>
+<ul>
+<li>A vs B 哪个更好？（或 4 选 1 / ties 等）</li>
+<li>有时还会分别打分：事实性、遵循指令、安全性、写作质量等</li>
+</ul>
+<p>不过需要注意的是：<strong>这不是“对错题”</strong>，很多任务是开放式偏好。</p>
+<p>有了这些数据之后，我们要训练一个Reward Model <span class="math inline">\(r_{\phi}(x, y)\)</span>. 每个回答都有一个隐藏分数，标注者更常选分高的。<br>
+用一个 logistic/softmax 形式拟合：</p>
+<p><span id="eq-reward-model-preference"><span class="math display">\[
+P(y^+ \succ y^- \mid x) = \sigma\big(r_\phi(x,y^+) - r_\phi(x,y^-)\big)
+\tag{3}\]</span></span></p>
+<p>于是你的 RLHF 数据就变成 reward model 的监督数据:</p>
+<p><span id="eq-reward-model-obj"><span class="math display">\[
+\underset{\phi}{\max} \sum_{(x, y^+, y^-) \in D} \log \sigma\big(r_\phi(x,y^+) - r_\phi(x,y^-)\big)
+\tag{4}\]</span></span></p>
+<p>训练完成后，就有了一个 reward model，可以给任意 (x, y) 对打分： <span class="math inline">\(r_{\phi}(x, y)\)</span>。</p>
+<p>当然，这个流程看似简单，实际上还是有很多考量的：</p>
+<ul>
+<li><strong>数据质量</strong>：标注者培训、审核、分布覆盖、偏见控制等</li>
+<li><strong>数据多样性</strong>：prompt 类型、回答风格、难度等</li>
+<li><strong>模型架构</strong>：reward model 通常是一个小型 LM，或者在 LM 上加个头</li>
+</ul>
+</section>
+<section id="rlhf-algorithms" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="rlhf-algorithms"><span class="header-section-number">2.2</span> RLHF Algorithms</h2>
+<p>有了Pair-Wise 的Dataset和Reward Model之后，我们可以开始训练的我们的模型了。在InstructGPT<span class="citation" data-cites="TrainingLanguageModels2022ouyang">(<a href="#ref-TrainingLanguageModels2022ouyang" role="doc-biblioref">Ouyang et al. 2022</a>)</span> 中，主要用的是PPO的算法。 接下来看看PPO的具体内容。</p>
+</section>
+<section id="ppo" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="ppo"><span class="header-section-number">2.3</span> PPO</h2>
+<p>回顾一下，看一下我们现在手头上有些什么东西：</p>
+<ul>
+<li>一个初始化的策略模型（通常是 <strong>SFT 模型</strong>）<span class="math inline">\(\pi_{\text{ref}}(y|x)\)</span>（作为参考策略/基线）</li>
+<li>一个奖励函数/奖励模型 <span class="math inline">\(r_{\phi}(x,y)\)</span>（由偏好数据训练出来）</li>
+<li>要训练的策略 <span class="math inline">\(\pi_\theta(y|x)\)</span>, (由LLM初始化)</li>
+</ul>
+<p>RLHF-PPO 的核心目标就是：</p>
+<p><span id="eq-rlhf-ppo-obj"><span class="math display">\[
+\underset{\theta}{\max}  \mathcal{J}(\theta) = \mathbb{E}_{y\sim \pi_\theta(\cdot|x)}\big[r_\phi(x,y)\big] \ -\ \beta \, \mathrm{KL}\big(\pi_\theta(\cdot|x)\ \|\ \pi_{\text{ref}}(\cdot|x)\big)
+\tag{5}\]</span></span></p>
+<p>通过这个目标函数，我们希望模型： <strong>回答更“高奖励”，但别偏离 SFT 太远</strong>（KL 约束防止跑飞、学会作弊或变得怪异/不安全）。</p>
+<section id="reinforce" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="reinforce"><span class="header-section-number">2.3.1</span> REINFORCE</h3>
+<p>在Neural Network中，我们优化目标通常用梯度下降法，因此我们需要计算上面目标的梯度。对于Deep RL也不例外，我们需要计算出这个Object Function (<a href="#eq-rlhf-ppo-obj" class="quarto-xref">Equation&nbsp;5</a>) 的梯度:</p>
+<p><span id="eq-reinforce"><span class="math display">\[
+\nabla_\theta \mathbb{E}_{y\sim \pi_\theta(\cdot|x)}\big[r_\phi(x,y)\big] = \mathbb{E}_{y\sim \pi_\theta(\cdot|x)}\left[r_\phi(x,y) \, \nabla_\theta \log \pi_\theta(y|x)\right]
+\tag{6}\]</span></span></p>
+<p>通过这个方法，我们可以计算出梯度，然后用SGD来更新模型参数，这也就是<strong>REINFORCE</strong>算法。 在实际操作中，我们可以通过Sampling的方式来估计上面的期望：</p>
+<p><span id="eq-reinforce-sampling"><span class="math display">\[
+\nabla_\theta \mathbb{E}_{y\sim \pi_\theta(\cdot|x)}\big[r_\phi(x,y)\big] \approx \frac{1}{N} \sum_{i=1}^N r_\phi(x,y_i) \, \nabla_\theta \log \pi_\theta(y_i|x), \quad y_i \sim \pi_\theta(\cdot|x)
+\tag{7}\]</span></span></p>
+<p>但是REINFORCE有两个主要问题：</p>
+<ol type="1">
+<li><strong>High variance</strong>：奖励信号往往很稀疏且噪声大，导致梯度估计方差很高，训练不稳定。</li>
+<li><strong>单步更新</strong>：REINFORCE 每次更新都基于当前策略采样的数据，不能多步利用旧数据，效率低。</li>
+</ol>
+<p>接下来，我们看看如何解决这两个问题，并且逐步引出PPO算法。</p>
+</section>
+<section id="variance-reduction-with-advantage-function" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="variance-reduction-with-advantage-function"><span class="header-section-number">2.3.2</span> Variance Reduction with Advantage Function</h3>
+<p>我们先来看一下为什么会有High Variance的问题。</p>
+<p>假设我们把回答 <span class="math inline">\(y\)</span> 看成一个序列的动作 <span class="math inline">\((a_1, a_2, \ldots, a_T)\)</span>，每个动作对应生成一个 token。 那么根据链式法则，回答的概率可以写成： <span id="eq-policy-chain-rule"><span class="math display">\[
+\pi_\theta(y|x) = \prod_{t=1}^T \pi_\theta(a_t | s_t)
+\tag{8}\]</span></span></p>
+<p>其中 <span class="math inline">\(s_t\)</span> 是生成第 <span class="math inline">\(t\)</span> 个 token 时的状态（包括 prompt 和前面生成的 tokens）。 根据 REINFORCE 的梯度公式 <a href="#eq-reinforce" class="quarto-xref">Equation&nbsp;6</a>，我们可以把梯度展开成对每个时间步的贡献求和： <span id="eq-reinforce-sequence"><span class="math display">\[
+\nabla_\theta \mathbb{E}_{y\sim \pi_\theta(\cdot|x)}\big[r_\phi(x,y)\big] = \mathbb{E}_{y\sim \pi_\theta(\cdot|x)}\left[r_\phi(x,y) \sum_{t=1}^T \nabla_\theta \log \pi_\theta(a_t | s_t)\right]
+\tag{9}\]</span></span></p>
+<p>这里的关键问题是：<strong>奖励 <span class="math inline">\(r_\phi(x,y)\)</span> 是对整个序列 <span class="math inline">\(y\)</span> 的评价</strong>，但我们把它直接用在每个时间步的梯度上，导致每个时间步的梯度估计都包含了整个序列的噪声，方差很大。</p>
+<p>为了降低梯度估计的方差，我们引入<strong>优势函数（Advantage Function）</strong> <span class="math inline">\(A_t\)</span>，它衡量在状态 <span class="math inline">\(s_t\)</span> 下采取动作 <span class="math inline">\(a_t\)</span> 相对于平均水平的好坏：</p>
+<p><span id="eq-advantage-function"><span class="math display">\[
+A_t = Q(s_t, a_t) - V(s_t)
+\tag{10}\]</span></span></p>
+<p>其中 <span class="math inline">\(Q(s_t, a_t)\)</span> 是在状态 <span class="math inline">\(s_t\)</span> 下采取动作 <span class="math inline">\(a_t\)</span> 后的预期回报，<span class="math inline">\(V(s_t)\)</span> 是状态 <span class="math inline">\(s_t\)</span> 的平均回报。 通过使用优势函数，我们可以把梯度公式改写为： <span id="eq-reinforce-advantage"><span class="math display">\[
+\nabla_\theta \mathbb{E}_{y\sim \pi_\theta(\cdot|x)}\big[r_\phi(x,y)\big] = \mathbb{E}_{y\sim \pi_\theta(\cdot|x)}\left[\sum_{t=1}^T A_t \, \nabla_\theta \log \pi_\theta(a_t | s_t)\right]
+\tag{11}\]</span></span></p>
+<p>这样，每个时间步的梯度只受到该时间步优势 <span class="math inline">\(A_t\)</span> 的影响，减少了整个序列奖励带来的噪声，从而降低了方差。</p>
+</section>
+<section id="off-policy-updates" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="off-policy-updates"><span class="header-section-number">2.3.3</span> Off-Policy Updates</h3>
+<p>REINFORCE 的另一个问题是它是<strong>on-policy</strong>的：每次更新都需要用当前策略采样新数据，不能多次利用旧数据，效率低。 为了解决这个问题，我们可以采用<strong>离线数据重用（off-policy updates）</strong>的思想。具体来说，我们可以保存之前采样的数据（prompts 和生成的回答），并在多次迭代中重复使用这些数据进行更新。</p>
+<p>但是直接使用旧数据会引入偏差，因为这些数据是根据旧策略 <span class="math inline">\(\pi_{\theta_{\text{old}}}\)</span> 采样的，而我们现在要更新的是新策略 <span class="math inline">\(\pi_\theta\)</span>。 为了纠正这种偏差，我们可以使用<strong>重要性采样（importance sampling）</strong>，通过计算每个回答在新旧策略下的概率比来调整梯度估计：</p>
+<p><span id="eq-importance-sampling"><span class="math display">\[
+\rho(y) = \frac{\pi_\theta(y|x)}{\pi_{\theta_{\text{old}}}(y|x)}
+\tag{12}\]</span></span></p>
+<p>然后，我们可以把梯度公式改写为： <span id="eq-off-policy-gradient"><span class="math display">\[
+\nabla_\theta \mathbb{E}_{y\sim \pi_{\theta_{\text{old}}}(\cdot|x)}\big[r_\phi(x,y)\big] = \mathbb{E}_{y\sim \pi_{\theta_{\text{old}}}(\cdot|x)}\left[\rho(y) \sum_{t=1}^T A_t \, \nabla_\theta \log \pi_\theta(a_t | s_t)\right]
+\tag{13}\]</span></span></p>
+<p>这样，我们就可以多次利用旧数据进行更新，提高数据效率。</p>
+</section>
+<section id="proximal-policy-optimization-ppo" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="proximal-policy-optimization-ppo"><span class="header-section-number">2.3.4</span> Proximal Policy Optimization (PPO)</h3>
+<p>结合上面的两个改进，我们就引出了<strong>PPO（Proximal Policy Optimization）</strong>算法。PPO 通过限制新旧策略的变化幅度，进一步稳定训练过程。具体来说，PPO 使用一个<strong>裁剪目标（clipped objective）</strong>，防止策略更新过大：</p>
+<p><span id="eq-ppo-clip"><span class="math display">\[
+L^{\text{clip}}(\theta) = \mathbb{E}_{y\sim \pi_{\theta_{\text{old}}}(\cdot|x)}\left[\min\left(\rho(y) A, \text{clip}(\rho(y), 1-\epsilon, 1+\epsilon) A\right)\right]
+\tag{14}\]</span></span> 其中 <span class="math inline">\(\epsilon\)</span> 是一个小的超参数，控制裁剪范围(通常是0.1到0.3)。 通过这个裁剪目标，PPO 保证了新策略不会偏离旧策略太远，从而避免了训练不稳定的问题。</p>
+<p>我们来看一下PPO的整体训练流程。</p>
+<ol type="1">
+<li>Rollout（采样回答）:对一批 prompts <span class="math inline">\(x\)</span>，用当前策略 <span class="math inline">\(\pi_{\theta_{\text{old}}}\)</span> 生成回答 <span class="math inline">\(y\)</span>。同时保存每个生成 token 的：
+<ul>
+<li>logprob：<span class="math inline">\(\log \pi_{\theta_{\text{old}}}(a_t|s_t)\)</span></li>
+</ul></li>
+<li>算奖励（reward）:用奖励模型 <span class="math inline">\(r_{\phi}(x,y)\)</span> 给整段回答一个标量分数。再加上 KL 惩罚，得到最终奖励信号:
+<ul>
+<li><p>KL 惩罚通常有两种做法：</p>
+<ul>
+<li>显式 KL penalty：把 <span class="math inline">\(-\beta \, \mathrm{KL}(\pi_\theta(\cdot|x) \| \pi_{\text{ref}}(\cdot|x))\)</span> 加进 reward</li>
+<li>或在 loss 里单独加 KL 项（类似 InstructGPT）</li>
+</ul></li>
+<li><p>很多实现把 token-level 的 KL 变成一个 shaping reward:</p>
+<p><span class="math display">\[
+r_t^{\text{KL}} = -\beta\left(\log \pi_\theta(a_t|s_t)-\log \pi_{\text{ref}}(a_t|s_t)\right)
+\]</span></p>
+<p>然后把最终奖励分配到序列末端或做一些分摊。</p></li>
+</ul></li>
+<li>估计 Value + Advantage</li>
+</ol>
+<p>训练一个 value head <span class="math inline">\(V_\psi(s_t)\)</span> 预测“从当前前缀往后能拿到的回报”。<br>
+用（GAE）等方法得到 <span class="math inline">\(A_t\)</span></p>
+<p><span id="eq-gae"><span class="math display">\[
+\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t) = \sum_{l\ge 0}(\gamma\lambda)^l \delta_{t+l}
+\tag{15}\]</span></span></p>
+<p>4：PPO update（多 epoch、小步更新）</p>
+<p>对同一批 rollout 数据，做 K 个 epoch 的 minibatch 更新：</p>
+<ul>
+<li><p>policy loss：−Lclip-L^{clip}−Lclip</p></li>
+<li><p>value loss：∥Vψ−R∥2|V_- R|^2∥Vψ​−R∥2</p></li>
+<li><p>entropy bonus：鼓励探索 (+αH)(+H)(+αH)</p></li>
+<li><p>（可选）KL 控制项</p></li>
+</ul>
+<p>总体 loss（常见形式）：</p>
+<p>L=Lpolicy+cvLvalue−ceH+cklKLL = L_{} + c_v L_{} - c_e H + c_{kl}L=Lpolicy​+cv​Lvalue​−ce​H+ckl​KL</p>
+<p>PPO 工程上复杂，主要因为：</p>
+<ol type="1">
+<li><p><strong>on-policy</strong>：每轮都要采样新数据（rollouts 成本高）</p></li>
+<li><p><strong>需要 value function</strong>：要训 value head，容易不稳</p></li>
+<li><p><strong>需要 careful 的 KL 控制</strong>：不然要么跑飞、要么学不动</p></li>
+<li><p><strong>sequence credit assignment</strong>：奖励常是序列级，怎么分到 token 上很敏感</p></li>
+<li><p><strong>长度偏置/奖励 hacking</strong>：reward model 可能偏好长回答 → 策略学会“写长骗分”</p></li>
+</ol>
+<div class="sourceCode" id="cb3" data-code-line-numbers=""><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># PPO RLHF: one training iteration (one "outer step")</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="co"># Assumes:</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="co">#   policy: trainable LM πθ</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="co">#   ref_policy: frozen LM πref (often SFT checkpoint)</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="co">#   reward_model: rφ(x, y) -&gt; scalar reward per sequence</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="co">#   value_head: Vψ(s_t) -&gt; scalar value per token/state (often a head on top of policy)</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="co">#</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="co"># Notation:</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a><span class="co">#   B = batch size (number of prompts)</span></span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="co">#   T = max total tokens (prompt + generated)</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a><span class="co">#   Tp = prompt length (varies per sample)</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="co">#   Tr = response length (varies per sample)</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="co">#</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="co"># Key masks:</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a><span class="co">#   response_mask[b,t] = 1 if token t is a generated response token (NOT prompt), else 0</span></span>
+<span id="cb3-16"><a href="#cb3-16"></a><span class="co">#   valid_mask[b,t] = 1 if token t exists (not padding), else 0</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a><span class="co">#</span></span>
+<span id="cb3-18"><a href="#cb3-18"></a><span class="co"># IMPORTANT alignment:</span></span>
+<span id="cb3-19"><a href="#cb3-19"></a><span class="co">#   For causal LM, token-level logprob at position t corresponds to predicting token_ids[t]</span></span>
+<span id="cb3-20"><a href="#cb3-20"></a><span class="co">#   from prefix token_ids[:t]. Commonly computed with a 1-step shift.</span></span>
+<span id="cb3-21"><a href="#cb3-21"></a></span>
+<span id="cb3-22"><a href="#cb3-22"></a><span class="kw">def</span> ppo_train_step(prompts):</span>
+<span id="cb3-23"><a href="#cb3-23"></a>    <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb3-24"><a href="#cb3-24"></a>    <span class="co"># 1) Rollout: sample responses from current policy (old policy snapshot)</span></span>
+<span id="cb3-25"><a href="#cb3-25"></a>    <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb3-26"><a href="#cb3-26"></a>    <span class="cf">with</span> no_grad():</span>
+<span id="cb3-27"><a href="#cb3-27"></a>        policy.<span class="bu">eval</span>()</span>
+<span id="cb3-28"><a href="#cb3-28"></a></span>
+<span id="cb3-29"><a href="#cb3-29"></a>        <span class="co"># Generate tokens (can be via vLLM or your sampler)</span></span>
+<span id="cb3-30"><a href="#cb3-30"></a>        <span class="co"># returns:</span></span>
+<span id="cb3-31"><a href="#cb3-31"></a>        <span class="co">#   token_ids: (B, T) padded</span></span>
+<span id="cb3-32"><a href="#cb3-32"></a>        <span class="co">#   response_mask: (B, T) 1 for response tokens</span></span>
+<span id="cb3-33"><a href="#cb3-33"></a>        <span class="co">#   valid_mask: (B, T) 1 for non-pad tokens</span></span>
+<span id="cb3-34"><a href="#cb3-34"></a>        token_ids, response_mask, valid_mask <span class="op">=</span> generate(policy, prompts)</span>
+<span id="cb3-35"><a href="#cb3-35"></a></span>
+<span id="cb3-36"><a href="#cb3-36"></a>        <span class="co"># (Optional) store prompt lengths, response lengths, etc.</span></span>
+<span id="cb3-37"><a href="#cb3-37"></a>        <span class="co"># prompt_mask = valid_mask &amp; (~response_mask)</span></span>
+<span id="cb3-38"><a href="#cb3-38"></a></span>
+<span id="cb3-39"><a href="#cb3-39"></a>    <span class="co"># Freeze a copy of current params as "old" logically.</span></span>
+<span id="cb3-40"><a href="#cb3-40"></a>    <span class="co"># In practice, we keep old_logp computed here as constants.</span></span>
+<span id="cb3-41"><a href="#cb3-41"></a>    <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb3-42"><a href="#cb3-42"></a>    <span class="co"># 2) Compute old_logp and ref_logp for the generated response tokens</span></span>
+<span id="cb3-43"><a href="#cb3-43"></a>    <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb3-44"><a href="#cb3-44"></a>    <span class="cf">with</span> no_grad():</span>
+<span id="cb3-45"><a href="#cb3-45"></a>        <span class="co"># old policy logprobs on the sampled trajectory</span></span>
+<span id="cb3-46"><a href="#cb3-46"></a>        <span class="co"># logp_old: (B, T) where positions not scored can be 0</span></span>
+<span id="cb3-47"><a href="#cb3-47"></a>        logp_old <span class="op">=</span> token_logprobs(policy, token_ids)     <span class="co"># aligned to token_ids</span></span>
+<span id="cb3-48"><a href="#cb3-48"></a>        logp_ref <span class="op">=</span> token_logprobs(ref_policy, token_ids) <span class="co"># aligned to token_ids</span></span>
+<span id="cb3-49"><a href="#cb3-49"></a></span>
+<span id="cb3-50"><a href="#cb3-50"></a>        <span class="co"># Only optimize on response tokens (typical RLHF)</span></span>
+<span id="cb3-51"><a href="#cb3-51"></a>        <span class="co"># Keep only response positions; everything else masked out.</span></span>
+<span id="cb3-52"><a href="#cb3-52"></a>        logp_old <span class="op">=</span> logp_old <span class="op">*</span> response_mask</span>
+<span id="cb3-53"><a href="#cb3-53"></a>        logp_ref <span class="op">=</span> logp_ref <span class="op">*</span> response_mask</span>
+<span id="cb3-54"><a href="#cb3-54"></a></span>
+<span id="cb3-55"><a href="#cb3-55"></a>    <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb3-56"><a href="#cb3-56"></a>    <span class="co"># 3) Reward + KL shaping</span></span>
+<span id="cb3-57"><a href="#cb3-57"></a>    <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb3-58"><a href="#cb3-58"></a>    <span class="cf">with</span> no_grad():</span>
+<span id="cb3-59"><a href="#cb3-59"></a>        <span class="co"># Sequence-level reward from reward model (scalar per sample)</span></span>
+<span id="cb3-60"><a href="#cb3-60"></a>        <span class="co"># r_seq: (B,)</span></span>
+<span id="cb3-61"><a href="#cb3-61"></a>        r_seq <span class="op">=</span> reward_model(prompts, token_ids)  <span class="co"># evaluates (x, y)</span></span>
+<span id="cb3-62"><a href="#cb3-62"></a></span>
+<span id="cb3-63"><a href="#cb3-63"></a>        <span class="co"># Token-level KL term (per token):</span></span>
+<span id="cb3-64"><a href="#cb3-64"></a>        <span class="co">#   kl_t = logπθ(a_t|s_t) - logπref(a_t|s_t)</span></span>
+<span id="cb3-65"><a href="#cb3-65"></a>        <span class="co"># For shaping, we usually use old policy logp here because rollout came from old policy.</span></span>
+<span id="cb3-66"><a href="#cb3-66"></a>        <span class="co"># kl_tok: (B, T)</span></span>
+<span id="cb3-67"><a href="#cb3-67"></a>        kl_tok <span class="op">=</span> (logp_old <span class="op">-</span> logp_ref)  <span class="co"># already masked to response tokens</span></span>
+<span id="cb3-68"><a href="#cb3-68"></a></span>
+<span id="cb3-69"><a href="#cb3-69"></a>        <span class="co"># KL penalty as "negative reward" per token</span></span>
+<span id="cb3-70"><a href="#cb3-70"></a>        <span class="co"># r_kl_tok: (B, T)</span></span>
+<span id="cb3-71"><a href="#cb3-71"></a>        r_kl_tok <span class="op">=</span> <span class="op">-</span>beta <span class="op">*</span> kl_tok</span>
+<span id="cb3-72"><a href="#cb3-72"></a></span>
+<span id="cb3-73"><a href="#cb3-73"></a>        <span class="co"># Combine rewards into a token-level reward signal.</span></span>
+<span id="cb3-74"><a href="#cb3-74"></a>        <span class="co"># Common simple choice: put the sequence reward at the final response token,</span></span>
+<span id="cb3-75"><a href="#cb3-75"></a>        <span class="co"># plus KL penalty at each response token.</span></span>
+<span id="cb3-76"><a href="#cb3-76"></a>        <span class="co"># r_tok: (B, T)</span></span>
+<span id="cb3-77"><a href="#cb3-77"></a>        r_tok <span class="op">=</span> zeros_like(kl_tok)                <span class="co"># (B, T)</span></span>
+<span id="cb3-78"><a href="#cb3-78"></a>        last_resp_index <span class="op">=</span> last_index(response_mask)  <span class="co"># (B,) gives t_end per sample</span></span>
+<span id="cb3-79"><a href="#cb3-79"></a>        r_tok[<span class="bu">range</span>(B), last_resp_index] <span class="op">+=</span> r_seq  <span class="co"># terminal reward</span></span>
+<span id="cb3-80"><a href="#cb3-80"></a>        r_tok <span class="op">+=</span> r_kl_tok                          <span class="co"># dense KL shaping</span></span>
+<span id="cb3-81"><a href="#cb3-81"></a></span>
+<span id="cb3-82"><a href="#cb3-82"></a>        <span class="co"># Ensure padding doesn't contribute</span></span>
+<span id="cb3-83"><a href="#cb3-83"></a>        r_tok <span class="op">=</span> r_tok <span class="op">*</span> valid_mask</span>
+<span id="cb3-84"><a href="#cb3-84"></a></span>
+<span id="cb3-85"><a href="#cb3-85"></a>    <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb3-86"><a href="#cb3-86"></a>    <span class="co"># 4) GAE: compute advantages A_t and returns R_t for response tokens</span></span>
+<span id="cb3-87"><a href="#cb3-87"></a>    <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb3-88"><a href="#cb3-88"></a>    <span class="cf">with</span> no_grad():</span>
+<span id="cb3-89"><a href="#cb3-89"></a>        <span class="co"># Value predictions for each token/state</span></span>
+<span id="cb3-90"><a href="#cb3-90"></a>        <span class="co"># v: (B, T)</span></span>
+<span id="cb3-91"><a href="#cb3-91"></a>        v <span class="op">=</span> value_head(policy, token_ids)  <span class="co"># or separate critic network</span></span>
+<span id="cb3-92"><a href="#cb3-92"></a>        v <span class="op">=</span> v <span class="op">*</span> valid_mask</span>
+<span id="cb3-93"><a href="#cb3-93"></a></span>
+<span id="cb3-94"><a href="#cb3-94"></a>        <span class="co"># Compute next-state values v_next (shifted)</span></span>
+<span id="cb3-95"><a href="#cb3-95"></a>        v_next <span class="op">=</span> shift_left(v)            <span class="co"># v_next[:, t] = v[:, t+1], last = 0</span></span>
+<span id="cb3-96"><a href="#cb3-96"></a>        v_next <span class="op">=</span> v_next <span class="op">*</span> valid_mask</span>
+<span id="cb3-97"><a href="#cb3-97"></a></span>
+<span id="cb3-98"><a href="#cb3-98"></a>        <span class="co"># TD residuals δ_t = r_t + γ v_{t+1} - v_t</span></span>
+<span id="cb3-99"><a href="#cb3-99"></a>        <span class="co"># delta: (B, T)</span></span>
+<span id="cb3-100"><a href="#cb3-100"></a>        delta <span class="op">=</span> r_tok <span class="op">+</span> gamma <span class="op">*</span> v_next <span class="op">-</span> v</span>
+<span id="cb3-101"><a href="#cb3-101"></a>        delta <span class="op">=</span> delta <span class="op">*</span> response_mask     <span class="co"># only response tokens matter</span></span>
+<span id="cb3-102"><a href="#cb3-102"></a></span>
+<span id="cb3-103"><a href="#cb3-103"></a>        <span class="co"># GAE recursion backwards over time for each sample</span></span>
+<span id="cb3-104"><a href="#cb3-104"></a>        <span class="co"># adv: (B, T)</span></span>
+<span id="cb3-105"><a href="#cb3-105"></a>        adv <span class="op">=</span> zeros_like(delta)</span>
+<span id="cb3-106"><a href="#cb3-106"></a>        gae <span class="op">=</span> zeros(B)</span>
+<span id="cb3-107"><a href="#cb3-107"></a>        <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">reversed</span>(<span class="bu">range</span>(T)):</span>
+<span id="cb3-108"><a href="#cb3-108"></a>            mask_t <span class="op">=</span> response_mask[:, t]  <span class="co"># (B,)</span></span>
+<span id="cb3-109"><a href="#cb3-109"></a>            <span class="co"># if mask_t=0, reset gae to 0 so prompt/pad doesn't leak</span></span>
+<span id="cb3-110"><a href="#cb3-110"></a>            gae <span class="op">=</span> delta[:, t] <span class="op">+</span> gamma <span class="op">*</span> lam <span class="op">*</span> gae</span>
+<span id="cb3-111"><a href="#cb3-111"></a>            gae <span class="op">=</span> gae <span class="op">*</span> mask_t</span>
+<span id="cb3-112"><a href="#cb3-112"></a>            adv[:, t] <span class="op">=</span> gae</span>
+<span id="cb3-113"><a href="#cb3-113"></a></span>
+<span id="cb3-114"><a href="#cb3-114"></a>        <span class="co"># Returns (target for value): R_t = A_t + V_t</span></span>
+<span id="cb3-115"><a href="#cb3-115"></a>        ret <span class="op">=</span> adv <span class="op">+</span> v</span>
+<span id="cb3-116"><a href="#cb3-116"></a>        ret <span class="op">=</span> ret <span class="op">*</span> response_mask</span>
+<span id="cb3-117"><a href="#cb3-117"></a></span>
+<span id="cb3-118"><a href="#cb3-118"></a>        <span class="co"># Normalize advantages over all response tokens in the batch (stabilizes PPO)</span></span>
+<span id="cb3-119"><a href="#cb3-119"></a>        adv <span class="op">=</span> masked_normalize(adv, response_mask)  <span class="co"># zero-mean, unit-std over masked positions</span></span>
+<span id="cb3-120"><a href="#cb3-120"></a></span>
+<span id="cb3-121"><a href="#cb3-121"></a>    <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb3-122"><a href="#cb3-122"></a>    <span class="co"># 5) PPO clipped loss (policy + value + entropy)</span></span>
+<span id="cb3-123"><a href="#cb3-123"></a>    <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb3-124"><a href="#cb3-124"></a>    policy.train()</span>
+<span id="cb3-125"><a href="#cb3-125"></a></span>
+<span id="cb3-126"><a href="#cb3-126"></a>    <span class="co"># Recompute current policy logprobs for the same token_ids (now θ is trainable)</span></span>
+<span id="cb3-127"><a href="#cb3-127"></a>    <span class="co"># logp_new: (B, T)</span></span>
+<span id="cb3-128"><a href="#cb3-128"></a>    logp_new <span class="op">=</span> token_logprobs(policy, token_ids)</span>
+<span id="cb3-129"><a href="#cb3-129"></a>    logp_new <span class="op">=</span> logp_new <span class="op">*</span> response_mask</span>
+<span id="cb3-130"><a href="#cb3-130"></a></span>
+<span id="cb3-131"><a href="#cb3-131"></a>    <span class="co"># Probability ratio ρ_t = exp(logp_new - logp_old)</span></span>
+<span id="cb3-132"><a href="#cb3-132"></a>    <span class="co"># ratio: (B, T)</span></span>
+<span id="cb3-133"><a href="#cb3-133"></a>    ratio <span class="op">=</span> exp(logp_new <span class="op">-</span> logp_old) <span class="op">*</span> response_mask</span>
+<span id="cb3-134"><a href="#cb3-134"></a></span>
+<span id="cb3-135"><a href="#cb3-135"></a>    <span class="co"># Clipped surrogate objective</span></span>
+<span id="cb3-136"><a href="#cb3-136"></a>    <span class="co"># unclipped = ratio * adv</span></span>
+<span id="cb3-137"><a href="#cb3-137"></a>    <span class="co"># clipped   = clip(ratio, 1-eps, 1+eps) * adv</span></span>
+<span id="cb3-138"><a href="#cb3-138"></a>    unclipped <span class="op">=</span> ratio <span class="op">*</span> adv</span>
+<span id="cb3-139"><a href="#cb3-139"></a>    clipped <span class="op">=</span> clip(ratio, <span class="dv">1</span> <span class="op">-</span> eps, <span class="dv">1</span> <span class="op">+</span> eps) <span class="op">*</span> adv</span>
+<span id="cb3-140"><a href="#cb3-140"></a></span>
+<span id="cb3-141"><a href="#cb3-141"></a>    <span class="co"># Policy loss: negative because we maximize objective</span></span>
+<span id="cb3-142"><a href="#cb3-142"></a>    <span class="co"># Take masked mean over response tokens</span></span>
+<span id="cb3-143"><a href="#cb3-143"></a>    policy_loss <span class="op">=</span> <span class="op">-</span>masked_mean(<span class="bu">min</span>(unclipped, clipped), response_mask)</span>
+<span id="cb3-144"><a href="#cb3-144"></a></span>
+<span id="cb3-145"><a href="#cb3-145"></a>    <span class="co"># Value loss: regress to ret (returns)</span></span>
+<span id="cb3-146"><a href="#cb3-146"></a>    v_pred <span class="op">=</span> value_head(policy, token_ids) <span class="op">*</span> response_mask</span>
+<span id="cb3-147"><a href="#cb3-147"></a>    value_loss <span class="op">=</span> masked_mean((v_pred <span class="op">-</span> ret) <span class="op">**</span> <span class="dv">2</span>, response_mask)</span>
+<span id="cb3-148"><a href="#cb3-148"></a></span>
+<span id="cb3-149"><a href="#cb3-149"></a>    <span class="co"># Entropy bonus (encourage exploration) on response tokens</span></span>
+<span id="cb3-150"><a href="#cb3-150"></a>    <span class="co"># entropy_tok: (B, T)</span></span>
+<span id="cb3-151"><a href="#cb3-151"></a>    entropy_tok <span class="op">=</span> token_entropy(policy, token_ids) <span class="op">*</span> response_mask</span>
+<span id="cb3-152"><a href="#cb3-152"></a>    entropy_bonus <span class="op">=</span> masked_mean(entropy_tok, response_mask)</span>
+<span id="cb3-153"><a href="#cb3-153"></a></span>
+<span id="cb3-154"><a href="#cb3-154"></a>    <span class="co"># (Optional) explicit KL term vs ref using current logp_new</span></span>
+<span id="cb3-155"><a href="#cb3-155"></a>    <span class="co"># Helps keep policy close even if clip isn't enough</span></span>
+<span id="cb3-156"><a href="#cb3-156"></a>    kl_new <span class="op">=</span> (logp_new <span class="op">-</span> logp_ref) <span class="op">*</span> response_mask</span>
+<span id="cb3-157"><a href="#cb3-157"></a>    kl_mean <span class="op">=</span> masked_mean(kl_new, response_mask)</span>
+<span id="cb3-158"><a href="#cb3-158"></a></span>
+<span id="cb3-159"><a href="#cb3-159"></a>    total_loss <span class="op">=</span> policy_loss <span class="op">+</span> c_v <span class="op">*</span> value_loss <span class="op">-</span> c_ent <span class="op">*</span> entropy_bonus <span class="op">+</span> c_kl <span class="op">*</span> kl_mean</span>
+<span id="cb3-160"><a href="#cb3-160"></a></span>
+<span id="cb3-161"><a href="#cb3-161"></a>    optimizer.zero_grad()</span>
+<span id="cb3-162"><a href="#cb3-162"></a>    total_loss.backward()</span>
+<span id="cb3-163"><a href="#cb3-163"></a>    clip_grad_norm_(policy.parameters(), max_grad_norm)</span>
+<span id="cb3-164"><a href="#cb3-164"></a>    optimizer.step()</span>
+<span id="cb3-165"><a href="#cb3-165"></a></span>
+<span id="cb3-166"><a href="#cb3-166"></a>    <span class="co"># Return logs</span></span>
+<span id="cb3-167"><a href="#cb3-167"></a>    <span class="cf">return</span> {</span>
+<span id="cb3-168"><a href="#cb3-168"></a>        <span class="st">"loss_total"</span>: total_loss,</span>
+<span id="cb3-169"><a href="#cb3-169"></a>        <span class="st">"loss_policy"</span>: policy_loss,</span>
+<span id="cb3-170"><a href="#cb3-170"></a>        <span class="st">"loss_value"</span>: value_loss,</span>
+<span id="cb3-171"><a href="#cb3-171"></a>        <span class="st">"entropy"</span>: entropy_bonus,</span>
+<span id="cb3-172"><a href="#cb3-172"></a>        <span class="st">"kl"</span>: kl_mean,</span>
+<span id="cb3-173"><a href="#cb3-173"></a>        <span class="st">"reward_seq_mean"</span>: mean(r_seq),</span>
+<span id="cb3-174"><a href="#cb3-174"></a>    }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="dpo" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="dpo"><span class="header-section-number">2.4</span> DPO</h2>
+<p>显然，PPO的算法，存在的主要一个缺陷就是所需的内存过多： 我们需要保存:</p>
+<ul>
+<li>Policy: 和LM一样大的模型</li>
+<li>Reference Policy: 和LM一样大的模型</li>
+<li>Value Model： 和LM一样大的模型</li>
+<li>Reward Model： 和LM差不多大的模型</li>
+</ul>
+<p>并且，在训练过程中，还需要保存大量的中间激活（activations）用于反向传播（backpropagation）。</p>
+<p>这对于动辄几个B的LM模型来说，消耗是巨大的，因此，提出了DPO的算法。 DPO（<strong>Direct Preference Optimization</strong>）<span class="citation" data-cites="DirectPreferenceOptimization2024rafailov">(<a href="#ref-DirectPreferenceOptimization2024rafailov" role="doc-biblioref">Rafailov et al. 2024</a>)</span> 可以把“RLHF + PPO”那套 <strong>采样→训练reward→RL更新</strong>，简化成一个<strong>纯监督式</strong>的偏好学习：直接用 <span class="math inline">\((x,y+,y^-)\)</span> 更新策略模型。一句话总结就是： <u>让模型对 preferred 回答的概率比 rejected 更大，同时用参考模型 πref_{}πref​ 约束别偏太远</u>。</p>
+<div id="fig-" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig--caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./assets/dpo-vs-ppo.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;8: 图中展示了 DPO 和 PPO 的对比，DPO 直接用偏好数据（chosen vs rejected）来训练策略 \pi_\theta, 对“人类更喜欢的回答”给更高概率，对“不喜欢的回答”给更低概率."><img src="./assets/dpo-vs-ppo.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig--caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: 图中展示了 DPO 和 PPO 的对比，DPO 直接用偏好数据（chosen vs rejected）来训练策略 <span class="math inline">\(\pi_\theta\)</span>, 对“人类更喜欢的回答”给更高概率，对“不喜欢的回答”给更低概率.
+</figcaption>
+</figure>
+</div>
+<p>接下来，我们来具体看看DPO算法： 假设 policy 不是神经网络，而是<strong>任意分布</strong>（nonparametric）。 在这个假设下，这个优化问题有解析解：</p>
+<p>πr(y∣x)=1Z(x)&nbsp;πref(y∣x)&nbsp;exp⁡ ⁣(1βr(x,y))<em>r(y|x)=&nbsp;</em>{}(y|x)&nbsp;!(r(x,y))πr​(y∣x)=Z(x)1​&nbsp;πref​(y∣x)&nbsp;exp(β1​r(x,y))</p>
+<p>这其实就是一个 <strong>Boltzmann / energy-based reweighting</strong>：</p>
+<ul>
+<li><p>参考分布 <span class="math inline">\(\pi_{\text{ref}}\)</span> 提供“先验”</p></li>
+<li><p>reward 越高，exp⁡(r/β)(r/)exp(r/β) 越把概率往上推</p></li>
+<li><p>Z(x)Z(x)Z(x) 是归一化常数（partition function）</p></li>
+</ul>
+</section>
+<section id="反解得到-implied-rewardreward-log-ratio差一个常数" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="反解得到-implied-rewardreward-log-ratio差一个常数"><span class="header-section-number">2.5</span> 反解”得到 implied reward：reward ≈ log-ratio（差一个常数）</h2>
+<p>把上式取 log 并整理，得到图里最后一行：</p>
+<p>r(x,y)=βlog⁡πr(y∣x)πref(y∣x)+βlog⁡Z(x)r(x,y)= + Z(x)r(x,y)=βlogπref​(y∣x)πr​(y∣x)​+βlogZ(x)</p>
+<p>关键点：</p>
+<ul>
+<li><p>βlog⁡Z(x)Z(x)βlogZ(x) <strong>只依赖 x，不依赖 y</strong> → 在“比较 y+y^+y+ vs y−y^-y−”时会相消</p></li>
+<li><p>所以在偏好学习里，你可以把 reward 的差写成：</p></li>
+</ul>
+<p>r(x,y+)−r(x,y−)=β(log⁡π(y+∣x)πref(y+∣x)−log⁡π(y−∣x)πref(y−∣x))r(x,y<sup>+)-r(x,y</sup>-) =( - )r(x,y+)−r(x,y−)=β(logπref​(y+∣x)π(y+∣x)​−logπref​(y−∣x)π(y−∣x)​)</p>
+<p>这一步就是 DPO 的核心：<strong>不显式训练 reward model，而是用 policy 的 logprob（相对 ref 的差）来“隐式表示 reward”。</strong></p>
+<p>r(x,y+)−r(x,y−)=β[logπref​(y+∣x)π(y+∣x)​−logπref​(y−∣x)π(y−∣x)​]</p>
+<p>把上面差值写得更紧凑一点：</p>
+<p>Δθ(x)=(log⁡πθ(y+∣x)−log⁡πθ(y−∣x))−(log⁡πref(y+∣x)−log⁡πref(y−∣x))<em>(x) =(</em>(y<sup>+|x)-<em>(y^-|x)) -(</em>{}(y</sup>+|x)-_{}(y^-|x))Δθ​(x)=(logπθ​(y+∣x)−logπθ​(y−∣x))−(logπref​(y+∣x)−logπref​(y−∣x))</p>
+<p>于是</p>
+<p><span id="eq-dpo-reward-delta"><span class="math display">\[
+r(x,y^+) - r(x,y^-) = \beta \, \Delta_\theta(x)
+\tag{16}\]</span></span></p>
+<p>代回偏好似然：</p>
+<p>LDPO(θ)=−E(x,y+,y−)[log⁡σ(β Δθ(x))]<em>{}() = -</em>{(x,y<sup>+,y</sup>-)}LDPO​(θ)=−E(x,y+,y−)​[logσ(βΔθ​(x))]</p>
+<p>这就是 DPO。</p>
+<p><strong>直觉解释</strong>：</p>
+<ul>
+<li><p>如果你的新策略 πθ<em>​ 相比 ref <strong>更偏向 chosen</strong>（Δθ</em>​ 大），loss 小</p></li>
+<li><p>如果反而更偏向 rejected（Δθ&lt;0_&lt;0Δθ​&lt;0），loss 大，会被梯度推回去</p></li>
+</ul>
+<p>在 LLM 里 log⁡πθ(y∣x)_(y|x)logπθ​(y∣x) 通常是 <strong>response tokens 的 logprob 之和</strong>：</p>
+<p>log⁡πθ(y∣x)=∑t∈responselog⁡πθ(yt∣x,y&lt;t)<em>(y|x)=</em>{t } <em>(y_t x, y</em>{&lt;t})logπθ​(y∣x)=t∈response∑​logπθ​(yt​∣x,y&lt;t​)</p>
+<p>所以 DPO 训练一次 step 就是：</p>
+<ol type="1">
+<li><p>对 batch 中每个样本，分别算：</p>
+<ul>
+<li><p><code>logp_pos = sum_logp(policy, x, y_pos)</code></p></li>
+<li><p><code>logp_neg = sum_logp(policy, x, y_neg)</code></p></li>
+<li><p><code>logp_ref_pos = sum_logp(ref, x, y_pos)</code>（no grad）</p></li>
+<li><p><code>logp_ref_neg = sum_logp(ref, x, y_neg)</code>（no grad）</p></li>
+</ul></li>
+<li><p><code>delta = (logp_pos - logp_neg) - (logp_ref_pos - logp_ref_neg)</code></p></li>
+<li><p><code>loss = -log_sigmoid(beta * delta).mean()</code></p></li>
+</ol>
+<div class="sourceCode" id="cb4" data-code-line-numbers=""><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="im">import</span> torch</span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="kw">def</span> dpo_train_step(</span>
+<span id="cb4-5"><a href="#cb4-5"></a>    policy,                 <span class="co"># trainable LM πθ</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>    ref_policy,             <span class="co"># frozen LM πref (e.g., SFT checkpoint)</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a>    optimizer,</span>
+<span id="cb4-8"><a href="#cb4-8"></a>    batch_pos_input_ids,    <span class="co"># (B, T) prompt+chosen padded</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>    batch_pos_attn_mask,    <span class="co"># (B, T) bool/int</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a>    batch_pos_resp_mask,    <span class="co"># (B, T) bool: 1 only on response tokens</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a>    batch_neg_input_ids,    <span class="co"># (B, T) prompt+rejected padded</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a>    batch_neg_attn_mask,    <span class="co"># (B, T)</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>    batch_neg_resp_mask,    <span class="co"># (B, T)</span></span>
+<span id="cb4-14"><a href="#cb4-14"></a>    beta: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span id="cb4-15"><a href="#cb4-15"></a>    max_grad_norm: <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="fl">1.0</span>,</span>
+<span id="cb4-16"><a href="#cb4-16"></a>):</span>
+<span id="cb4-17"><a href="#cb4-17"></a>    <span class="co">"""</span></span>
+<span id="cb4-18"><a href="#cb4-18"></a><span class="co">    DPO core update step (ONLY training part).</span></span>
+<span id="cb4-19"><a href="#cb4-19"></a><span class="co">    Assumes inputs are already tokenized + padded and include response masks.</span></span>
+<span id="cb4-20"><a href="#cb4-20"></a></span>
+<span id="cb4-21"><a href="#cb4-21"></a><span class="co">    DPO:</span></span>
+<span id="cb4-22"><a href="#cb4-22"></a><span class="co">      delta = (logπθ(y+|x)-logπθ(y-|x)) - (logπref(y+|x)-logπref(y-|x))</span></span>
+<span id="cb4-23"><a href="#cb4-23"></a><span class="co">      loss  = -E[ log σ(beta * delta) ]</span></span>
+<span id="cb4-24"><a href="#cb4-24"></a><span class="co">    """</span></span>
+<span id="cb4-25"><a href="#cb4-25"></a></span>
+<span id="cb4-26"><a href="#cb4-26"></a>    <span class="kw">def</span> seq_logprob(model, input_ids, attn_mask, resp_mask):</span>
+<span id="cb4-27"><a href="#cb4-27"></a>        <span class="co"># logits: (B, T, V)</span></span>
+<span id="cb4-28"><a href="#cb4-28"></a>        logits <span class="op">=</span> model(input_ids<span class="op">=</span>input_ids, attention_mask<span class="op">=</span>attn_mask).logits</span>
+<span id="cb4-29"><a href="#cb4-29"></a></span>
+<span id="cb4-30"><a href="#cb4-30"></a>        <span class="co"># causal shift: logits[:, t] predicts input_ids[:, t+1]</span></span>
+<span id="cb4-31"><a href="#cb4-31"></a>        logits <span class="op">=</span> logits[:, :<span class="op">-</span><span class="dv">1</span>, :]          <span class="co"># (B, T-1, V)</span></span>
+<span id="cb4-32"><a href="#cb4-32"></a>        labels <span class="op">=</span> input_ids[:, <span class="dv">1</span>:]           <span class="co"># (B, T-1)</span></span>
+<span id="cb4-33"><a href="#cb4-33"></a></span>
+<span id="cb4-34"><a href="#cb4-34"></a>        logp <span class="op">=</span> F.log_softmax(logits, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb4-35"><a href="#cb4-35"></a>        tok_logp <span class="op">=</span> logp.gather(<span class="op">-</span><span class="dv">1</span>, labels.unsqueeze(<span class="op">-</span><span class="dv">1</span>)).squeeze(<span class="op">-</span><span class="dv">1</span>)  <span class="co"># (B, T-1)</span></span>
+<span id="cb4-36"><a href="#cb4-36"></a></span>
+<span id="cb4-37"><a href="#cb4-37"></a>        <span class="co"># align masks with shift</span></span>
+<span id="cb4-38"><a href="#cb4-38"></a>        mask <span class="op">=</span> (resp_mask[:, <span class="dv">1</span>:] <span class="op">&amp;</span> attn_mask[:, <span class="dv">1</span>:]).to(tok_logp.dtype)  <span class="co"># (B, T-1)</span></span>
+<span id="cb4-39"><a href="#cb4-39"></a></span>
+<span id="cb4-40"><a href="#cb4-40"></a>        <span class="cf">return</span> (tok_logp <span class="op">*</span> mask).<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>)  <span class="co"># (B,)</span></span>
+<span id="cb4-41"><a href="#cb4-41"></a></span>
+<span id="cb4-42"><a href="#cb4-42"></a>    <span class="co"># ----- policy logprobs -----</span></span>
+<span id="cb4-43"><a href="#cb4-43"></a>    logp_pos <span class="op">=</span> seq_logprob(policy, batch_pos_input_ids, batch_pos_attn_mask, batch_pos_resp_mask)</span>
+<span id="cb4-44"><a href="#cb4-44"></a>    logp_neg <span class="op">=</span> seq_logprob(policy, batch_neg_input_ids, batch_neg_attn_mask, batch_neg_resp_mask)</span>
+<span id="cb4-45"><a href="#cb4-45"></a></span>
+<span id="cb4-46"><a href="#cb4-46"></a>    <span class="co"># ----- reference logprobs (no grad) -----</span></span>
+<span id="cb4-47"><a href="#cb4-47"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb4-48"><a href="#cb4-48"></a>        logp_ref_pos <span class="op">=</span> seq_logprob(ref_policy, batch_pos_input_ids, batch_pos_attn_mask, batch_pos_resp_mask)</span>
+<span id="cb4-49"><a href="#cb4-49"></a>        logp_ref_neg <span class="op">=</span> seq_logprob(ref_policy, batch_neg_input_ids, batch_neg_attn_mask, batch_neg_resp_mask)</span>
+<span id="cb4-50"><a href="#cb4-50"></a></span>
+<span id="cb4-51"><a href="#cb4-51"></a>    <span class="co"># ----- DPO loss -----</span></span>
+<span id="cb4-52"><a href="#cb4-52"></a>    delta <span class="op">=</span> (logp_pos <span class="op">-</span> logp_neg) <span class="op">-</span> (logp_ref_pos <span class="op">-</span> logp_ref_neg)  <span class="co"># (B,)</span></span>
+<span id="cb4-53"><a href="#cb4-53"></a>    loss <span class="op">=</span> <span class="op">-</span>F.logsigmoid(beta <span class="op">*</span> delta).mean()</span>
+<span id="cb4-54"><a href="#cb4-54"></a></span>
+<span id="cb4-55"><a href="#cb4-55"></a>    optimizer.zero_grad(set_to_none<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-56"><a href="#cb4-56"></a>    loss.backward()</span>
+<span id="cb4-57"><a href="#cb4-57"></a></span>
+<span id="cb4-58"><a href="#cb4-58"></a>    <span class="cf">if</span> max_grad_norm <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb4-59"><a href="#cb4-59"></a>        torch.nn.utils.clip_grad_norm_(policy.parameters(), max_grad_norm)</span>
+<span id="cb4-60"><a href="#cb4-60"></a></span>
+<span id="cb4-61"><a href="#cb4-61"></a>    optimizer.step()</span>
+<span id="cb4-62"><a href="#cb4-62"></a></span>
+<span id="cb4-63"><a href="#cb4-63"></a>    <span class="cf">return</span> {</span>
+<span id="cb4-64"><a href="#cb4-64"></a>        <span class="st">"loss"</span>: <span class="bu">float</span>(loss.detach().cpu()),</span>
+<span id="cb4-65"><a href="#cb4-65"></a>        <span class="st">"delta_mean"</span>: <span class="bu">float</span>(delta.detach().mean().cpu()),</span>
+<span id="cb4-66"><a href="#cb4-66"></a>        <span class="st">"pref_acc"</span>: <span class="bu">float</span>((delta.detach() <span class="op">&gt;</span> <span class="dv">0</span>).<span class="bu">float</span>().mean().cpu()),</span>
+<span id="cb4-67"><a href="#cb4-67"></a>    }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="others" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="others"><span class="header-section-number">2.6</span> Others</h2>
+<p>在DPO提出之后，后续也有许多算法对其提出了改进，在这里介绍两种 ### SimPO <strong>DPO 的“参考模型项（ref）”可以不要</strong> → 得到 <strong>SimPO (no ref)</strong> DPO/偏好学习很容易出现：<strong>长回答更容易赢</strong><br>
+因为 sequence logprob 是 token logprob 的“和”，长度不同会导致比较不公平。</p>
+<p>所以把</p>
+<p>log⁡πθ(y∣x)=∑t∈ylog⁡pθ(yt∣⋅)<em>(y|x)=</em>{ty}p_(y_t|)logπθ​(y∣x)=t∈y∑​logpθ​(yt​∣⋅)</p>
+<p>改成<strong>平均每 token 的 logprob</strong>：</p>
+<p>1∣y∣log⁡πθ(y∣x)_(y|x)∣y∣1​logπθ​(y∣x)</p>
+<p>图里蓝框就是这个：β/∣yw∣⋅log⁡πθ(yw∣x)/|y_w|<em>(y_w|x)β/∣yw​∣⋅logπθ​(yw​∣x) 和 β/∣yl∣⋅log⁡πθ(yl∣x)/|y_l|</em>(y_l|x)β/∣yl​∣⋅logπθ​(yl​∣x)。</p>
+<p>imPO 的 logit 里减了一个 γ：</p>
+<p>ΔSimPO=β∣yw∣log⁡πθ(yw∣x)−β∣yl∣log⁡πθ(yl∣x)−γ<em>{} = </em>(y_w|x) - _(y_l|x) -​=∣yw​∣β​logπθ​(yw​∣x)−∣yl​∣β​logπθ​(yl​∣x)−γ</p>
+<p>直觉：你不是只要 ywy_wyw​ 比 yly_lyl​ 好一点点就行，而是希望它<strong>至少好过一个幅度</strong>（margin）。<br>
+γ越大，训练越“严格”。</p>
+<div class="sourceCode" id="cb5" data-code-line-numbers=""><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="im">import</span> torch</span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb5-3"><a href="#cb5-3"></a></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="kw">def</span> simpo_step(</span>
+<span id="cb5-5"><a href="#cb5-5"></a>    policy, optimizer,</span>
+<span id="cb5-6"><a href="#cb5-6"></a>    pos_input_ids, pos_attn, pos_rmask,</span>
+<span id="cb5-7"><a href="#cb5-7"></a>    neg_input_ids, neg_attn, neg_rmask,</span>
+<span id="cb5-8"><a href="#cb5-8"></a>    beta: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span id="cb5-9"><a href="#cb5-9"></a>    gamma: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.0</span>,</span>
+<span id="cb5-10"><a href="#cb5-10"></a>):</span>
+<span id="cb5-11"><a href="#cb5-11"></a>    <span class="kw">def</span> seq_logprob_and_len(model, input_ids, attn_mask, resp_mask):</span>
+<span id="cb5-12"><a href="#cb5-12"></a>        logits <span class="op">=</span> model(input_ids<span class="op">=</span>input_ids, attention_mask<span class="op">=</span>attn_mask).logits</span>
+<span id="cb5-13"><a href="#cb5-13"></a>        logits <span class="op">=</span> logits[:, :<span class="op">-</span><span class="dv">1</span>, :]</span>
+<span id="cb5-14"><a href="#cb5-14"></a>        labels <span class="op">=</span> input_ids[:, <span class="dv">1</span>:]</span>
+<span id="cb5-15"><a href="#cb5-15"></a></span>
+<span id="cb5-16"><a href="#cb5-16"></a>        logp <span class="op">=</span> F.log_softmax(logits, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb5-17"><a href="#cb5-17"></a>        tok_logp <span class="op">=</span> logp.gather(<span class="op">-</span><span class="dv">1</span>, labels.unsqueeze(<span class="op">-</span><span class="dv">1</span>)).squeeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb5-18"><a href="#cb5-18"></a></span>
+<span id="cb5-19"><a href="#cb5-19"></a>        mask <span class="op">=</span> (resp_mask[:, <span class="dv">1</span>:] <span class="op">&amp;</span> attn_mask[:, <span class="dv">1</span>:]).to(tok_logp.dtype)</span>
+<span id="cb5-20"><a href="#cb5-20"></a>        seq_lp <span class="op">=</span> (tok_logp <span class="op">*</span> mask).<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>)            <span class="co"># (B,)</span></span>
+<span id="cb5-21"><a href="#cb5-21"></a>        resp_len <span class="op">=</span> mask.<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>).clamp_min(<span class="fl">1.0</span>)        <span class="co"># (B,)</span></span>
+<span id="cb5-22"><a href="#cb5-22"></a>        <span class="cf">return</span> seq_lp, resp_len</span>
+<span id="cb5-23"><a href="#cb5-23"></a></span>
+<span id="cb5-24"><a href="#cb5-24"></a>    lp_pos, len_pos <span class="op">=</span> seq_logprob_and_len(policy, pos_input_ids, pos_attn, pos_rmask)</span>
+<span id="cb5-25"><a href="#cb5-25"></a>    lp_neg, len_neg <span class="op">=</span> seq_logprob_and_len(policy, neg_input_ids, neg_attn, neg_rmask)</span>
+<span id="cb5-26"><a href="#cb5-26"></a></span>
+<span id="cb5-27"><a href="#cb5-27"></a>    <span class="co"># SimPO logit (no ref) + length normalization + margin gamma</span></span>
+<span id="cb5-28"><a href="#cb5-28"></a>    delta <span class="op">=</span> (beta <span class="op">*</span> (lp_pos <span class="op">/</span> len_pos) <span class="op">-</span> beta <span class="op">*</span> (lp_neg <span class="op">/</span> len_neg) <span class="op">-</span> gamma)</span>
+<span id="cb5-29"><a href="#cb5-29"></a></span>
+<span id="cb5-30"><a href="#cb5-30"></a>    loss <span class="op">=</span> <span class="op">-</span>F.logsigmoid(delta).mean()</span>
+<span id="cb5-31"><a href="#cb5-31"></a></span>
+<span id="cb5-32"><a href="#cb5-32"></a>    optimizer.zero_grad(set_to_none<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-33"><a href="#cb5-33"></a>    loss.backward()</span>
+<span id="cb5-34"><a href="#cb5-34"></a>    optimizer.step()</span>
+<span id="cb5-35"><a href="#cb5-35"></a></span>
+<span id="cb5-36"><a href="#cb5-36"></a>    <span class="cf">return</span> loss</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="length-normalized-dpo" class="level3" data-number="2.6.1">
+<h3 data-number="2.6.1" class="anchored" data-anchor-id="length-normalized-dpo"><span class="header-section-number">2.6.1</span> Length Normalized DPO</h3>
+<div class="sourceCode" id="cb6" data-code-line-numbers=""><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="im">import</span> torch</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="kw">def</span> dpo_len_norm_step(</span>
+<span id="cb6-5"><a href="#cb6-5"></a>    policy, ref_policy, optimizer,</span>
+<span id="cb6-6"><a href="#cb6-6"></a>    pos_input_ids, pos_attn, pos_rmask,</span>
+<span id="cb6-7"><a href="#cb6-7"></a>    neg_input_ids, neg_attn, neg_rmask,</span>
+<span id="cb6-8"><a href="#cb6-8"></a>    beta: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span id="cb6-9"><a href="#cb6-9"></a>):</span>
+<span id="cb6-10"><a href="#cb6-10"></a>    <span class="kw">def</span> seq_logprob_and_len(model, input_ids, attn_mask, resp_mask):</span>
+<span id="cb6-11"><a href="#cb6-11"></a>        logits <span class="op">=</span> model(input_ids<span class="op">=</span>input_ids, attention_mask<span class="op">=</span>attn_mask).logits</span>
+<span id="cb6-12"><a href="#cb6-12"></a>        logits <span class="op">=</span> logits[:, :<span class="op">-</span><span class="dv">1</span>, :]</span>
+<span id="cb6-13"><a href="#cb6-13"></a>        labels <span class="op">=</span> input_ids[:, <span class="dv">1</span>:]</span>
+<span id="cb6-14"><a href="#cb6-14"></a></span>
+<span id="cb6-15"><a href="#cb6-15"></a>        logp <span class="op">=</span> F.log_softmax(logits, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb6-16"><a href="#cb6-16"></a>        tok_logp <span class="op">=</span> logp.gather(<span class="op">-</span><span class="dv">1</span>, labels.unsqueeze(<span class="op">-</span><span class="dv">1</span>)).squeeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb6-17"><a href="#cb6-17"></a></span>
+<span id="cb6-18"><a href="#cb6-18"></a>        mask <span class="op">=</span> (resp_mask[:, <span class="dv">1</span>:] <span class="op">&amp;</span> attn_mask[:, <span class="dv">1</span>:]).to(tok_logp.dtype)</span>
+<span id="cb6-19"><a href="#cb6-19"></a>        seq_lp <span class="op">=</span> (tok_logp <span class="op">*</span> mask).<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>)            <span class="co"># (B,)</span></span>
+<span id="cb6-20"><a href="#cb6-20"></a>        resp_len <span class="op">=</span> mask.<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>).clamp_min(<span class="fl">1.0</span>)        <span class="co"># (B,)</span></span>
+<span id="cb6-21"><a href="#cb6-21"></a>        <span class="cf">return</span> seq_lp, resp_len</span>
+<span id="cb6-22"><a href="#cb6-22"></a></span>
+<span id="cb6-23"><a href="#cb6-23"></a>    <span class="co"># policy</span></span>
+<span id="cb6-24"><a href="#cb6-24"></a>    lp_pos, len_pos <span class="op">=</span> seq_logprob_and_len(policy, pos_input_ids, pos_attn, pos_rmask)</span>
+<span id="cb6-25"><a href="#cb6-25"></a>    lp_neg, len_neg <span class="op">=</span> seq_logprob_and_len(policy, neg_input_ids, neg_attn, neg_rmask)</span>
+<span id="cb6-26"><a href="#cb6-26"></a></span>
+<span id="cb6-27"><a href="#cb6-27"></a>    <span class="co"># ref (no grad)</span></span>
+<span id="cb6-28"><a href="#cb6-28"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb6-29"><a href="#cb6-29"></a>        lp_ref_pos, len_ref_pos <span class="op">=</span> seq_logprob_and_len(ref_policy, pos_input_ids, pos_attn, pos_rmask)</span>
+<span id="cb6-30"><a href="#cb6-30"></a>        lp_ref_neg, len_ref_neg <span class="op">=</span> seq_logprob_and_len(ref_policy, neg_input_ids, neg_attn, neg_rmask)</span>
+<span id="cb6-31"><a href="#cb6-31"></a></span>
+<span id="cb6-32"><a href="#cb6-32"></a>    <span class="co"># length-normalized log-ratio</span></span>
+<span id="cb6-33"><a href="#cb6-33"></a>    pos_term <span class="op">=</span> (lp_pos <span class="op">/</span> len_pos) <span class="op">-</span> (lp_ref_pos <span class="op">/</span> len_ref_pos)</span>
+<span id="cb6-34"><a href="#cb6-34"></a>    neg_term <span class="op">=</span> (lp_neg <span class="op">/</span> len_neg) <span class="op">-</span> (lp_ref_neg <span class="op">/</span> len_ref_neg)</span>
+<span id="cb6-35"><a href="#cb6-35"></a>    delta <span class="op">=</span> beta <span class="op">*</span> (pos_term <span class="op">-</span> neg_term)</span>
+<span id="cb6-36"><a href="#cb6-36"></a></span>
+<span id="cb6-37"><a href="#cb6-37"></a>    loss <span class="op">=</span> <span class="op">-</span>F.logsigmoid(delta).mean()</span>
+<span id="cb6-38"><a href="#cb6-38"></a></span>
+<span id="cb6-39"><a href="#cb6-39"></a>    optimizer.zero_grad(set_to_none<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-40"><a href="#cb6-40"></a>    loss.backward()</span>
+<span id="cb6-41"><a href="#cb6-41"></a>    optimizer.step()</span>
+<span id="cb6-42"><a href="#cb6-42"></a></span>
+<span id="cb6-43"><a href="#cb6-43"></a>    <span class="cf">return</span> loss</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="ppo-vs.-dpo" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="ppo-vs.-dpo"><span class="header-section-number">2.7</span> PPO vs.&nbsp;DPO</h2>
+<ul>
+<li><p><strong>PPO 的优势来自“更灵活的优化信号”</strong><br>
+PPO 显式做 on-policy rollout + advantage（GAE）+ clip + KL 约束，能更直接地把“奖励模型/偏好信号”转成梯度更新；<br>
+DPO/SimPO 更像“把 RL 变成监督学习”，简单、稳定、便宜，但<strong>表达能力/可控性有时不如 PPO</strong>（尤其当你需要更细的控制或 reward 很复杂时）。</p></li>
+<li><p><strong>右侧 Tülu 3 的表：同一个 benchmark 上，结论也会跟着超参和变体跑</strong><br>
+你会看到 SimPO、DPO、PPO、DPO-norm（长度归一化）分数差异不大，而且对 <strong>β、γ、学习率、batch size、epoch</strong> 很敏感。<br>
+⇒ 这页想让你记住：<strong>在 RLHF 里，工程细节（数据 + 超参 + 训练recipe）往往比“算法名字”更决定结果。</strong></p></li>
+</ul>
+<p>DPO/SimPO 把 RLHF 简化成“好实现的监督学习”，但 PPO 仍可能在某些数据/奖励/超参组合下更强；因此 RLHF 的实验结论必须连同 setup 一起看。</p>
+</section>
+</section>
+<section id="things-to-watch-out-for-in-rlhf" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Things to watch out for in RLHF</h1>
+<p>接下来来我们来看一下RLHF中常见的两个坑：</p>
+<ul>
+<li>对奖励过度优化（reward overoptimization / reward hacking）</li>
+<li>mode collapse / entropy</li>
+</ul>
+<section id="over-optimization" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="over-optimization"><span class="header-section-number">3.1</span> Over-optimization</h2>
+<ul>
+<li><p>横轴是 <strong>KL distance</strong>（RL 后的策略跟初始/参考策略差多远）。</p></li>
+<li><p>纵轴是 <strong>RM score</strong>（reward model 给的分）。</p></li>
+<li><p>曲线先升后“变坏”：一开始往 RM 喜欢的方向走，分数上升；但当 KL 越来越大时，模型会学到 <strong>奖励模型的漏洞/捷径</strong>，导致：</p>
+<ul>
+<li><p>RM 分数可能还很高，<strong>但真实质量（人类偏好/事实性/有用性）开始下降</strong>；</p></li>
+<li><p>这就是典型的 <strong>“对代理目标（proxy reward）过拟合”</strong>。</p></li>
+</ul></li>
+</ul>
+<p>一句话：<strong>你优化的是 RM，不是人类真实偏好；走太远会开始“刷分”。</strong></p>
+</section>
+<section id="model-collapse" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="model-collapse"><span class="header-section-number">3.2</span> Model Collapse</h2>
+<p>RLHF 会把模型从“按概率拟合数据”的语言模型，推成“为拿高奖励而输出”的策略模型，从而降低输出分布的熵、压缩多样性，并让模型的置信度不再可信（calibration 变差）。</p>
+<p>This is the updated content.</p>
+</section>
+</section>
+<section id="summary" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Summary</h1>
+<p>这节课把“后训练（post-training）”的主线串起来了：先用 <strong>SFT</strong> 把模型从“会续写”拉到“会按指令回答”，再用 <strong>RLHF（PPO/DPO/SimPO 等）</strong> 去对齐人类偏好与安全规范，并讨论了一个很关键的现实：RLHF 的目标函数本质是“奖励最大化（带 KL 约束）”，这会让模型从概率建模器变成策略优化器，因此会带来需要警惕的副作用——<strong>过优化 reward（reward hacking/overfitting）</strong>、<strong>模式坍缩/熵坍缩（多样性下降）</strong>，以及更隐蔽但很重要的 <strong>calibration 变差</strong>（模型给出的概率/置信度不再可靠）。我学到的核心是：对齐不是“再训练一次”这么简单，而是<strong>数据、目标、正则、评估</strong>共同决定行为；尤其当 reward 有噪声或偏差时，“继续把 reward 拉高”反而会伤害真实质量与泛化，所以必须用 KL、早停、离线评估与多维指标（helpfulness/safety/verbosity/calibration/entropy）去约束与监控。</p>
+<p>需要注意的点：第一，SFT 数据很贵且存在 <strong>G-V gap</strong>（人并不总能写出自己真正偏好的答案），所以偏好数据与奖励学习不可避免；第二，RLHF 的训练信号（pairwise/标量 reward）更容易获取，但也更容易被模型“钻空子”，出现 reward 上升但人评/泛化下降；第三，RLHF 往往会降低熵并破坏校准，这会影响置信门控、工具调用与风险控制等下游系统设计，因此在工程上要把“模型概率”当作策略分数而非可靠置信度，并专门做校准/温度/熵约束与评估。</p>
+<p>下一步是 <strong>RLVR（Reinforcement Learning with Verifiable Rewards）</strong>，原因很直接：RLHF 的难点在于“人类偏好”与“奖励模型”都带噪声，标注贵、尺度难、容易过拟合奖励；而 RLVR 把训练信号换成<strong>可验证、低噪声、可程序化判定</strong>的 reward（例如数学/代码/约束满足/单元测试/格式与可执行检查），让优化目标更接近“客观正确性”，显著降低 reward hacking 的空间，同时成本更低、可扩展性更强。换句话说，RLVR 试图把对齐里最不稳定的一环（主观偏好与代理 reward）替换成更硬的监督信号，从而在规模化训练时更稳、更可控，也更适合把“推理能力”往上拉。</p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-OpenAssistantConversationsDemocratizing2023kopf" class="csl-entry" role="listitem">
+Köpf, Andreas, Yannic Kilcher, Dimitri von Rütte, Sotiris Anagnostidis, Zhi-Rui Tam, Keith Stevens, Abdullah Barhoum, et al. 2023. <span>“<span>OpenAssistant Conversations</span> – <span>Democratizing Large Language Model Alignment</span>.”</span> October 31, 2023. <a href="https://doi.org/10.48550/arXiv.2304.07327">https://doi.org/10.48550/arXiv.2304.07327</a>.
+</div>
+<div id="ref-FlanCollectionDesigning2023longpre" class="csl-entry" role="listitem">
+Longpre, Shayne, Le Hou, Tu Vu, Albert Webson, Hyung Won Chung, Yi Tay, Denny Zhou, et al. 2023. <span>“The <span>Flan Collection</span>: <span>Designing Data</span> and <span>Methods</span> for <span>Effective Instruction Tuning</span>.”</span> February 14, 2023. <a href="https://doi.org/10.48550/arXiv.2301.13688">https://doi.org/10.48550/arXiv.2301.13688</a>.
+</div>
+<div id="ref-TrainingLanguageModels2022ouyang" class="csl-entry" role="listitem">
+Ouyang, Long, Jeff Wu, Xu Jiang, Diogo Almeida, Carroll L. Wainwright, Pamela Mishkin, Chong Zhang, et al. 2022. <span>“Training Language Models to Follow Instructions with Human Feedback.”</span> March 4, 2022. <a href="https://doi.org/10.48550/arXiv.2203.02155">https://doi.org/10.48550/arXiv.2203.02155</a>.
+</div>
+<div id="ref-DirectPreferenceOptimization2024rafailov" class="csl-entry" role="listitem">
+Rafailov, Rafael, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher D. Manning, and Chelsea Finn. 2024. <span>“Direct <span>Preference Optimization</span>: <span>Your Language Model</span> Is <span>Secretly</span> a <span>Reward Model</span>.”</span> July 29, 2024. <a href="https://doi.org/10.48550/arXiv.2305.18290">https://doi.org/10.48550/arXiv.2305.18290</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark_dimmed">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "YYZhang2025/YYZhang2025.github.io";
+    script.dataset.repoId = "R_kgDOQlDTcQ";
+    script.dataset.category = "General";
+    script.dataset.categoryId = "DIC_kwDOQlDTcc4C2MRz";
+    script.dataset.mapping = "title";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "top";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© CC-By Yuyang, 2025</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This page is built with ❤️ and <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+    <script type="text/javascript">
+    (function(d) {
+      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+        let pseudocodeOptions = {
+          indentSize: el.dataset.indentSize,
+          commentDelimiter: el.dataset.commentDelimiter,
+          lineNumber: el.dataset.lineNumber.toLowerCase() === "true",
+          lineNumberPunc: el.dataset.lineNumberPunc,
+          noEnd: el.dataset.noEnd.toLowerCase() === "true",
+          titlePrefix: el.dataset.captionPrefix
+        };
+        pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
+      });
+    })(document);
+    (function(d) {
+      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+        let captionSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
+        if (captionSpan !== null) {
+          let captionPrefix = el.dataset.captionPrefix + " ";
+          let captionNumber = "";
+          if (el.dataset.pseudocodeNumber) {
+            captionNumber = el.dataset.pseudocodeNumber + " ";
+            if (el.dataset.chapterLevel) {
+              captionNumber = el.dataset.chapterLevel + "." + captionNumber;
+            }
+          }
+          captionSpan.innerHTML = captionPrefix + captionNumber;
+        }
+      });
+    })(document);
+    </script>
+  
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="../../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
+</body></html>
