@@ -2,6 +2,7 @@
   {
     "listing": "/posts/Projects/projects_index.html",
     "items": [
+      "/posts/Projects/LLM_Pre-Training/index.html",
       "/posts/Projects/Micro-LLM/index.html",
       "/posts/Projects/Qwen3-VL/Qwen3-VL.html",
       "/posts/Projects/VLM-from-scratch/index.html",
