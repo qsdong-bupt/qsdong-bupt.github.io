@@ -2,16 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Yuyang Zhang">
+<meta name="author" content="Qingsen Zhang">
 <meta name="dcterms.date" content="2026-01-25">
-<meta name="description" content="In this blog, we explore how reinforcement learning (RL) is used to post-train large language models (LLMs) to improve performance, robustness, and alignment. We begin by formulating LLM generation as an RL problem (states, actions, policies, rewards), then introduce widely used RL-from-preference methods (RLHF), focusing on algorithms such as PPO and DPO. Next, we cover RLVR (Reinforcement Learning with Verifiable Rewards) and discuss representative approaches including GRPO, GSPO, DAPO, SAPO, and the current state-of-the-art GDPO. We then survey practical training frameworks for LLM-RL, such as Verl, and conclude with key challenges, open problems, and future research directions in RL for language models.">
+<meta name="description" content="In this blog, we explore how reinforcement learning (RL) is used to post-train large language models (LLMs) to improve performance, robustness, and alignment. We cover RLHF, PPO, DPO, RLVR, GRPO, GSPO, DAPO, SAPO, and GDPO.">
 
 <title>Reinforcement Learning in LLM</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -23,62 +26,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -88,27 +36,21 @@ div.csl-indent {
 <script src="../../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../../">
-<link href="../../.././style/icon.avif" rel="icon">
+<link href="../../../style/icon.avif" rel="icon">
 <script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/bootstrap/bootstrap-dark-44402bf054b1fe078bc4e7aebe64bce9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
-<script src="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.js"></script>
-<link href="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.css" rel="stylesheet">
-<script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
-<link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-0b09eb4da84538f8c2fd112b9812168b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -145,100 +87,31 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
 </script>
-<link href="https://fonts.cdnfonts.com/css/cmu-sans-serif" rel="stylesheet">
+<script>
+  MathJax = {
+    loader: { load: ['[tex]/boldsymbol'] },
+    tex: {
+      tags: "all",
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      packages: { '[+]': ['boldsymbol'] }
+    }
+  };
+</script>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<script>
-    MathJax = {
-        loader: {
-        load: ['[tex]/boldsymbol']
-        },
-        tex: {
-        tags: "all",
-        inlineMath: [['$','$'], ['\\(','\\)']],
-        displayMath: [['$$','$$'], ['\\[','\\]']],
-        processEscapes: true,
-        processEnvironments: true,
-        packages: {
-            '[+]': ['boldsymbol']
-        }
-        }
-    };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".foldable-header").forEach(header => {
-    header.addEventListener("click", () => {
-      const block = header.closest(".foldable");
-      if (block) {
-        block.classList.toggle("is-open");
-      }
-    });
-
-    // 可访问性（键盘）
-    header.setAttribute("tabindex", "0");
-    header.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        header.click();
-      }
-    });
-  });
-});
-</script>
-    <style type="text/css">
-    .ps-root .ps-algorithm {
-      border-top: 2px solid;
-      border-bottom: 2px solid;
-    }
-    .pseudocode-container {
-      text-align: left;
-    }
-    </style>
-  
-      <style type="text/css">
-      .ps-algorithm > .ps-line {
-        text-align: left;
-      }
-      </style>
-    
-
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
 <meta property="og:title" content="Reinforcement Learning in LLM">
-<meta property="og:description" content="In this blog, we explore how reinforcement learning (RL) is used to post-train large language models (LLMs) to improve performance, robustness, and alignment. We begin by formulating LLM generation as an RL problem (states, actions, policies, rewards), then introduce widely used RL-from-preference methods (RLHF), focusing on algorithms such as PPO and DPO. Next, we cover RLVR (Reinforcement Learning with Verifiable Rewards) and discuss representative approaches including GRPO, GSPO, DAPO, SAPO, and the current state-of-the-art GDPO. We then survey practical training frameworks for LLM-RL, such as Verl, and conclude with key challenges, open problems, and future research directions in RL for language models.">
-<meta property="og:image" content="./assets/rl-overview.png">
+<meta property="og:description" content="In this blog, we explore how reinforcement learning (RL) is used to post-train large language models (LLMs) to improve performance, robustness, and alignment. We cover RLHF, PPO, DPO, RLVR, GRPO, GSPO, DAPO, SAPO, and GDPO.">
+<meta property="og:image" content="https://qsdong-bupt.github.io/posts/Blogs/LLM-RL/assets/rl-overview.png">
+<meta property="og:image:height" content="415">
+<meta property="og:image:width" content="1025">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -436,150 +309,52 @@ window.Quarto = {
     <a class="nav-link" href="../../../posts/Projects/projects_index.html"> 
 <span class="menu-text">Projects</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="https://yyzhang2025.github.io/LearningNotes/"> 
-<span class="menu-text">100 PwC</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../../posts/CS336/index.html"> 
-<span class="menu-text">Stanford CS336</span></a>
-  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
+    <a href="" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-toggle-dark-mode"></i></a>
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Reinforcement Learning in LLM</h1>
-        </a>     
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#preliminaries" id="toc-preliminaries" class="nav-link active" data-scroll-target="#preliminaries"><span class="header-section-number">1</span> Preliminaries</a>
-  <ul>
-  <li><a href="#sec-entropy" id="toc-sec-entropy" class="nav-link" data-scroll-target="#sec-entropy"><span class="header-section-number">1.1</span> Entropy</a></li>
-  <li><a href="#sec-kl-divergence" id="toc-sec-kl-divergence" class="nav-link" data-scroll-target="#sec-kl-divergence"><span class="header-section-number">1.2</span> KL-Divergence</a></li>
-  <li><a href="#sec-monte-carlo-estimation" id="toc-sec-monte-carlo-estimation" class="nav-link" data-scroll-target="#sec-monte-carlo-estimation"><span class="header-section-number">1.3</span> Monte Carlo Estimation</a></li>
-  <li><a href="#sec-important-sampling" id="toc-sec-important-sampling" class="nav-link" data-scroll-target="#sec-important-sampling"><span class="header-section-number">1.4</span> Importance Sampling</a></li>
-  </ul></li>
-  <li><a href="#notations" id="toc-notations" class="nav-link" data-scroll-target="#notations"><span class="header-section-number">2</span> Notations</a></li>
-  <li><a href="#review-of-reinforcement-learning" id="toc-review-of-reinforcement-learning" class="nav-link" data-scroll-target="#review-of-reinforcement-learning"><span class="header-section-number">3</span> Review of Reinforcement Learning</a>
-  <ul>
-  <li><a href="#on-policy-vs-off-policy" id="toc-on-policy-vs-off-policy" class="nav-link" data-scroll-target="#on-policy-vs-off-policy"><span class="header-section-number">3.1</span> On Policy vs Off Policy</a></li>
-  </ul></li>
-  <li><a href="#mapping-llm-post-training-as-rl-problems" id="toc-mapping-llm-post-training-as-rl-problems" class="nav-link" data-scroll-target="#mapping-llm-post-training-as-rl-problems"><span class="header-section-number">4</span> Mapping LLM Post Training as RL Problems</a>
-  <ul>
-  <li><a href="#state-action-policy-in-llm" id="toc-state-action-policy-in-llm" class="nav-link" data-scroll-target="#state-action-policy-in-llm"><span class="header-section-number">4.1</span> State, Action, Policy in LLM</a></li>
-  <li><a href="#reward-design-challenges-in-llm" id="toc-reward-design-challenges-in-llm" class="nav-link" data-scroll-target="#reward-design-challenges-in-llm"><span class="header-section-number">4.2</span> Reward Design Challenges in LLM</a></li>
-  </ul></li>
-  <li><a href="#reinforcement-learning-from-human-feedbackrlhf" id="toc-reinforcement-learning-from-human-feedbackrlhf" class="nav-link" data-scroll-target="#reinforcement-learning-from-human-feedbackrlhf"><span class="header-section-number">5</span> Reinforcement Learning from Human Feedback(RLHF)</a>
-  <ul>
-  <li><a href="#ppo" id="toc-ppo" class="nav-link" data-scroll-target="#ppo"><span class="header-section-number">5.1</span> PPO</a></li>
-  <li><a href="#dpo" id="toc-dpo" class="nav-link" data-scroll-target="#dpo"><span class="header-section-number">5.2</span> DPO</a></li>
-  <li><a href="#reinforce-leave-one-out-rloo" id="toc-reinforce-leave-one-out-rloo" class="nav-link" data-scroll-target="#reinforce-leave-one-out-rloo"><span class="header-section-number">5.3</span> REINFORCE Leave One-Out (RLOO)</a></li>
-  <li><a href="#remax" id="toc-remax" class="nav-link" data-scroll-target="#remax"><span class="header-section-number">5.4</span> ReMax</a></li>
-  <li><a href="#reinforce" id="toc-reinforce" class="nav-link" data-scroll-target="#reinforce"><span class="header-section-number">5.5</span> REINFORCE++</a></li>
-  </ul></li>
-  <li><a href="#reinforcement-learning-from-verified-rewardsrlvr" id="toc-reinforcement-learning-from-verified-rewardsrlvr" class="nav-link" data-scroll-target="#reinforcement-learning-from-verified-rewardsrlvr"><span class="header-section-number">6</span> Reinforcement Learning from Verified Rewards(RLVR)</a>
-  <ul>
-  <li><a href="#grpo" id="toc-grpo" class="nav-link" data-scroll-target="#grpo"><span class="header-section-number">6.1</span> GRPO</a>
-  <ul>
-  <li><a href="#objective-function" id="toc-objective-function" class="nav-link" data-scroll-target="#objective-function"><span class="header-section-number">6.1.1</span> Objective Function</a></li>
-  </ul></li>
-  <li><a href="#dr.grpo" id="toc-dr.grpo" class="nav-link" data-scroll-target="#dr.grpo"><span class="header-section-number">6.2</span> Dr.GRPO</a></li>
-  <li><a href="#dapo" id="toc-dapo" class="nav-link" data-scroll-target="#dapo"><span class="header-section-number">6.3</span> DAPO</a></li>
-  <li><a href="#gspo" id="toc-gspo" class="nav-link" data-scroll-target="#gspo"><span class="header-section-number">6.4</span> GSPO</a></li>
-  <li><a href="#cispo" id="toc-cispo" class="nav-link" data-scroll-target="#cispo"><span class="header-section-number">6.5</span> CISPO</a></li>
-  <li><a href="#sapo" id="toc-sapo" class="nav-link" data-scroll-target="#sapo"><span class="header-section-number">6.6</span> SAPO</a></li>
-  <li><a href="#gdpo" id="toc-gdpo" class="nav-link" data-scroll-target="#gdpo"><span class="header-section-number">6.7</span> GDPO</a></li>
-  </ul></li>
-  <li><a href="#llm-rl-in-practice" id="toc-llm-rl-in-practice" class="nav-link" data-scroll-target="#llm-rl-in-practice"><span class="header-section-number">7</span> LLM-RL in Practice</a>
-  <ul>
-  <li><a href="#trl-transformer-reinforcement-learning" id="toc-trl-transformer-reinforcement-learning" class="nav-link" data-scroll-target="#trl-transformer-reinforcement-learning"><span class="header-section-number">7.1</span> TRL: Transformer Reinforcement Learning</a></li>
-  <li><a href="#verl-volcano-engine-reinforcement-learning-for-llms" id="toc-verl-volcano-engine-reinforcement-learning-for-llms" class="nav-link" data-scroll-target="#verl-volcano-engine-reinforcement-learning-for-llms"><span class="header-section-number">7.2</span> verl: Volcano Engine Reinforcement Learning for LLMs</a></li>
-  <li><a href="#openrlhf" id="toc-openrlhf" class="nav-link" data-scroll-target="#openrlhf"><span class="header-section-number">7.3</span> OpenRLHF</a></li>
-  <li><a href="#swift-scalable-lightweight-infrastructure-for-fine-tuning" id="toc-swift-scalable-lightweight-infrastructure-for-fine-tuning" class="nav-link" data-scroll-target="#swift-scalable-lightweight-infrastructure-for-fine-tuning"><span class="header-section-number">7.4</span> SWIFT (Scalable lightWeight Infrastructure for Fine-Tuning)</a></li>
-  </ul></li>
-  <li><a href="#multi-turn-rl-in-llms" id="toc-multi-turn-rl-in-llms" class="nav-link" data-scroll-target="#multi-turn-rl-in-llms"><span class="header-section-number">8</span> Multi-Turn RL in LLMs</a></li>
-  <li><a href="#challenges-further-direction" id="toc-challenges-further-direction" class="nav-link" data-scroll-target="#challenges-further-direction"><span class="header-section-number">9</span> Challenges &amp; Further Direction</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">10</span> Summary</a></li>
-  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix"><span class="header-section-number">11</span> Appendix</a>
-  <ul>
-  <li><a href="#code-snippets" id="toc-code-snippets" class="nav-link" data-scroll-target="#code-snippets"><span class="header-section-number">11.1</span> Code Snippets</a></li>
-  </ul></li>
-  </ul>
-</nav>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Reinforcement Learning in LLM</h1>
-  <div class="quarto-categories">
-    <div class="quarto-category">Transformer</div>
-    <div class="quarto-category">Large Language Model</div>
-    <div class="quarto-category">Reinforcement Learning</div>
-  </div>
-  </div>
+<h1 class="title">Reinforcement Learning in LLM</h1>
+</div>
 
 <div>
   <div class="description">
-    In this blog, we explore how reinforcement learning (RL) is used to post-train large language models (LLMs) to improve performance, robustness, and alignment. We begin by formulating LLM generation as an RL problem (states, actions, policies, rewards), then introduce widely used RL-from-preference methods (RLHF), focusing on algorithms such as <strong>PPO</strong> and <strong>DPO</strong>. Next, we cover <strong>RLVR</strong> (Reinforcement Learning with Verifiable Rewards) and discuss representative approaches including <strong>GRPO</strong>, <strong>GSPO</strong>, <strong>DAPO</strong>, <strong>SAPO</strong>, and the current state-of-the-art <strong>GDPO</strong>. We then survey practical training frameworks for LLM-RL, such as <strong>Verl</strong>, and conclude with key challenges, open problems, and future research directions in RL for language models.
+    In this blog, we explore how reinforcement learning (RL) is used to post-train large language models (LLMs) to improve performance, robustness, and alignment. We cover RLHF, PPO, DPO, RLVR, GRPO, GSPO, DAPO, SAPO, and GDPO.
   </div>
 </div>
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Yuyang Zhang </p>
+             <p>Qingsen Zhang </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">2026-01-25</p>
+      <p class="date">January 25, 2026</p>
     </div>
   </div>
   
-    <div>
-    <div class="quarto-title-meta-heading">Modified</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date-modified">2026-03-28</p>
-    </div>
-  </div>
     
   </div>
   
@@ -587,693 +362,12 @@ window.Quarto = {
 
 </header>
 
-<nav id="TOC-body" role="doc-toc">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#preliminaries" id="toc-preliminaries"><span class="header-section-number">1</span> Preliminaries</a>
-  <ul>
-  <li><a href="#sec-entropy" id="toc-sec-entropy"><span class="header-section-number">1.1</span> Entropy</a></li>
-  <li><a href="#sec-kl-divergence" id="toc-sec-kl-divergence"><span class="header-section-number">1.2</span> KL-Divergence</a></li>
-  <li><a href="#sec-monte-carlo-estimation" id="toc-sec-monte-carlo-estimation"><span class="header-section-number">1.3</span> Monte Carlo Estimation</a></li>
-  <li><a href="#sec-important-sampling" id="toc-sec-important-sampling"><span class="header-section-number">1.4</span> Importance Sampling</a></li>
-  </ul></li>
-  <li><a href="#notations" id="toc-notations"><span class="header-section-number">2</span> Notations</a></li>
-  <li><a href="#review-of-reinforcement-learning" id="toc-review-of-reinforcement-learning"><span class="header-section-number">3</span> Review of Reinforcement Learning</a>
-  <ul>
-  <li><a href="#on-policy-vs-off-policy" id="toc-on-policy-vs-off-policy"><span class="header-section-number">3.1</span> On Policy vs Off Policy</a></li>
-  </ul></li>
-  <li><a href="#mapping-llm-post-training-as-rl-problems" id="toc-mapping-llm-post-training-as-rl-problems"><span class="header-section-number">4</span> Mapping LLM Post Training as RL Problems</a>
-  <ul>
-  <li><a href="#state-action-policy-in-llm" id="toc-state-action-policy-in-llm"><span class="header-section-number">4.1</span> State, Action, Policy in LLM</a></li>
-  <li><a href="#reward-design-challenges-in-llm" id="toc-reward-design-challenges-in-llm"><span class="header-section-number">4.2</span> Reward Design Challenges in LLM</a></li>
-  </ul></li>
-  <li><a href="#reinforcement-learning-from-human-feedbackrlhf" id="toc-reinforcement-learning-from-human-feedbackrlhf"><span class="header-section-number">5</span> Reinforcement Learning from Human Feedback(RLHF)</a>
-  <ul>
-  <li><a href="#ppo" id="toc-ppo"><span class="header-section-number">5.1</span> PPO</a></li>
-  <li><a href="#dpo" id="toc-dpo"><span class="header-section-number">5.2</span> DPO</a></li>
-  <li><a href="#reinforce-leave-one-out-rloo" id="toc-reinforce-leave-one-out-rloo"><span class="header-section-number">5.3</span> REINFORCE Leave One-Out (RLOO)</a></li>
-  <li><a href="#remax" id="toc-remax"><span class="header-section-number">5.4</span> ReMax</a></li>
-  <li><a href="#reinforce" id="toc-reinforce"><span class="header-section-number">5.5</span> REINFORCE++</a></li>
-  </ul></li>
-  <li><a href="#reinforcement-learning-from-verified-rewardsrlvr" id="toc-reinforcement-learning-from-verified-rewardsrlvr"><span class="header-section-number">6</span> Reinforcement Learning from Verified Rewards(RLVR)</a>
-  <ul>
-  <li><a href="#grpo" id="toc-grpo"><span class="header-section-number">6.1</span> GRPO</a>
-  <ul>
-  <li><a href="#objective-function" id="toc-objective-function"><span class="header-section-number">6.1.1</span> Objective Function</a></li>
-  </ul></li>
-  <li><a href="#dr.grpo" id="toc-dr.grpo"><span class="header-section-number">6.2</span> Dr.GRPO</a></li>
-  <li><a href="#dapo" id="toc-dapo"><span class="header-section-number">6.3</span> DAPO</a></li>
-  <li><a href="#gspo" id="toc-gspo"><span class="header-section-number">6.4</span> GSPO</a></li>
-  <li><a href="#cispo" id="toc-cispo"><span class="header-section-number">6.5</span> CISPO</a></li>
-  <li><a href="#sapo" id="toc-sapo"><span class="header-section-number">6.6</span> SAPO</a></li>
-  <li><a href="#gdpo" id="toc-gdpo"><span class="header-section-number">6.7</span> GDPO</a></li>
-  </ul></li>
-  <li><a href="#llm-rl-in-practice" id="toc-llm-rl-in-practice"><span class="header-section-number">7</span> LLM-RL in Practice</a>
-  <ul>
-  <li><a href="#trl-transformer-reinforcement-learning" id="toc-trl-transformer-reinforcement-learning"><span class="header-section-number">7.1</span> TRL: Transformer Reinforcement Learning</a></li>
-  <li><a href="#verl-volcano-engine-reinforcement-learning-for-llms" id="toc-verl-volcano-engine-reinforcement-learning-for-llms"><span class="header-section-number">7.2</span> verl: Volcano Engine Reinforcement Learning for LLMs</a></li>
-  <li><a href="#openrlhf" id="toc-openrlhf"><span class="header-section-number">7.3</span> OpenRLHF</a></li>
-  <li><a href="#swift-scalable-lightweight-infrastructure-for-fine-tuning" id="toc-swift-scalable-lightweight-infrastructure-for-fine-tuning"><span class="header-section-number">7.4</span> SWIFT (Scalable lightWeight Infrastructure for Fine-Tuning)</a></li>
-  </ul></li>
-  <li><a href="#multi-turn-rl-in-llms" id="toc-multi-turn-rl-in-llms"><span class="header-section-number">8</span> Multi-Turn RL in LLMs</a></li>
-  <li><a href="#challenges-further-direction" id="toc-challenges-further-direction"><span class="header-section-number">9</span> Challenges &amp; Further Direction</a></li>
-  <li><a href="#summary" id="toc-summary"><span class="header-section-number">10</span> Summary</a></li>
-  <li><a href="#appendix" id="toc-appendix"><span class="header-section-number">11</span> Appendix</a>
-  <ul>
-  <li><a href="#code-snippets" id="toc-code-snippets"><span class="header-section-number">11.1</span> Code Snippets</a></li>
-  </ul></li>
-  </ul>
-</nav>
-<p>In previous blogs, we discussed the fundamental concepts of large language models (LLMs), including their architecture and supervised training via <strong>next-token prediction</strong>. Through maximum likelihood training, we are able to build models that generate fluent text matching the distribution of the training data.However, this is only the starting point. Modern LLM systems, such as ChatGPT, do not merely imitate text from the data distribution. They are expected to generate responses that are <em>helpful, truthful, harmless, and aligned with human preferences</em>. Moreover, recent models such as DeepSeek-R1 <span class="citation" data-cites="DeepSeekR1IncentivizingReasoning2025deepseek-ai">(<a href="#ref-DeepSeekR1IncentivizingReasoning2025deepseek-ai" role="doc-biblioref">DeepSeek-AI et al. 2025</a>)</span> demonstrate advanced reasoning capabilities, including the explicit generation of intermediate reasoning steps before producing a final answer.How are such behaviors achieved? How can a model be trained to optimize objectives that go beyond next-token likelihood — objectives that involve sequence-level evaluation, preference alignment, and verifiable correctness? The key lies in Reinforcement Learning (RL).</p>
-<p>In this blog, we explore how reinforcement learning is used to post-train large language models to improve their performance, robustness, reasoning ability, and alignment with human values. We begin by formulating the LLM generation process as an RL problem, defining <strong>states</strong>, <strong>actions</strong>, <strong>policies</strong>, and <strong>rewards</strong> in the context of language modeling. We then introduce widely adopted reinforcement learning from human preference methods (RLHF), focusing on algorithms such as Proximal Policy Optimization (<strong>PPO</strong>)<span class="citation" data-cites="TrainingLanguageModels2022ouyang">(<a href="#ref-TrainingLanguageModels2022ouyang" role="doc-biblioref">Ouyang et al. 2022</a>)</span> and Direct Preference Optimization (<strong>DPO</strong>)<span class="citation" data-cites="DirectPreferenceOptimization2024rafailov">(<a href="#ref-DirectPreferenceOptimization2024rafailov" role="doc-biblioref">Rafailov et al. 2024</a>)</span>. Next, we discuss <strong>Reinforcement Learning with Verifiable Rewards</strong> (RLVR) and representative approaches including <strong>GRPO</strong><span class="citation" data-cites="DeepSeekMathPushingLimits2024shao">(<a href="#ref-DeepSeekMathPushingLimits2024shao" role="doc-biblioref">Shao et al. 2024</a>)</span>, <strong>GSPO</strong><span class="citation" data-cites="GroupSequencePolicy2025zheng">(<a href="#ref-GroupSequencePolicy2025zheng" role="doc-biblioref">Zheng et al. 2025</a>)</span>, <strong>DAPO</strong><span class="citation" data-cites="DAPOOpenSourceLLM2025yu">(<a href="#ref-DAPOOpenSourceLLM2025yu" role="doc-biblioref">Yu et al. 2025</a>)</span>, <strong>SAPO</strong><span class="citation" data-cites="SoftAdaptivePolicy2025gao">(<a href="#ref-SoftAdaptivePolicy2025gao" role="doc-biblioref">Gao et al. 2025</a>)</span>, and the state-of-the-art <strong>GDPO</strong><span class="citation" data-cites="GDPOGroupRewardDecoupled2026liu">(<a href="#ref-GDPOGroupRewardDecoupled2026liu" role="doc-biblioref">Liu et al. 2026</a>)</span>. We also survey practical training frameworks for LLM-RL, such as Verl, Open-RLHF and so on.</p>
-<p>Finally, we conclude with key challenges, open problems, and emerging research directions in applying reinforcement learning to large language models.</p>
-<p>But before we dive into the specific algorithms and techniques, let’s first review some fundamental concepts and notations in reinforcement learning that will be essential for understanding the subsequent discussions.</p>
-<section id="preliminaries" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Preliminaries</h1>
-<p>In this section, we will review some fundamental concepts and notations that are essential for understanding reinforcement learning (RL) and its application in large language models (LLMs). We will cover key topics such as <strong>entropy</strong>, <strong>KL-Divergence</strong>, <strong>Monte Carlo estimation</strong> and <strong>importance sampling</strong>. These concepts will provide a solid foundation for the subsequent discussions on RL algorithms and their integration with LLMs. For readers who are already familiar with these topics, feel free to skip this section and proceed to the next part of the blog.</p>
-<section id="sec-entropy" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="sec-entropy"><span class="header-section-number">1.1</span> Entropy</h2>
-<p>Entropy is a measure of uncertainty or randomness in a probability distribution. In the context of reinforcement learning, <u>entropy is often used to encourage exploration by promoting diverse action selection.</u> The entropy of a discrete probability distribution <span class="math inline">\(p(x)\)</span> is defined as:</p>
-<p><span id="eq-entropy-discrete"><span class="math display">\[
-H(p) = - \sum_{x} p(x) \log p(x)
-\tag{1}\]</span></span></p>
-<p>For continuous distributions, the entropy is defined as: <span id="eq-entropy-continuous"><span class="math display">\[
-H(p) = - \int p(x) \log p(x) dx
-\tag{2}\]</span></span></p>
-<p>One thing to note is that:</p>
-<ul>
-<li><span class="hilite-teal">Higher entropy</span> indicates <span class="hilite-teal">more uncertainty and exploration</span></li>
-<li><span class="hilite-teal">Lower entropy</span> indicates <span class="hilite-teal">more certainty and exploitation</span></li>
-</ul>
-<p>For the discrete case, the entropy is maximized when the distribution is uniform <span class="math inline">\(p(x) = \frac{1}{|X|}\)</span>, i.e., all outcomes are equally likely. In contrast, the entropy is minimized (zero) when the distribution is deterministic, i.e., one outcome has probability 1 and all others have probability 0.</p>
-</section>
-<section id="sec-kl-divergence" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="sec-kl-divergence"><span class="header-section-number">1.2</span> KL-Divergence</h2>
-<p>The Kullback-Leibler (KL) Divergence is a measure of how one probability distribution diverges from a second, expected probability distribution. In reinforcement learning, KL-Divergence is often used to quantify the difference between two policies, which is useful for policy optimization and regularization. The KL-Divergence from distribution <span class="math inline">\(P\)</span> to distribution <span class="math inline">\(Q\)</span> is defined as: <span id="eq-kl-divergence-discrete"><span class="math display">\[
-D_{KL}(P \| Q) = \sum_{x} P(x) \log \frac{P(x)}{Q(x)}
-\tag{3}\]</span></span></p>
-<p>For continuous distributions, the KL-Divergence is defined as: <span id="eq-kl-divergence-continuous"><span class="math display">\[
-D_{KL}(P \| Q) = \int P(x) \log \frac{P(x)}{Q(x)} dx
-\tag{4}\]</span></span></p>
-<p>The KL-Divergence has several important properties:</p>
-<ul>
-<li><strong>Non-negativity</strong>: <span class="math inline">\(D_{KL}(P \| Q) \geq 0\)</span>, with equality if and only if <span class="math inline">\(P = Q\)</span> almost everywhere.</li>
-<li><strong>Asymmetry</strong>: <span class="math inline">\(D_{KL}(P \| Q) \neq D_{KL}(Q \| P)\)</span> in general.</li>
-</ul>
-<p>To compute the KL-Divergence between two distributions <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> in practice, we can use the following function:</p>
-<div class="sourceCode" id="cb1" data-code-line-numbers=""><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
-<span id="cb1-2"><a href="#cb1-2"></a></span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="kw">def</span> compute_kl_divergence(P_logits: torch.Tensor, Q_logits: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
-<span id="cb1-4"><a href="#cb1-4"></a>    <span class="co">"""</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a><span class="co">    P_logits (torch.Tensor): Logits of distribution P (shape: [batch_size, num_classes])</span></span>
-<span id="cb1-6"><a href="#cb1-6"></a><span class="co">    Q_logits (torch.Tensor): Logits of distribution Q (shape: [batch_size, num_classes])</span></span>
-<span id="cb1-7"><a href="#cb1-7"></a><span class="co">    """</span></span>
-<span id="cb1-8"><a href="#cb1-8"></a>    log_prob_p <span class="op">=</span> F.log_softmax(P_logits, dim<span class="op">=-</span><span class="dv">1</span>)  <span class="co"># Log probabilities of P</span></span>
-<span id="cb1-9"><a href="#cb1-9"></a>    log_prob_q <span class="op">=</span> F.log_softmax(Q_logits, dim<span class="op">=-</span><span class="dv">1</span>)  <span class="co"># Log probabilities of Q</span></span>
-<span id="cb1-10"><a href="#cb1-10"></a></span>
-<span id="cb1-11"><a href="#cb1-11"></a>    kl_divergence <span class="op">=</span> torch.<span class="bu">sum</span>(torch.exp(log_prob_p) <span class="op">*</span> (log_prob_p <span class="op">-</span> log_prob_q), dim<span class="op">=-</span><span class="dv">1</span>)  <span class="co"># KL Divergence</span></span>
-<span id="cb1-12"><a href="#cb1-12"></a>    <span class="cf">return</span> kl_divergence</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="note foldable is-open">
-<div class="note-header foldable-header">
-<p>NOTE Further Reading about Entropy &amp; KL Divergence</p>
-</div>
-<div class="note-container foldable-content">
-<p>For those who want to dive deeper into Entropy and KL-Divergence, I highly recommend to check out my previous blog: <a href="https://yyzhang2025.github.io/posts/Blogs/KL-Divergence/post.html">From Entropy to KL Divergence: A Comprehensive Guide</a></p>
-</div>
-</div>
-</section>
-<section id="sec-monte-carlo-estimation" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="sec-monte-carlo-estimation"><span class="header-section-number">1.3</span> Monte Carlo Estimation</h2>
-<p>In the practice of machine learning and reinforcement learning, we often encounter situations where we need to compute expectations of functions with respect to complex probability distributions. <strong>Monte Carlo estimation</strong> is a powerful technique that <u>allows us to approximate these expectations using random sampling</u>. The basic idea is:</p>
-<div class="highlight">
-<p>draw samples from the target distribution and use them to compute an empirical average of the function of interest.</p>
-</div>
-<p>Due to the <a href="https://en.wikipedia.org/wiki/Law_of_large_numbers">law of large numbers</a>, this empirical average converges to the true expectation as the number of samples increases.</p>
-<p>For example, suppose we want to estimate the expectation of a function <span class="math inline">\(f(x)\)</span> with respect to a probability distribution <span class="math inline">\(p(x)\)</span>: <span id="eq-expectation"><span class="math display">\[
-\begin{split}
-\mathbb{E}_{x \sim p(x)}[f(x)] &amp; = \int f(x) p(x) dx \\
-&amp; \approx \frac{1}{N} \sum_{i=1}^{N} f(x^{(i)}) \quad \text{where } x^{(i)} \sim p(x)
-\end{split}
-\tag{5}\]</span></span></p>
-<p>This is the foundation of many algorithms in reinforcement learning, where we need to estimate expected returns, value functions, and policy gradients based on sampled trajectories.</p>
-<p>For the KL-Divergence between two distributions <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>, we can use Monte Carlo estimation to approximate it as follows: <span id="eq-kl-monte-carlo"><span class="math display">\[
-D_{KL}(P || Q) = \mathbb{E}_{x \sim P} \left[ \log \frac{P(x)}{Q(x)} \right] \approx \frac{1}{N} \sum_{i=1}^{N} \log \frac{P(x^{(i)})}{Q(x^{(i)})} \quad \text{where } x^{(i)} \sim P(x)
-\tag{6}\]</span></span></p>
-</section>
-<section id="sec-important-sampling" class="level2" data-number="1.4">
-<h2 data-number="1.4" class="anchored" data-anchor-id="sec-important-sampling"><span class="header-section-number">1.4</span> Importance Sampling</h2>
-<p>When we want to estimate an expectation with respect to a <strong>target distribution</strong> <span class="math inline">\(p(x)\)</span>, but we can only sample from a different distribution <span class="math inline">\(q(x)\)</span> (known as the <strong>proposal distribution</strong>), we can use importance sampling to correct for the discrepancy between the two distributions. The key idea is to <span class="hilite-green">reweight the samples drawn from the proposal distribution by the ratio of the target and proposal densities</span>. The expectation of a function <span class="math inline">\(f(x)\)</span> with respect to the target distribution <span class="math inline">\(p(x)\)</span> can be expressed as:</p>
-<p><span id="eq-importance-sampling-expectation"><span class="math display">\[
-\mathbb{E}_{x \sim p(x)}[f(x)] = \int f(x) p(x) dx = \int f(x) \frac{p(x)}{\textcolor{red}{q(x)}} \textcolor{red}{q(x)} dx = \mathbb{E}_{x \sim \textcolor{red}{q(x)}}\left[ f(x) \frac{p(x)}{\textcolor{red}{q(x)}} \right]
-\tag{7}\]</span></span></p>
-<p>Using Monte Carlo estimation, we can approximate this expectation using samples drawn from the proposal distribution <span class="math inline">\(q(x)\)</span>: <span id="eq-importance-sampling-monte-carlo"><span class="math display">\[
-\mathbb{E}_{x \sim p(x)}[f(x)] \approx \frac{1}{N} \sum_{i=1}^{N} f(x^{(i)}) \frac{p(x^{(i)})}{\textcolor{red}q(x^{(i)})} \quad \text{where } x^{(i)} \sim \textcolor{red}{q(x)}
-\tag{8}\]</span></span></p>
-<p>where <span class="math inline">\(\frac{p(x^{(i)})}{q(x^{(i)})}\)</span> is known as the <strong>importance weight</strong> / <strong>importance ratio</strong>. Importance sampling is particularly useful in reinforcement learning when we want to evaluate or improve a policy using data collected from a different policy.</p>
-</section>
-</section>
-<section id="notations" class="level1 page-columns page-full" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Notations</h1>
-<p>There are various notations used in the literature of reinforcement learning (RL) and large language models (LLMs). To maintain consistency and clarity throughout this blog, we will define and use a standard set of notations as following:</p>
-<div class="column-page" data-scrollable="true">
-<div id="tbl-notation" class="hover quarto-float quarto-figure quarto-figure-center anchored" data-tbl-colwidths="[10,20,70]">
-<figure class="quarto-float quarto-float-tbl figure">
-<div aria-describedby="tbl-notation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="table-hover table">
-<colgroup>
-<col style="width: 10%">
-<col style="width: 20%">
-<col style="width: 70%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: center;">Notation</th>
-<th style="text-align: left;">Meaning</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;"><span class="math inline">\(\pi_{\theta}\)</span></td>
-<td style="text-align: left;"><strong>Policy</strong></td>
-<td style="text-align: left;">A mapping function from <em>states</em> to a <em>probability distribution over actions</em>.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><span class="math inline">\(s_t\)</span></td>
-<td style="text-align: left;"><strong>State</strong> at time <span class="math inline">\(t\)</span></td>
-<td style="text-align: left;">The current context or input to the LLM at time step <span class="math inline">\(t\)</span>. This could include the text generated so far and any other relevant information.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><span class="math inline">\(a_t\)</span></td>
-<td style="text-align: left;"><strong>Action</strong> at time <span class="math inline">\(t\)</span></td>
-<td style="text-align: left;">The token or word generated by the LLM at time step <span class="math inline">\(t\)</span>.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><span class="math inline">\(r_t\)</span></td>
-<td style="text-align: left;"><strong>Reward</strong> at time <span class="math inline">\(t\)</span></td>
-<td style="text-align: left;">A scalar value received after taking action <span class="math inline">\(a_t\)</span> in state <span class="math inline">\(s_t\)</span>. It indicates the quality of the generated token in the context of the overall text generation task.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><span class="math inline">\(R_t\)</span></td>
-<td style="text-align: left;"><strong>Return</strong> at time <span class="math inline">\(t\)</span></td>
-<td style="text-align: left;">The cumulative reward received from time step <span class="math inline">\(t\)</span> onwards. It is often used to evaluate the long-term effectiveness of the policy.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><span class="math inline">\(\gamma\)</span></td>
-<td style="text-align: left;"><strong>Discount factor</strong></td>
-<td style="text-align: left;">A value between 0 and 1 that determines the importance of future rewards. A higher value places more emphasis on future rewards.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><span class="math inline">\(V^{\pi}(s)\)</span></td>
-<td style="text-align: left;"><strong>Value function</strong> / <strong>State-value function</strong></td>
-<td style="text-align: left;">The expected return when starting from state <span class="math inline">\(s\)</span> and following policy <span class="math inline">\(\pi\)</span>. It measures the long-term value of being in state <span class="math inline">\(s\)</span>.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><span class="math inline">\(Q^{\pi}(s, a)\)</span></td>
-<td style="text-align: left;"><strong>Action-value function</strong></td>
-<td style="text-align: left;">The expected return when starting from state <span class="math inline">\(s\)</span>, taking action <span class="math inline">\(a\)</span>, and thereafter following policy <span class="math inline">\(\pi\)</span>. It evaluates the quality of taking action <span class="math inline">\(a\)</span> in state <span class="math inline">\(s\)</span>.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><span class="math inline">\(A^{\pi}(s, a)\)</span></td>
-<td style="text-align: left;"><strong>Advantage function</strong></td>
-<td style="text-align: left;">The difference between the action-value function and the value function: <span class="math inline">\(A^{\pi}(s, a) = Q^{\pi}(s, a) - V^{\pi}(s)\)</span>. It indicates how much better or worse taking action <span class="math inline">\(a\)</span> in state <span class="math inline">\(s\)</span> is compared to the average action.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><span class="math inline">\(H(p)\)</span></td>
-<td style="text-align: left;"><strong>Entropy</strong> of distribution <span class="math inline">\(p\)</span></td>
-<td style="text-align: left;">A measure of uncertainty or randomness in the policy’s action selection. Higher entropy indicates more exploration.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><span class="math inline">\(\tau\)</span></td>
-<td style="text-align: left;"><strong>Trajectory</strong> / <strong>Episode</strong> / <strong>Rollout</strong></td>
-<td style="text-align: left;">A sequence of states, actions, and rewards generated by following a policy from an initial state to a terminal state. Can be viewd as a sequence of state and action pairs: <span class="math inline">\(\tau = (s_0, a_0, s_1, a_1, ..., s_T, a_T)\)</span></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><span class="math inline">\(\rho(\tau)\)</span></td>
-<td style="text-align: left;"><strong>Importance Sampling</strong> Ratio</td>
-<td style="text-align: left;">The ratio of probabilities of a trajectory under two different policies: <span class="math inline">\(\frac{\pi_{\theta}(\tau)}{\pi_{\theta_{old}}(\tau)}\)</span></td>
-</tr>
-</tbody>
-</table>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-notation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: Notations in RL and LLMs
-</figcaption>
-</figure>
-</div>
-</div>
-</section>
-<section id="review-of-reinforcement-learning" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Review of Reinforcement Learning</h1>
-<p>In this section, we will provide a brief overview of key reinforcement learning (RL) concepts that are relevant to understanding how RL is applied in large language models (LLMs). We will cover the fundamental components of RL, including the agent, environment, states, actions, rewards, and policies. Additionally, we will discuss common RL algorithms and techniques that are often employed in the context of LLMs.</p>
-<div class="tip foldable is-open">
-<div class="tip-header foldable-header">
-<p>TIP: Dig into Reinforcement Learning</p>
-</div>
-<div class="tip-container foldable-content">
-<p>For those who what to dig deeper into RL, I highly recommend the following resources:</p>
-<ul>
-<li><a href="https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf">Reinforcement learning: An introduction</a>: A comprehensive textbook by Sutton and Barto that covers the fundamentals of RL.</li>
-<li><a href="https://web.stanford.edu/class/cs234/">Stanford CS234 Reinforcement Learning</a>: This course provides lectures and video materials on various RL topics, it can be seen as complementary to the Sutton and Barto book.</li>
-<li><a href="https://rail.eecs.berkeley.edu/deeprlcourse/">UCB CS285 Deep Reinforcement Learning</a>: This course focuses on deep reinforcement learning techniques and their applications. (The first several lectures cover basic Deep RL concepts and Policy Gradient methods, the review section in this blog is heavily inspired by these lectures)</li>
-</ul>
-</div>
-</div>
-<p>Reinforcement Learning (RL) is a framework for learning to make sequential decisions by interacting with an environment. In RL, an agent learns to take actions in an environment in order to maximize cumulative rewards over time. The key components of RL include:</p>
-<ul>
-<li><strong>Agent</strong>: The learner or decision-maker that interacts with the environment.</li>
-<li><strong>Environment</strong>: The external system with which the agent interacts. It provides feedback in the form of rewards and new states based on the agent’s actions.</li>
-<li><strong>State (<span class="math inline">\(s_t\)</span>)</strong>: A representation of the current situation or context at time step <span class="math inline">\(t\)</span>.</li>
-<li><strong>Action (<span class="math inline">\(a_t\)</span>)</strong>: A decision or move made by the agent at time step <span class="math inline">\(t\)</span>.</li>
-<li><strong>Reward (<span class="math inline">\(r_t\)</span>)</strong>: A scalar feedback signal received after taking action <span class="math inline">\(a_t\)</span> in state <span class="math inline">\(s_t\)</span>. It indicates the immediate value of the action taken.</li>
-<li><strong>Policy (<span class="math inline">\(\pi\)</span>)</strong>: A mapping from states to a probability distribution over actions. It defines the agent’s behavior and decision-making strategy.</li>
-</ul>
-<p>We can see how those components related in the following figure:</p>
-<div id="fig-rl-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-rl-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/rl-overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: The overall framework of Reinforcement Learning. The agent interacts with the environment by taking action a_t = \pi(s_t) based on its current state s_t, receiving rewards r_t, and transitioning to new states with probability p(s_{t+1} | s_t, a_t)."><img src="./assets/rl-overview.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rl-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: The overall framework of Reinforcement Learning. The agent interacts with the environment by taking action <span class="math inline">\(a_t = \pi(s_t)\)</span> based on its current state <span class="math inline">\(s_t\)</span>, receiving rewards <span class="math inline">\(r_t\)</span>, and transitioning to new states with probability <span class="math inline">\(p(s_{t+1} | s_t, a_t)\)</span>.
-</figcaption>
-</figure>
-</div>
-<p>The goal of reinforcement learning is to find an optimal policy <span class="math inline">\(\pi^*\)</span> that <span class="hilite-green">maximizes the expected cumulative reward (return) over time</span>. Let’s first define the objective function <span class="math inline">\(J(\pi)\)</span> that we want to maximize:</p>
-<p><span id="eq-rl-objective"><span class="math display">\[
-J(\pi) = \mathbb{E}_{\tau \sim \pi} \left[\sum_{t=0}^{T} r_t \right]
-\tag{9}\]</span></span></p>
-<p>where:</p>
-<ul>
-<li><span class="math inline">\(\tau\)</span> represents a trajectory (sequence of states, actions) generated by following policy <span class="math inline">\(\pi\)</span>.</li>
-</ul>
-<p>Let’s expand the trajectory expectation:</p>
-<p><span id="eq-trajectory-probability"><span class="math display">\[
-p(\tau | \pi) = p(s_0) \prod_{t=0}^{T} \pi(a_t | s_t) p(s_{t+1} | s_t, a_t)
-\tag{10}\]</span></span></p>
-<p>Where:</p>
-<ul>
-<li><span class="math inline">\(p(s_0)\)</span> is the <strong>initial state distribution</strong>, which is often given by the environment or can be assumed to be a fixed distribution.</li>
-<li><span class="math inline">\(\pi(a_t | s_t)\)</span> is the <strong>policy’s probability of taking action</strong> <span class="math inline">\(a_t\)</span> in state <span class="math inline">\(s_t\)</span>, this is the part we can control and optimize in policy gradient methods.</li>
-<li><span class="math inline">\(p(s_{t+1} | s_t, a_t)\)</span> is the environment’s <strong>transition probability</strong> from state <span class="math inline">\(s_t\)</span> to <span class="math inline">\(s_{t+1}\)</span> given action <span class="math inline">\(a_t\)</span>. We usually do not have access to this transition probability in model-free RL.</li>
-</ul>
-<p>We know that the policy <span class="math inline">\(\pi_{\theta}\)</span> is parameterized by <span class="math inline">\(\theta\)</span> (e.g., neural network weights). The goal of RL is to optimize the policy parameters <span class="math inline">\(\theta\)</span> to maximize the expected return <span class="math inline">\(J(\pi_{\theta})\)</span>. This is typically done using <strong>gradient-based optimization</strong> methods, where we compute the gradient of the objective function with respect to the policy parameters:</p>
-<p><span id="eq-policy-gradient-general"><span class="math display">\[
-\nabla_{\theta} J(\pi_{\theta}) = \nabla_{\theta} \mathbb{E}_{\tau \sim \pi_{\theta}} \left[\sum_{t=0}^{T} r_t \right]
-\tag{11}\]</span></span></p>
-<p>However, we cannot get the gradient directly because:</p>
-<ol type="1">
-<li>The expectation is over trajectories <span class="math inline">\(\tau\)</span>, which depend on the policy <span class="math inline">\(\pi_{\theta}\)</span>.</li>
-<li>The environment dynamics (transition probabilities) are usually unknown.</li>
-</ol>
-<p>To address this, we can use the <strong>Log-Derivative Trick</strong> (also known as the <strong>Score Function Estimator</strong>) to rewrite the gradient:</p>
-<p><span id="eq-log-derivative-trick"><span class="math display">\[
-\nabla_{\theta} P_{\theta}(x) = P_{\theta}(x) \nabla_{\theta} \log P_{\theta}(x)
-\tag{12}\]</span></span></p>
-<p>Applying <a href="#eq-log-derivative-trick" class="quarto-xref">Equation&nbsp;12</a> to our policy gradient, we have:</p>
-<p><span id="eq-policy-gradient-log-derivative"><span class="math display">\[
-\begin{split}
-\nabla_{\theta} J(\pi_{\theta})
-&amp; = \int \nabla_{\theta} p(\tau | \pi_{\theta}) \sum_{t=0}^{T} r_t d\tau \\
-&amp; = \mathbb{E}_{\tau \sim \pi_{\theta}} \left[ \nabla_{\theta} \log \pi_{\theta}(\tau) \sum_{t=0}^{T} r_t \right]
-\end{split}
-\tag{13}\]</span></span></p>
-<p>Where:</p>
-<ul>
-<li><span class="math inline">\(\log \pi_{\theta}(\tau)\)</span> is the <strong>log-probability</strong> of the trajectory <span class="math inline">\(\tau\)</span> under the policy <span class="math inline">\(\pi_{\theta}\)</span>.</li>
-<li><span class="math inline">\(\sum_{t=0}^{T} r_t\)</span> is the cumulative reward for the trajectory.</li>
-</ul>
-<p>Plugging in the trajectory probability from Equation <a href="#eq-trajectory-probability" class="quarto-xref">Equation&nbsp;10</a>, we can further expand the policy gradient:</p>
-<p><span id="eq-policy-gradient-expanded"><span class="math display">\[
-\nabla_{\theta} J(\pi_{\theta}) = \mathbb{E}_{\tau \sim \pi_{\theta}} \left[ \left( \sum_{t=0}^{T} \nabla_{\theta} \log \pi_{\theta}(a_t | s_t) \right) \left( \sum_{t=0}^{T} r_t \right) \right]
-\tag{14}\]</span></span></p>
-<p>where <span class="math inline">\(\sum_{t=0}^{T} \nabla_{\theta} \log \pi_{\theta}(a_t | s_t)\)</span> is the sum of log-probability gradients of the actions taken along the trajectory, since the transition probabilities <span class="math inline">\(p(s_{t+1} | s_t, a_t)\)</span> do not depend on <span class="math inline">\(\theta\)</span>, they do not contribute to the gradient.</p>
-<p>To get this expectation, we can use Monte Carlo estimation (<a href="#sec-monte-carlo-estimation" class="quarto-xref">Section&nbsp;1.3</a>) by sampling trajectories from the current policy <span class="math inline">\(\pi_{\theta}\)</span> and computing the empirical average:</p>
-<p><span id="eq-policy-gradient-monte-carlo"><span class="math display">\[
-\nabla_{\theta} J(\pi_{\theta}) \approx \frac{1}{N} \sum_{i=1}^{N} \left[ \left( \sum_{t=0}^{T} \textcolor{cyan}{\nabla_{\theta} \log \pi_{\theta}(a_t^{(i)} | s_t^{(i)})} \right) \left( \sum_{t=0}^{T} r_t^{(i)} \right) \right]
-\tag{15}\]</span></span></p>
-<p>WAIT!! This look familiaer? Yes, in the Deep Learning 101. We know the classification loss gradient can be written as: <span id="eq-classification-loss-gradient"><span class="math display">\[
-\begin{split}
-\nabla_{\theta} \mathcal{L}_{\text{classification}} &amp; = - \mathbb{E}_{(x, y) \sim \mathcal{D}} \left[ \nabla_{\theta} \log p_{\theta}(y | x) \right] \\
-&amp; \approx - \frac{1}{N} \sum_{i=1}^{N} \textcolor{cyan}{\nabla_{\theta} \log p_{\theta}(y^{(i)} | x^{(i)})}
-\end{split}
-\tag{16}\]</span></span></p>
-<p>Where <span class="math inline">\(p_{\theta}(y|x)\)</span> is the model’s predicted probability for label <span class="math inline">\(y\)</span> given input <span class="math inline">\(x\)</span>.</p>
-<p>The similarity between Equation (<a href="#eq-policy-gradient-monte-carlo" class="quarto-xref">Equation&nbsp;15</a>) and Equation (<a href="#eq-classification-loss-gradient" class="quarto-xref">Equation&nbsp;16</a>) highlights that both RL policy gradients and supervised learning gradients can be computed using <tag style="color:red">log-probabilities of actions/labels weighted by rewards/losses</tag>. This connection allows us to leverage techniques from supervised learning, such as stochastic gradient descent, in the context of reinforcement learning.</p>
-<p>This form the most foundation of policy gradient methods in RL, the algorithms to optimize the policy parameters <span class="math inline">\(\theta\)</span> by is called <strong>REINFORCE</strong> algorithm.</p>
-<p>However, the basic REINFORCE algorithms suffers from several issues, one of the major issue is the high variance of the gradient estimates, which can lead to unstable and slow learning. To address this, several variance reduction techniques have been developed, such as using baselines (e.g., value functions) to reduce variance without introducing bias.</p>
-<p><span id="eq-policy-gradient-with-baseline"><span class="math display">\[
-\nabla_{\theta} J(\pi_{\theta}) \approx \frac{1}{N} \sum_{i=1}^{N} \left[ \left( \sum_{t=0}^{T} \nabla_{\theta} \log \pi_{\theta}(a_t^{(i)} | s_t^{(i)}) \right) \left( \sum_{t=0}^{T} r_t^{(i)} - b(s_t^{(i)}) \right) \right]
-\tag{17}\]</span></span></p>
-<div class="question foldable">
-<div class="question-header foldable-header">
-<p>Question: Why this is Unbiased?</p>
-</div>
-<div class="question-container foldable-content">
-<p>The baseline <span class="math inline">\(b(s_t)\)</span> does not depend on the action <span class="math inline">\(a_t\)</span>, so it does not introduce bias into the gradient estimate. When we take the expectation over the trajectories, the term involving the baseline cancels out because:</p>
-<p><span class="math display">\[
-\mathbb{E}_{\tau \sim \pi_{\theta}} \left[ \nabla_{\theta} \log \pi_{\theta}(a_t | s_t) b(s_t) \right] = b(s_t) \mathbb{E}_{\tau \sim \pi_{\theta}} \left[ \nabla_{\theta} \log \pi_{\theta}(a_t | s_t) \right] = 0
-\]</span></p>
-</div>
-</div>
-<p>We are safe to subtract any baseline without introducing bias as long as it does not depend on the action <span class="math inline">\(a_t\)</span>. A common choice for the baseline is the value function <span class="math inline">\(V^{\pi}(s_t)\)</span>, which estimates the expected return from state <span class="math inline">\(s_t\)</span> under policy <span class="math inline">\(\pi\)</span>. Using the value function as a baseline helps to reduce variance by centering the rewards around their expected values.</p>
-<p><span id="eq-policy-gradient-with-value-baseline"><span class="math display">\[
-\nabla_{\theta} J(\pi_{\theta}) \approx \frac{1}{N} \sum_{i=1}^{N} \left[ \left( \sum_{t=0}^{T} \nabla_{\theta} \log \pi_{\theta}(a_t^{(i)} | s_t^{(i)}) \right) \left( \sum_{t=0}^{T} r_t^{(i)} - V^{\pi}(s_t^{(i)}) \right) \right]
-\tag{18}\]</span></span></p>
-<p>The other thing to can use to reduce variance is by applying causality, which means that an action at time step <span class="math inline">\(t\)</span> can only affect future rewards, not past rewards. Therefore, we can rewrite the policy gradient to only consider future rewards from time step <span class="math inline">\(t\)</span> onwards:</p>
-<p><span id="eq-policy-gradient-with-causality"><span class="math display">\[
-\nabla_{\theta} J(\pi_{\theta}) \approx \frac{1}{N} \sum_{i=1}^{N} \left[ \sum_{t=0}^{T} \nabla_{\theta} \log \pi_{\theta}(a_t^{(i)} | s_t^{(i)}) \left( \sum_{t'=t}^{T} r_{t'}^{(i)} - V^{\pi}(s_t^{(i)}) \right) \right]
-\tag{19}\]</span></span></p>
-<p>Here, we give <span class="math inline">\(\sum_{t'=t}^{T} r_{t'}\)</span> a special name called reward to go(also known as return) <span class="math inline">\(R_t\)</span>:</p>
-<p><span id="eq-reward-to-go"><span class="math display">\[
-R_t = \sum_{t'=t}^{T} r_{t'}
-\tag{20}\]</span></span></p>
-<p>Take a close look at reward to go <span class="math inline">\(R_t\)</span>, we can see that it is an estimate of expected reward if we take action <span class="math inline">\(a_t\)</span> at state <span class="math inline">\(s_t\)</span> and follow policy <span class="math inline">\(\pi\)</span> thereafter. This is exactly the definition of action-value function <span class="math inline">\(Q^{\pi}(s_t, a_t)\)</span>:</p>
-<p><span id="eq-action-value-function"><span class="math display">\[
-Q^{\pi}(s_t, a_t) = \mathbb{E}_{\tau \sim \pi} \left[ R_t | s_t, a_t \right]
-\tag{21}\]</span></span></p>
-<p>So, we can further rewrite the policy gradient as:</p>
-<p><span id="eq-policy-gradient-with-advantage"><span class="math display">\[
-\nabla_{\theta} J(\pi_{\theta}) \approx \frac{1}{N} \sum_{i=1}^{N} \left[ \sum_{t=0}^{T} \nabla_{\theta} \log \pi_{\theta}(a_t^{(i)} | s_t^{(i)}) \left( Q^{\pi}(s_t^{(i)}, a_t^{(i)}) - V^{\pi}(s_t^{(i)}) \right) \right]
-\tag{22}\]</span></span></p>
-<p>Where the term in the parentheses is known as the advantage function <span class="math inline">\(A^{\pi}(s_t, a_t)\)</span>: <span id="eq-advantage-function"><span class="math display">\[
-A^{\pi}(s_t, a_t) = Q^{\pi}(s_t, a_t) - V^{\pi}(s_t)
-\tag{23}\]</span></span></p>
-<p>And we know the action-value function <span class="math inline">\(Q^{\pi}(s_t, a_t)\)</span> and value function <span class="math inline">\(V^{\pi}(s_t)\)</span> can be estimated using various methods, such as Monte Carlo estimation, Temporal Difference (TD) learning, or function approximation (e.g., neural networks), according to the Ballman equation, the value function and action-value function satisfy the following relationships:</p>
-<p><span id="eq-bellman-value-function"><span class="math display">\[
-V^{\pi}(s_t) = \mathbb{E}_{a_t \sim \pi} \left[ Q^{\pi}(s_t, a_t) \right]
-\tag{24}\]</span></span></p>
-<p>And <span id="eq-bellman-action-value-function"><span class="math display">\[
-Q^{\pi}(s_t, a_t) = \mathbb{E}_{s_{t+1} \sim p} \left[ r_t + \gamma V^{\pi}(s_{t+1}) \right]
-\tag{25}\]</span></span></p>
-<p>So, to train an RL agent using policy gradient methods, we typically follow these steps:</p>
-<ol type="1">
-<li><strong>Collect Trajectories</strong>: Sample trajectories by executing the current policy <span class="math inline">\(\pi_{\theta}\)</span> in the environment.</li>
-<li><strong>Estimate Returns</strong>: Compute the returns <span class="math inline">\(R_t\)</span> for each time step in the collected trajectories.</li>
-<li><strong>Estimate Value Functions</strong>: Estimate the value function <span class="math inline">\(V^{\pi}(s_t)\)</span> and action-value function <span class="math inline">\(Q^{\pi}(s_t, a_t)\)</span> using the collected data.</li>
-<li><strong>Compute Policy Gradient</strong>: Use the estimated value functions to compute the policy gradient using Equation {#eq-policy-gradient-with-advantage}.</li>
-<li><strong>Update Policy Parameters</strong>: Update the policy parameters <span class="math inline">\(\theta\)</span> using gradient ascent: <span class="math display">\[
-\theta \leftarrow \theta + \alpha \nabla_{\theta} J(\pi_{\theta})
-\]</span> Where <span class="math inline">\(\alpha\)</span> is the learning rate.</li>
-</ol>
-<p>This is known as Actor-Critic method, where the policy (actor) is updated using value function estimates (critic) to reduce variance and improve learning stability.</p>
-<section id="on-policy-vs-off-policy" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="on-policy-vs-off-policy"><span class="header-section-number">3.1</span> On Policy vs Off Policy</h2>
-<p>So far, we have discussed policy gradient methods in the context of on-policy learning, where the policy used to collect data (trajectories) is the same as the policy being optimized. However, there are also off-policy methods, where the data is collected using a different policy (behavior policy) than the one being optimized (target policy). The goal of off-policy methods is to leverage data collected from various policies to improve learning efficiency and stability. The main idea behind off-policy learning is to use importance sampling (<a href="#sec-important-sampling" class="quarto-xref">Section&nbsp;1.4</a>) to correct for the distribution mismatch between the behavior policy and the target policy.</p>
-<p>Let’s re-write the policy gradient using importance sampling, what we have is the state action reward pairs collected from the old policy <span class="math inline">\(\pi_{\theta_{old}}\)</span>, but we want to optimize the new policy <span class="math inline">\(\pi_{\theta}\)</span>:</p>
-<p><span id="eq-off-policy-policy-gradient"><span class="math display">\[
-\begin{split}
-\nabla_{\theta} J(\pi_{\theta}) &amp; = \mathbb{E}_{\tau \sim \pi_{\theta}} \left[ \nabla_{\theta} \log \pi_{\theta}(\tau) \sum_{t=0}^{T} r_t \right] \\
-&amp; = \mathbb{E}_{\tau \sim \pi_{\theta_{old}}} \left[ \underbrace{\frac{\pi_{\theta}(\tau)}{\pi_{\theta_{old}}(\tau)}}_{\text{Importance Ratio}} \nabla_{\theta} \log \pi_{\theta}(\tau) \sum_{t=0}^{T} r_t \right]
-\end{split}
-\tag{26}\]</span></span></p>
-<p>Let’s expand the importance ratio: <span id="eq-importance-ratio"><span class="math display">\[
-\frac{\pi_{\theta}(\tau)}{\pi_{\theta_{old}}(\tau)} = \prod_{t=0}^{T} \frac{\pi_{\theta}(a_t | s_t)}{\pi_{\theta_{old}}(a_t | s_t)}
-\tag{27}\]</span></span></p>
-<p>Plugging this back to <a href="#eq-off-policy-policy-gradient" class="quarto-xref">Equation&nbsp;26</a>, we have: <span id="eq-off-policy-policy-gradient-expanded"><span class="math display">\[
-\begin{split}
-\nabla_{\theta} J(\pi_{\theta})
-&amp;= \mathbb{E}_{\tau \sim \pi_{\theta_{old}}} \left[ \left( \prod_{t=0}^{T} \frac{\pi_{\theta}(a_t | s_t)}{\pi_{\theta_{old}}(a_t | s_t)} \right) \left( \nabla_{\theta} \log \pi_{\theta}(\tau) \sum_{t=0}^{T} r_t \right) \right] \\
-&amp; \approx \frac{1}{N} \sum_{i=1}^{N} \left[ \left( \prod_{t=0}^{T} \frac{\pi_{\theta}(a_t^{(i)} | s_t^{(i)})}{\pi_{\theta_{old}}(a_t^{(i)} | s_t^{(i)})} \right) \left( \sum_{t=0}^{T} \nabla_{\theta} \log \pi_{\theta}(a_t^{(i)} | s_t^{(i)}) \right) A^{(i)} \right]
-\end{split}
-\tag{28}\]</span></span></p>
-<p>There are several challenges with off-policy policy gradient methods:</p>
-<div id="algo-reinforce" class="pseudocode-container quarto-float" data-indent-size="1.2em" data-line-number-punc=":" data-pseudocode-number="1" data-no-end="false" data-comment-delimiter="//" data-line-number="true" data-caption-prefix="Algorithm">
-<div class="pseudocode">
-\begin{algorithm} \caption{REINFORCE (Monte Carlo Policy Gradient)} \begin{algorithmic} \Require Policy $\pi_\theta(a \mid s)$ with parameters $\theta$ \Require Learning rate $\alpha$ \While{not converged} \State Sample a trajectory $\tau = (s_0, a_0, r_0, \dots, s_T, a_T, r_T)$ by running $\pi_\theta$ \For{$t = 0$ \textbf{to} $T$} \State $R_t \gets \sum_{t' = t}^{T} r_{t'}$ \Comment{Reward-to-go} \State $\theta \gets \theta + \alpha \, \nabla_\theta \log \pi_\theta(a_t \mid s_t) \, R_t$ \EndFor \EndWhile \end{algorithmic} \end{algorithm}
-</div>
-</div>
-<p>As we can see, this algorithm <a href="#algo-reinforce" class="quarto-xref">Algorithm 1</a> to more</p>
-</section>
-</section>
-<section id="mapping-llm-post-training-as-rl-problems" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> Mapping LLM Post Training as RL Problems</h1>
-<p>In the previous section, we have reviewed the fundamental concepts of reinforcement learning (RL) and policy gradient methods. Now, we will explore how these RL concepts can be applied to large language models (LLMs) in the context of post-training fine-tuning. We will discuss how to formulate the LLM fine-tuning process as an RL problem, including defining states, actions, rewards, and policies. This mapping will provide a foundation for understanding various RL algorithms used in LLMs, such as Reinforcement Learning from Human Feedback (RLHF) and Reinforcement Learning from Verified Rewards (RLVR).</p>
-<section id="state-action-policy-in-llm" class="level2" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="state-action-policy-in-llm"><span class="header-section-number">4.1</span> State, Action, Policy in LLM</h2>
-<p>In the context of large language models (LLMs), we can map the components of reinforcement learning (RL) to the LLM fine-tuning process as follows:</p>
-<ul>
-<li><strong>State (<span class="math inline">\(s_t\)</span>)</strong>: The state at time step <span class="math inline">\(t\)</span> can be defined as the current context or input to the LLM. This includes the text generated so far, any preceding prompts, and potentially other relevant information such as metadata or user preferences. The state encapsulates all the information that the model has access to when generating the next token.</li>
-<li><strong>Action (<span class="math inline">\(a_t\)</span>)</strong>: The action at time step <span class="math inline">\(t\)</span> corresponds to the token or word generated by the LLM. The action space is typically the vocabulary of the language model, and the model selects an action based on its current policy (i.e., the probability distribution over the vocabulary given the current state).</li>
-<li><strong>Policy (<span class="math inline">\(\pi_{\theta}\)</span>)</strong>: The policy in the context of LLMs is represented by the language model itself, parameterized by <span class="math inline">\(\theta\)</span>. The policy defines the probability distribution over actions (tokens) given the current state (context). The policy can be expressed as <span class="math inline">\(\pi_{\theta}(a_t | s_t)\)</span>, which gives the probability of generating token <span class="math inline">\(a_t\)</span> given the context <span class="math inline">\(s_t\)</span>.</li>
-<li><strong>Reward (<span class="math inline">\(r_t\)</span>)</strong>: The reward at time step <span class="math inline">\(t\)</span> is a scalar value that indicates the quality of the generated token in the context of the overall text generation task. Rewards can be derived from various sources, such as human feedback, automated evaluation metrics, or other criteria that reflect the desired behavior of the LLM. The reward signal guides the learning process by providing feedback on the effectiveness of the generated tokens.</li>
-</ul>
-<p>One thing good about LLM is that <tag style="color:blue">the environment dynamics (transition probabilities) are known and deterministic</tag>. Given a state <span class="math inline">\(s_t\)</span> and an action <span class="math inline">\(a_t\)</span>, the next state <span class="math inline">\(s_{t+1}\)</span> is simply the concatenation of the current context with the newly generated token <span class="math inline">\(s_{t + 1} = (s_t, a_t)\)</span>. This simplifies the RL formulation, as we do not need to learn or estimate the environment dynamics.</p>
-<p>Because of this, we can focus on optimizing the policy (the LLM) directly based on the reward signals without worrying about modeling the environment transitions.</p>
-<p>For example, at the begin of training, we have text(prompt) like: “The capital of France is”, this is our initial state <span class="math inline">\(s_0\)</span>.</p>
-<div class="highlight">
-<ul>
-<li><span class="math inline">\(s_0\)</span> = “The capital of France is”</li>
-<li><span class="math inline">\(a_0 \sim \text{softmax}(f_{\theta}(s_0))\)</span> = ” Paris”</li>
-<li><span class="math inline">\(s_1 = (s_0, a_0)\)</span> = “The capital of France is Paris”</li>
-<li><span class="math inline">\(a_1 \sim \text{softmax}(f_{\theta}(s_1))\)</span> = “.”</li>
-<li><span class="math inline">\(s_2 = (s_1, a_1)\)</span> = “The capital of France is Paris.”</li>
-<li>…</li>
-</ul>
-</div>
-<p>This process continues until the model generates a complete response or reaches a predefined stopping criterion, when the <code>&lt;eos&gt;</code> token is generated or the max length is reached. In the end, we got trajectory/episode/rollout <span class="math inline">\(\tau = (s_0, a_0,  s_1, a_1,  ..., s_T, a_T)\)</span>.</p>
-</section>
-<section id="reward-design-challenges-in-llm" class="level2" data-number="4.2">
-<h2 data-number="4.2" class="anchored" data-anchor-id="reward-design-challenges-in-llm"><span class="header-section-number">4.2</span> Reward Design Challenges in LLM</h2>
-<p>In reinforcement learning for large language models (LLMs), the reward function plays a crucial role in guiding the model’s learning process. The reward function defines the objectives and desired behaviors that the LLM should exhibit during text generation. However, designing effective reward functions for LLMs can be challenging:</p>
-<ul>
-<li>Sparse Rewards: In many cases, rewards may only be provided at the end of a generated sequence, making it difficult to attribute credit to individual token (action) generations.</li>
-<li>Ambiguous Objectives: The desired behavior of LLMs can be complex and multifaceted, making it hard to define a single reward function that captures all aspects of quality.</li>
-<li>Human Feedback: When using human feedback as a reward signal, it can be noisy, inconsistent, and expensive to obtain.</li>
-<li>Scalability: As LLMs generate long sequences, computing rewards for every token can be computationally expensive.</li>
-<li>Exploration vs.&nbsp;Exploitation: Balancing the need for exploration (trying new token generations) and exploitation (generating high-reward tokens) is crucial for effective learning.</li>
-</ul>
-<p>In the following sections, we will explore specific RL algorithms that have been applied to LLM fine-tuning, including Reinforcement Learning from Human Feedback (RLHF) and Reinforcement Learning from Verified Rewards (RLVR). We will discuss how these algorithms leverage the RL framework to improve the performance and alignment of LLMs with human preferences</p>
-</section>
-</section>
-<section id="reinforcement-learning-from-human-feedbackrlhf" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> Reinforcement Learning from Human Feedback(RLHF)</h1>
-<p>After Pre-Training and Supervised Fine-Tuning, Large Language Models(LLMs) can generate high-quality text, but they may not always align with human preferences or ethical guidelines. To address this, Reinforcement Learning from Human Feedback (RLHF) has emerged as a powerful technique to fine-tune LLMs using feedback from human evaluators. RLHF leverages reinforcement learning (RL) principles to optimize the LLM’s behavior based on human-provided rewards, guiding the model to generate text that better aligns with human values and expectations. <span class="citation" data-cites="TrainingLanguageModels2022ouyang">(<a href="#ref-TrainingLanguageModels2022ouyang" role="doc-biblioref">Ouyang et al. 2022</a>)</span></p>
-<div id="fig-instruct-gpt-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-instruct-gpt-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/instruct-gpt-overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Overview of the RLHF process used in InstructGPT. The process involves three main steps: (1) collecting human feedback on model-generated outputs, (2) training a reward model to predict human preferences, and (3) fine-tuning the LLM using reinforcement learning to optimize for the learned reward model. (We only focus on the RL part in this blog)"><img src="./assets/instruct-gpt-overview.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-instruct-gpt-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Overview of the RLHF process used in InstructGPT. The process involves three main steps: (1) collecting human feedback on model-generated outputs, (2) training a reward model to predict human preferences, and (3) fine-tuning the LLM using reinforcement learning to optimize for the learned reward model. (We only focus on the RL part in this blog)
-</figcaption>
-</figure>
-</div>
-<p>Before diving into the RLHF algorithms, let’s first take a look at the data collection process for human feedback. The human feedback data is typically collected through the following steps:</p>
-<ol type="1">
-<li><strong>Prompt Generation</strong>: A set of prompts is created to elicit responses from the LLM. These prompts can be designed to cover a wide range of topics and scenarios to ensure diverse feedback.</li>
-<li><strong>Model Response Generation</strong>: The LLM generates responses to the prompts, which are then presented to human evaluators for review.</li>
-<li><strong>Human Evaluation</strong>: Human evaluators assess the generated responses based on various criteria, such as relevance, coherence, informativeness, and alignment with human values. They may provide feedback in the form of ratings, rankings, or qualitative comments.</li>
-<li><strong>Reward Model Training</strong>: The collected human feedback is used to train a reward model that can predict the quality of generated responses based on the human evaluations. This reward model serves as a proxy for human preferences and is used to guide the reinforcement learning process in fine-tuning the LLM.</li>
-<li><strong>Reinforcement Learning Fine-Tuning</strong>: The LLM is fine-tuned using reinforcement learning algorithms, such as Proximal Policy Optimization (PPO), to optimize the policy (the LLM) to maximize the expected reward as predicted by the reward model.</li>
-</ol>
-<p>Here we will focus on the reinforcement learning fine-tuning step, specifically the PPO algorithm, which is commonly used in RLHF for LLMs. Assume we have already collected human feedback and trained a reward model <span class="math inline">\(R_{\phi}(s, a)\)</span>, we can now use PPO to fine-tune the LLM based on the learned reward model.</p>
-<section id="ppo" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="ppo"><span class="header-section-number">5.1</span> PPO</h2>
-<p>Following the foundational work of InstructGPT <span class="citation" data-cites="TrainingLanguageModels2022ouyang">(<a href="#ref-TrainingLanguageModels2022ouyang" role="doc-biblioref">Ouyang et al. 2022</a>)</span>, Proximal Policy Optimization (PPO)<span class="citation" data-cites="ProximalPolicyOptimization2017schulman">(<a href="#ref-ProximalPolicyOptimization2017schulman" role="doc-biblioref">Schulman et al. 2017</a>)</span> has become one of the most widely used algorithms for implementing RLHF in large language models. We can see the PPO algorithm in the <a href="#fig-instruct-gpt-overview" class="quarto-xref">Figure&nbsp;2</a>. It has several steps:</p>
-<ol type="1">
-<li><strong>Collecting Human Feedback</strong>: Initially, the LLM generates responses to a set of prompts. Human evaluators then review these responses and provide feedback, typically in the form of rankings or ratings. This feedback serves as the basis for training a reward model.</li>
-<li><strong>Training a Reward Model</strong>: A separate reward model is trained to predict the human feedback based on the generated responses. This model learns to assign higher scores to responses that align better with human preferences</li>
-<li><strong>Fine-Tuning with PPO</strong>: The LLM is then fine-tuned using the PPO algorithm, which optimizes the policy (the LLM) to maximize the expected reward as predicted by the reward model. PPO uses a clipped objective function to ensure that policy updates are not too large, maintaining stability during training.</li>
-</ol>
-<p>Here we just focus on the step 3, the PPO fine-tuning process. The PPO algorithm can be summarized as follows:</p>
-<div id="algo-ppo" class="pseudocode-container quarto-float" data-indent-size="1.2em" data-line-number-punc=":" data-pseudocode-number="2" data-no-end="false" data-comment-delimiter="#" data-line-number="true" data-caption-prefix="Algorithm">
-<div class="pseudocode">
-\begin{algorithm} \caption{Proximal Policy Optimization (PPO) for RLHF (LLMs)} \begin{algorithmic} \Require Initial policy $\pi_{\theta_{old}}$ with parameters $\theta_{old}$ \Require Reward model $R_{\phi}$ trained on human feedback \Require Reference policy $\pi_{\text{ref}}$ (e.g., SFT model) \Require Value function (critic) $V_{\psi}$ with parameters $\psi$ \Require Clipping parameter $\epsilon$, KL coefficient $\beta$ \Require Discount $\gamma$, GAE parameter $\lambda$ \Require Number of PPO epochs $K$, minibatch size $m$ \Require Learning rates $\alpha_{\theta}, \alpha_{\psi}$ \While{not converged} \State Sample a batch of prompts $\{x_i\}_{i=1}^{B}$ \State Roll out $\pi_{\theta_{old}}$ to get responses $\{y_i\}$ with token actions $\{a_{i,t}\}_{t=1}^{T_i}$ \State Compute old log-probs $\ell^{old}_{i,t} \gets \log \pi_{\theta_{old}}(a_{i,t}\mid x_i, a_{i,&lt;t})$ \State Compute ref log-probs $\ell^{ref}_{i,t} \gets \log \pi_{\text{ref}}(a_{i,t}\mid x_i, a_{i,&lt;t})$ \State Compute sequence reward $r^{RM}_i \gets R_{\phi}(x_i, y_i)$ \Comment{Define per-timestep rewards with KL penalty (token-level) + terminal reward} \For{$i = 1$ \textbf{to} $B$} \For{$t = 1$ \textbf{to} $T_i$} \State $\text{kl}_{i,t} \gets \ell^{old}_{i,t} - \ell^{ref}_{i,t}$ \State $r_{i,t} \gets -\beta \cdot \text{kl}_{i,t}$ \EndFor \State $r_{i,T_i} \gets r_{i,T_i} + r^{RM}_i$ \Comment{terminal reward added at last token} \EndFor \For{$i = 1$ \textbf{to} $B$} \Comment{Compute advantages via GAE using critic $V_{\psi}$} \State $A_{i,T_i+1} \gets 0$ \For{$t = T_i$ \textbf{down to} $1$} \State $\delta_{i,t} \gets r_{i,t} + \gamma V_{\psi}(s_{i,t+1}) - V_{\psi}(s_{i,t})$ \State $A_{i,t} \gets \delta_{i,t} + \gamma \lambda A_{i,t+1}$ \State $\hat{R}_{i,t} \gets A_{i,t} + V_{\psi}(s_{i,t})$ \Comment{return/target} \EndFor \EndFor \For{$epoch = 1$ \textbf{to} $K$} \Comment{Optimize policy and value for $K$ epochs over minibatches} \State Shuffle all token positions $(i,t)$ and split into minibatches of size $m$ \For{\textbf{each} minibatch $\mathcal{M}$} \State $\ell_{i,t} \gets \log \pi_{\theta}(a_{i,t}\mid s_{i,t}) \quad \forall (i,t)\in\mathcal{M}$ \State $\rho_{i,t} \gets \exp(\ell_{i,t} - \ell^{old}_{i,t})$ \State $\tilde{\rho}_{i,t} \gets \text{clip}(\rho_{i,t}, 1-\epsilon, 1+\epsilon)$ \State $L^{\text{clip}}(\theta) \gets -\mathbb{E}_{(i,t)\in\mathcal{M}}\left[\min(\rho_{i,t}A_{i,t}, \tilde{\rho}_{i,t}A_{i,t})\right]$ \State $L^{V}(\psi) \gets \mathbb{E}_{(i,t)\in\mathcal{M}}\left[(V_{\psi}(s_{i,t}) - \hat{R}_{i,t})^2\right]$ \State $\theta \gets \theta - \alpha_{\theta}\nabla_{\theta} L^{\text{clip}}(\theta)$ \State $\psi \gets \psi - \alpha_{\psi}\nabla_{\psi} L^{V}(\psi)$ \EndFor \EndFor \State $\theta_{old} \gets \theta$ \Comment{sync old policy for next rollout} \EndWhile \end{algorithmic} \end{algorithm}
-</div>
-</div>
-<p>Let’s break down the PPO algorithm for RLHF in LLMs: 1. <strong>Initialization</strong>: We start with an initial policy <span class="math inline">\(\pi_{\theta_{old}}\)</span>, which can be a pre-trained language model or a supervised fine-tuned model. We also have a reward model <span class="math inline">\(R_{\phi}\)</span> trained on human feedback, a reference policy <span class="math inline">\(\pi_{\text{ref}}\)</span> (often the same as the initial policy), and a value function (critic) <span class="math inline">\(V_{\psi}\)</span>. We set the clipping parameter <span class="math inline">\(\epsilon\)</span>, KL coefficient <span class="math inline">\(\beta\)</span>, discount factor <span class="math inline">\(\gamma\)</span>, GAE parameter <span class="math inline">\(\lambda\)</span>, number of PPO epochs <span class="math inline">\(K\)</span>, minibatch size <span class="math inline">\(m\)</span>, and learning rates for policy and value updates. 2. <strong>Data Collection</strong>: We sample a batch of prompts and roll out the current policy <span class="math inline">\(\pi_{\theta_{old}}\)</span> to generate responses. We compute the log-probabilities of the generated tokens under both the old policy and the reference policy, as well as the sequence-level reward from the reward model. 3. <strong>Reward Definition</strong>: We define per-timestep rewards that include a KL penalty based on the difference between the old policy and the reference policy, as well as a terminal reward from the reward model at the last token. 4. <strong>Advantage Estimation</strong>: We compute the advantages using Generalized Advantage Estimation (GAE) with the value function <span class="math inline">\(V_{\psi}\)</span>. 5. <strong>Policy and Value Optimization</strong>: We perform multiple epochs of optimization over shuffled minibatches. For each minibatch, we compute the PPO clipped objective for the policy and the value loss for the critic, and update the parameters accordingly. 6. <strong>Policy Synchronization</strong>: After the updates, we sync the old policy parameters with the new policy for the next rollout.</p>
-<p>To apply this in code:</p>
-</section>
-<section id="dpo" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="dpo"><span class="header-section-number">5.2</span> DPO</h2>
-<p>Direct Preference Optimization (DPO) <span class="citation" data-cites="DirectPreferenceOptimization2024rafailov">(<a href="#ref-DirectPreferenceOptimization2024rafailov" role="doc-biblioref">Rafailov et al. 2024</a>)</span> is a novel approach for fine-tuning large language models using human feedback without the need for a separate reward model.</p>
-<div id="fig-dpo-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-dpo-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/DPO-overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: Overview of the Direct Preference Optimization (DPO) process. DPO directly optimizes the policy using human preference data by adjusting the model’s logits based on the preference between pairs of responses, eliminating the need for a separate reward model."><img src="./assets/DPO-overview.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dpo-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Overview of the Direct Preference Optimization (DPO) process. DPO directly optimizes the policy using human preference data by adjusting the model’s logits based on the preference between pairs of responses, eliminating the need for a separate reward model.
-</figcaption>
-</figure>
-</div>
-</section>
-<section id="reinforce-leave-one-out-rloo" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="reinforce-leave-one-out-rloo"><span class="header-section-number">5.3</span> REINFORCE Leave One-Out (RLOO)</h2>
-<p>Rein</p>
-</section>
-<section id="remax" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="remax"><span class="header-section-number">5.4</span> ReMax</h2>
-</section>
-<section id="reinforce" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="reinforce"><span class="header-section-number">5.5</span> REINFORCE++</h2>
-</section>
-</section>
-<section id="reinforcement-learning-from-verified-rewardsrlvr" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Reinforcement Learning from Verified Rewards(RLVR)</h1>
-<section id="grpo" class="level2" data-number="6.1">
-<h2 data-number="6.1" class="anchored" data-anchor-id="grpo"><span class="header-section-number">6.1</span> GRPO</h2>
-<section id="objective-function" class="level3" data-number="6.1.1">
-<h3 data-number="6.1.1" class="anchored" data-anchor-id="objective-function"><span class="header-section-number">6.1.1</span> Objective Function</h3>
-<p>The objective function of GRPO is defined as:</p>
-<p><span id="eq-grpo-objective-expectation"><span class="math display">\[
-\begin{split}
-\mathcal{J}_{\text{GRPO}}(\pi_\theta)
-&amp;=
-\mathbb{E}_{q \sim \mathcal{D}}
-\;\mathbb{E}_{o \sim \pi_{\theta_{\text{old}}}(\cdot\mid q)}
-\left[
-\sum_{t=1}^{|o|}
-\min \Big(
-\rho_t \hat{A}_{t},
-\text{clip}\big( \rho_t, 1 - \epsilon_{\text{clip}}, 1 + \epsilon_{\text{clip}} \big)\hat{A}_{t}
-\Big)
-\;-\;\beta \,\text{KL}\big(\pi_\theta \,\|\, \pi_{\text{ref}}\big)
-\right] \\
-&amp;\approx
-\frac{1}{B}\sum_{b=1}^{B}
-\left[
-\frac{1}{G}\sum_{i=1}^{G}
-\frac{1}{|o_{b,i}|}\sum_{t=1}^{|o_{b,i}|}
-\min \Big(
-\rho_{b,i,t} \hat{A}_{b,i,t},
-\text{clip}\big( \rho_{b,i,t}, 1 - \epsilon_{\text{clip}}, 1 + \epsilon_{\text{clip}} \big)\hat{A}_{b,i,t}
-\Big)
-\;-\;\beta \,\text{KL}\big(\pi_\theta \,\|\, \pi_{\text{ref}}\big)
-\right]
-\end{split}
-\tag{29}\]</span></span></p>
-<p>Where:</p>
-<p><span id="eq-grpo"><span class="math display">\[
-\mathcal{J}_{\text{GRPO}}(\pi_\theta) =
-\tag{30}\]</span></span></p>
-<p>其中：</p>
-<p><span id="eq-importance-ratio"><span class="math display">\[
-\rho(o_{i,t}) = \frac{\pi_\theta(o_{i,t}|q, o_{i,&lt;t})}{\pi_{\text{ref}}(o_{i,t}|q, o_{i,&lt;t})}
-\tag{31}\]</span></span></p>
-</section>
-</section>
-<section id="dr.grpo" class="level2" data-number="6.2">
-<h2 data-number="6.2" class="anchored" data-anchor-id="dr.grpo"><span class="header-section-number">6.2</span> Dr.GRPO</h2>
-</section>
-<section id="dapo" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="dapo"><span class="header-section-number">6.3</span> DAPO</h2>
-</section>
-<section id="gspo" class="level2" data-number="6.4">
-<h2 data-number="6.4" class="anchored" data-anchor-id="gspo"><span class="header-section-number">6.4</span> GSPO</h2>
-</section>
-<section id="cispo" class="level2" data-number="6.5">
-<h2 data-number="6.5" class="anchored" data-anchor-id="cispo"><span class="header-section-number">6.5</span> CISPO</h2>
-</section>
-<section id="sapo" class="level2" data-number="6.6">
-<h2 data-number="6.6" class="anchored" data-anchor-id="sapo"><span class="header-section-number">6.6</span> SAPO</h2>
-</section>
-<section id="gdpo" class="level2" data-number="6.7">
-<h2 data-number="6.7" class="anchored" data-anchor-id="gdpo"><span class="header-section-number">6.7</span> GDPO</h2>
-</section>
-</section>
-<section id="llm-rl-in-practice" class="level1" data-number="7">
-<h1 data-number="7"><span class="header-section-number">7</span> LLM-RL in Practice</h1>
-<section id="trl-transformer-reinforcement-learning" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="trl-transformer-reinforcement-learning"><span class="header-section-number">7.1</span> TRL: Transformer Reinforcement Learning</h2>
-<p><a href="https://github.com/huggingface/trl">Link</a></p>
-</section>
-<section id="verl-volcano-engine-reinforcement-learning-for-llms" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="verl-volcano-engine-reinforcement-learning-for-llms"><span class="header-section-number">7.2</span> verl: Volcano Engine Reinforcement Learning for LLMs</h2>
-<p><a href="https://github.com/volcengine/verl">Link</a></p>
-</section>
-<section id="openrlhf" class="level2" data-number="7.3">
-<h2 data-number="7.3" class="anchored" data-anchor-id="openrlhf"><span class="header-section-number">7.3</span> OpenRLHF</h2>
-<p><a href="https://github.com/OpenRLHF/OpenRLHF">Link</a></p>
-</section>
-<section id="swift-scalable-lightweight-infrastructure-for-fine-tuning" class="level2" data-number="7.4">
-<h2 data-number="7.4" class="anchored" data-anchor-id="swift-scalable-lightweight-infrastructure-for-fine-tuning"><span class="header-section-number">7.4</span> SWIFT (Scalable lightWeight Infrastructure for Fine-Tuning)</h2>
-<p><a href="https://github.com/modelscope/ms-swift">Link</a></p>
-<p>This is the test of <a href="#codeblock-attn" class="quarto-xref">Code-Block&nbsp;1</a></p>
-</section>
-</section>
-<section id="multi-turn-rl-in-llms" class="level1" data-number="8">
-<h1 data-number="8"><span class="header-section-number">8</span> Multi-Turn RL in LLMs</h1>
-<p>So far, we have discussed RL algorithms for fine-tuning LLMs in a single-turn setting, where the model generates a response based on a given prompt. However, in many real-world applications, LLMs are used in multi-turn interactions, such as chatbots or dialogue systems, where the model needs to generate responses over multiple turns of conversation. This means we have <span class="math inline">\(\text{history}_t, s_t, \text{think}_t, a_t\)</span> at each time step <span class="math inline">\(t\)</span>, where <span class="math inline">\(\text{history}_t\)</span> is the conversation history up to time <span class="math inline">\(t\)</span>, defined as <span class="math inline">\(\text{history}_t = s_0, \text{think}_0, a_0, s_1, \text{think}_1, a_1, ..., s_{t-1}, \text{think}_{t-1}, a_{t-1}, s_t\)</span>. The model needs to generate a response <span class="math inline">\(a_t\)</span> based on the current state <span class="math inline">\(s_t\)</span> and the conversation history <span class="math inline">\(\text{history}_t\)</span>.</p>
-</section>
-<section id="challenges-further-direction" class="level1" data-number="9">
-<h1 data-number="9"><span class="header-section-number">9</span> Challenges &amp; Further Direction</h1>
-</section>
-<section id="summary" class="level1" data-number="10">
-<h1 data-number="10"><span class="header-section-number">10</span> Summary</h1>
-</section>
-<section id="appendix" class="level1" data-number="11">
-<h1 data-number="11"><span class="header-section-number">11</span> Appendix</h1>
-<section id="code-snippets" class="level2" data-number="11.1">
-<h2 data-number="11.1" class="anchored" data-anchor-id="code-snippets"><span class="header-section-number">11.1</span> Code Snippets</h2>
-<p>In this section, we provide some code snippets to illustrate the implementation of key components in reinforcement learning for large language models (LLMs). These snippets are meant to serve as examples and may not be complete or directly runnable without additional context and dependencies.</p>
-<div id="codeblock-attn" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-codeblock figure">
-<div aria-describedby="codeblock-attn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="sourceCode" id="cb2" data-code-line-numbers=""><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">def</span> get_log_probs(model, inputs, actions):</span>
-<span id="cb2-2"><a href="#cb2-2"></a>    <span class="co">"""</span></span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="co">    Compute log-probabilities of the actions given the inputs using the model.</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a><span class="co">    </span></span>
-<span id="cb2-5"><a href="#cb2-5"></a><span class="co">    Args:</span></span>
-<span id="cb2-6"><a href="#cb2-6"></a><span class="co">        model: The language model (e.g., a transformer) that outputs logits.</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a><span class="co">        inputs: The input sequences (contexts) for which to compute log-probs.</span></span>
-<span id="cb2-8"><a href="#cb2-8"></a><span class="co">        actions: The token actions for which to compute log-probs.</span></span>
-<span id="cb2-9"><a href="#cb2-9"></a><span class="co">    </span></span>
-<span id="cb2-10"><a href="#cb2-10"></a><span class="co">    Returns:</span></span>
-<span id="cb2-11"><a href="#cb2-11"></a><span class="co">        log_probs: A tensor of log-probabilities corresponding to the actions.</span></span>
-<span id="cb2-12"><a href="#cb2-12"></a><span class="co">    """</span></span>
-<span id="cb2-13"><a href="#cb2-13"></a>    <span class="co"># Get logits from the model</span></span>
-<span id="cb2-14"><a href="#cb2-14"></a>    logits <span class="op">=</span> model(inputs)  <span class="co"># Shape: [batch_size, seq_len, vocab_size]</span></span>
-<span id="cb2-15"><a href="#cb2-15"></a></span>
-<span id="cb2-16"><a href="#cb2-16"></a>    log_probs <span class="op">=</span> torch.log_softmax(logits, dim<span class="op">=-</span><span class="dv">1</span>)  <span class="co"># Convert logits to log-probabilities</span></span>
-<span id="cb2-17"><a href="#cb2-17"></a>    </span>
-<span id="cb2-18"><a href="#cb2-18"></a>    <span class="co"># Gather log-probs for the taken actions</span></span>
-<span id="cb2-19"><a href="#cb2-19"></a>    log_probs <span class="op">=</span> log_probs.gather(dim<span class="op">=-</span><span class="dv">1</span>, index<span class="op">=</span>actions.unsqueeze(<span class="op">-</span><span class="dv">1</span>)).squeeze(<span class="op">-</span><span class="dv">1</span>)  <span class="co"># Shape: [batch_size, seq_len]</span></span>
-<span id="cb2-20"><a href="#cb2-20"></a>    </span>
-<span id="cb2-21"><a href="#cb2-21"></a>    <span class="cf">return</span> log_probs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-codeblock quarto-uncaptioned" id="codeblock-attn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Code-Block&nbsp;1
-</figcaption>
-</figure>
-</div>
+
+<!-- Content: edit here -- RL in LLM blog post -->
 
 
 
-</section>
-</section>
-
-<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-DeepSeekR1IncentivizingReasoning2025deepseek-ai" class="csl-entry" role="listitem">
-DeepSeek-AI, Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Peiyi Wang, Qihao Zhu, et al. 2025. <span>“<span>DeepSeek-R1</span>: <span>Incentivizing Reasoning Capability</span> in <span>LLMs</span> via <span>Reinforcement Learning</span>.”</span> <em>Nature</em> 645 (8081): 633–38. <a href="https://doi.org/10.1038/s41586-025-09422-z">https://doi.org/10.1038/s41586-025-09422-z</a>.
-</div>
-<div id="ref-SoftAdaptivePolicy2025gao" class="csl-entry" role="listitem">
-Gao, Chang, Chujie Zheng, Xiong-Hui Chen, Kai Dang, Shixuan Liu, Bowen Yu, An Yang, Shuai Bai, Jingren Zhou, and Junyang Lin. 2025. <span>“Soft <span>Adaptive Policy Optimization</span>.”</span> December 1, 2025. <a href="https://doi.org/10.48550/arXiv.2511.20347">https://doi.org/10.48550/arXiv.2511.20347</a>.
-</div>
-<div id="ref-GDPOGroupRewardDecoupled2026liu" class="csl-entry" role="listitem">
-Liu, Shih-Yang, Xin Dong, Ximing Lu, Shizhe Diao, Peter Belcak, Mingjie Liu, Min-Hung Chen, et al. 2026. <span>“<span>GDPO</span>: <span>Group</span> Reward-<span>Decoupled Normalization Policy Optimization</span> for <span class="nocase">Multi-reward RL Optimization</span>.”</span> January 8, 2026. <a href="https://doi.org/10.48550/arXiv.2601.05242">https://doi.org/10.48550/arXiv.2601.05242</a>.
-</div>
-<div id="ref-TrainingLanguageModels2022ouyang" class="csl-entry" role="listitem">
-Ouyang, Long, Jeff Wu, Xu Jiang, Diogo Almeida, Carroll L. Wainwright, Pamela Mishkin, Chong Zhang, et al. 2022. <span>“Training Language Models to Follow Instructions with Human Feedback.”</span> March 4, 2022. <a href="https://doi.org/10.48550/arXiv.2203.02155">https://doi.org/10.48550/arXiv.2203.02155</a>.
-</div>
-<div id="ref-DirectPreferenceOptimization2024rafailov" class="csl-entry" role="listitem">
-Rafailov, Rafael, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher D. Manning, and Chelsea Finn. 2024. <span>“Direct <span>Preference Optimization</span>: <span>Your Language Model</span> Is <span>Secretly</span> a <span>Reward Model</span>.”</span> July 29, 2024. <a href="https://doi.org/10.48550/arXiv.2305.18290">https://doi.org/10.48550/arXiv.2305.18290</a>.
-</div>
-<div id="ref-ProximalPolicyOptimization2017schulman" class="csl-entry" role="listitem">
-Schulman, John, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. 2017. <span>“Proximal <span>Policy Optimization Algorithms</span>.”</span> August 28, 2017. <a href="https://doi.org/10.48550/arXiv.1707.06347">https://doi.org/10.48550/arXiv.1707.06347</a>.
-</div>
-<div id="ref-DeepSeekMathPushingLimits2024shao" class="csl-entry" role="listitem">
-Shao, Zhihong, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei Zhang, et al. 2024. <span>“<span>DeepSeekMath</span>: <span>Pushing</span> the <span>Limits</span> of <span>Mathematical Reasoning</span> in <span>Open Language Models</span>.”</span> April 27, 2024. <a href="https://doi.org/10.48550/arXiv.2402.03300">https://doi.org/10.48550/arXiv.2402.03300</a>.
-</div>
-<div id="ref-DAPOOpenSourceLLM2025yu" class="csl-entry" role="listitem">
-Yu, Qiying, Zheng Zhang, Ruofei Zhu, Yufeng Yuan, Xiaochen Zuo, Yu Yue, Weinan Dai, et al. 2025. <span>“<span>DAPO</span>: <span>An Open-Source LLM Reinforcement Learning System</span> at <span>Scale</span>.”</span> May 20, 2025. <a href="https://doi.org/10.48550/arXiv.2503.14476">https://doi.org/10.48550/arXiv.2503.14476</a>.
-</div>
-<div id="ref-GroupSequencePolicy2025zheng" class="csl-entry" role="listitem">
-Zheng, Chujie, Shixuan Liu, Mingze Li, Xiong-Hui Chen, Bowen Yu, Chang Gao, Kai Dang, et al. 2025. <span>“Group <span>Sequence Policy Optimization</span>.”</span> July 28, 2025. <a href="https://doi.org/10.48550/arXiv.2507.18071">https://doi.org/10.48550/arXiv.2507.18071</a>.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -1338,13 +432,14 @@ Zheng, Chujie, Shixuan Liu, Mingze Li, Xiong-Hui Chen, Bowen Yu, Chang Gao, Kai 
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -1359,7 +454,7 @@ Zheng, Chujie, Shixuan Liu, Mingze Li, Xiong-Hui Chen, Bowen Yu, Chang Gao, Kai 
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/qsdong-bupt\.github\.io");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -1373,11 +468,6 @@ Zheng, Chujie, Shixuan Liu, Mingze Li, Xiong-Hui Chen, Bowen Yu, Chang Gao, Kai 
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -1691,119 +781,39 @@ Zheng, Chujie, Shixuan Liu, Mingze Li, Xiong-Hui Chen, Bowen Yu, Chang Gao, Kai 
     }
   });
   </script>
-<input type="hidden" id="giscus-base-theme" value="light">
-<input type="hidden" id="giscus-alt-theme" value="dark_dimmed">
-<script>
-  function loadGiscus() {
-    // Function to get the theme based on body class
-    const getTheme = () => {
-      let baseTheme = document.getElementById('giscus-base-theme').value;
-      let altTheme = document.getElementById('giscus-alt-theme').value;
-      if (authorPrefersDark) {
-          [baseTheme, altTheme] = [altTheme, baseTheme];
-      }
-      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
-    };
-    const script = document.createElement("script");
-    script.src = "https://giscus.app/client.js";
-    script.async = true;
-    script.dataset.repo = "YYZhang2025/YYZhang2025.github.io";
-    script.dataset.repoId = "R_kgDOQlDTcQ";
-    script.dataset.category = "General";
-    script.dataset.categoryId = "DIC_kwDOQlDTcc4C2MRz";
-    script.dataset.mapping = "title";
-    script.dataset.reactionsEnabled = "1";
-    script.dataset.emitMetadata = "0";
-    script.dataset.inputPosition = "top";
-    script.dataset.theme = getTheme();
-    script.dataset.lang = "en";
-    script.crossOrigin = "anonymous";
-    // Append the script to the desired div instead of at the end of the body
-    document.getElementById("quarto-content").appendChild(script);
-  }
-  loadGiscus();
-</script>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© CC-By Yuyang, 2025</p>
-</div>   
+      &nbsp;
+    </div>   
     <div class="nav-footer-center">
+<p>© 2025 Yuyang Zhang. Built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+    <div class="nav-footer-right">
       &nbsp;
     </div>
-    <div class="nav-footer-right">
-<p>This page is built with ❤️ and <a href="https://quarto.org/">Quarto</a>.</p>
-</div>
   </div>
 </footer>
-    <script type="text/javascript">
-    (function(d) {
-      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
-        let pseudocodeOptions = {
-          indentSize: el.dataset.indentSize,
-          commentDelimiter: el.dataset.commentDelimiter,
-          lineNumber: el.dataset.lineNumber.toLowerCase() === "true",
-          lineNumberPunc: el.dataset.lineNumberPunc,
-          noEnd: el.dataset.noEnd.toLowerCase() === "true",
-          titlePrefix: el.dataset.captionPrefix
-        };
-        pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
-      });
-    })(document);
-    (function(d) {
-      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
-        let captionSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
-        if (captionSpan !== null) {
-          let captionPrefix = el.dataset.captionPrefix + " ";
-          let captionNumber = "";
-          if (el.dataset.pseudocodeNumber) {
-            captionNumber = el.dataset.pseudocodeNumber + " ";
-            if (el.dataset.chapterLevel) {
-              captionNumber = el.dataset.chapterLevel + "." + captionNumber;
-            }
-          }
-          captionSpan.innerHTML = captionPrefix + captionNumber;
-        }
-      });
-    })(document);
-    </script>
-  
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
-(function() {
-  let previousOnload = window.onload;
-  window.onload = () => {
-    if (previousOnload) {
-      previousOnload();
-    }
-    lightboxQuarto.on('slide_before_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      const href = trigger.getAttribute('href');
-      if (href !== null) {
-        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
-        if (imgEl !== null) {
-          const srcAttr = imgEl.getAttribute("src");
-          if (srcAttr && srcAttr.startsWith("data:")) {
-            slideConfig.href = srcAttr;
-          }
-        }
-      } 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) block.classList.toggle("is-open");
     });
-  
-    lightboxQuarto.on('slide_after_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(slideNode);
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
       }
     });
-  
-  };
-  
-})();
-          </script>
+  });
+});
+</script>
 
 
 
 
-<script src="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
 </body></html>

@@ -11,7 +11,7 @@
 <meta name="keywords" content="LLM, Pre-Training, Scaling Laws, SFT, GRPO, Mixed Precision Training, ZeRO-2">
 <meta name="description" content="Built an end-to-end LLM stack from scratch, covering scaling law experiments, compute-optimal model sizing, pre-training, supervised fine-tuning, and GRPO-based post-training. Trained a ChatGPT-style conversational model and deployed an interactive demo to showcase instruction following, reasoning, and multi-turn generation.">
 
-<title>ChatLLM: From-Scratch LLM Training and Post-Training Stack – About YUYANG</title>
+<title>ChatLLM: From-Scratch LLM Training and Post-Training Stack</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -49,9 +49,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../../site_libs/bootstrap/bootstrap-e4fce400aae830c5c5e1cfbfd10025f2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/bootstrap/bootstrap-dark-b9c890956cf5b2016d3d3d5ae12cc304.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../../site_libs/bootstrap/bootstrap-e4fce400aae830c5c5e1cfbfd10025f2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-0b09eb4da84538f8c2fd112b9812168b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -103,12 +103,11 @@ gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
 </script>
 
 
-<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/cmu-sans-serif">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<meta property="og:title" content="ChatLLM: From-Scratch LLM Training and Post-Training Stack – About YUYANG">
+<meta property="og:title" content="ChatLLM: From-Scratch LLM Training and Post-Training Stack">
 <meta property="og:description" content="Built an end-to-end LLM stack from scratch, covering scaling law experiments, compute-optimal model sizing, pre-training, supervised fine-tuning, and GRPO-based post-training. Trained a ChatGPT-style conversational model and deployed an interactive demo to showcase instruction following, reasoning, and multi-turn generation.">
 <meta property="og:image" content="https://qsdong-bupt.github.io/posts/Projects/Micro-LLM/assets/cover.gif">
-<meta property="og:site_name" content="About YUYANG">
 </head>
 
 <body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -279,11 +278,6 @@ gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../../../index.html">
-    <span class="navbar-title">About YUYANG</span>
-    </a>
-  </div>
             <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
@@ -314,21 +308,6 @@ gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
     <a class="nav-link" href="../../../posts/Projects/projects_index.html"> 
 <span class="menu-text">Projects</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="https://yyzhang2025.github.io/100-AI-Papers-with-Code/"> 
-<span class="menu-text">100-PwC</span></a>
-  </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-learning-notes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Learning Notes</span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-learning-notes">    
-        <li>
-    <a class="dropdown-item" href="../../../posts/LearningNotes/CS336/index.html">
- <span class="dropdown-text">Stanford CS336 LLM From Scratch</span></a>
-  </li>  
-    </ul>
-  </li>
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">

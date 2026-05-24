@@ -2,16 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Yuyang Zhang">
+<meta name="author" content="Qingsen Zhang">
 <meta name="dcterms.date" content="2026-03-20">
-<meta name="description" content="在这篇文章中，我们将深入探讨不同的LLM的模型架构。随着LLM的不断发展，模型的架构也在不断的演变，我们将从最初的Transformer架构展开，逐步的介绍不同Component的演变和改进。在最后，我们还会介绍除了Transformer架构之外的其他架构，比如Mamba, RetNet等。最后我们还会介绍不同的Optimizer，Loss Functions: Cross-Entropy Loss，Diffusion Loss等，以及Regularization techniques在LLM训练中的应用。">
+<meta name="description" content="Detailed exploration of LLM architectures from Transformer to Mamba, RetNet, and beyond, covering attention mechanisms, MoE, and the complete training pipeline.">
 
 <title>LLM Series Part1: Architecture and Training Stages</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -23,62 +26,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -88,27 +36,21 @@ div.csl-indent {
 <script src="../../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../../">
-<link href="../../.././style/icon.avif" rel="icon">
+<link href="../../../style/icon.avif" rel="icon">
 <script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/bootstrap/bootstrap-dark-44402bf054b1fe078bc4e7aebe64bce9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
-<script src="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.js"></script>
-<link href="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.css" rel="stylesheet">
-<script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
-<link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-0b09eb4da84538f8c2fd112b9812168b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -145,100 +87,31 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
 </script>
-<link href="https://fonts.cdnfonts.com/css/cmu-sans-serif" rel="stylesheet">
+<script>
+  MathJax = {
+    loader: { load: ['[tex]/boldsymbol'] },
+    tex: {
+      tags: "all",
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      packages: { '[+]': ['boldsymbol'] }
+    }
+  };
+</script>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<script>
-    MathJax = {
-        loader: {
-        load: ['[tex]/boldsymbol']
-        },
-        tex: {
-        tags: "all",
-        inlineMath: [['$','$'], ['\\(','\\)']],
-        displayMath: [['$$','$$'], ['\\[','\\]']],
-        processEscapes: true,
-        processEnvironments: true,
-        packages: {
-            '[+]': ['boldsymbol']
-        }
-        }
-    };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".foldable-header").forEach(header => {
-    header.addEventListener("click", () => {
-      const block = header.closest(".foldable");
-      if (block) {
-        block.classList.toggle("is-open");
-      }
-    });
-
-    // 可访问性（键盘）
-    header.setAttribute("tabindex", "0");
-    header.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        header.click();
-      }
-    });
-  });
-});
-</script>
-    <style type="text/css">
-    .ps-root .ps-algorithm {
-      border-top: 2px solid;
-      border-bottom: 2px solid;
-    }
-    .pseudocode-container {
-      text-align: left;
-    }
-    </style>
-  
-      <style type="text/css">
-      .ps-algorithm > .ps-line {
-        text-align: left;
-      }
-      </style>
-    
-
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
 <meta property="og:title" content="LLM Series Part1: Architecture and Training Stages">
-<meta property="og:description" content="在这篇文章中，我们将深入探讨不同的LLM的模型架构。随着LLM的不断发展，模型的架构也在不断的演变，我们将从最初的Transformer架构展开，逐步的介绍不同Component的演变和改进。在最后，我们还会介绍除了Transformer架构之外的其他架构，比如Mamba, RetNet等。最后我们还会介绍不同的Optimizer，Loss Functions: Cross-Entropy Loss，Diffusion Loss等，以及Regularization techniques在LLM训练中的应用。">
-<meta property="og:image" content="./assets/LLM-Architecture-Gallery.png">
+<meta property="og:description" content="Detailed exploration of LLM architectures from Transformer to Mamba, RetNet, and beyond, covering attention mechanisms, MoE, and the complete training pipeline.">
+<meta property="og:image" content="https://qsdong-bupt.github.io/posts/Blogs/LLM-Architecture/assets/LLM-Architecture-Gallery.png">
+<meta property="og:image:height" content="2808">
+<meta property="og:image:width" content="3276">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -436,139 +309,52 @@ window.Quarto = {
     <a class="nav-link" href="../../../posts/Projects/projects_index.html"> 
 <span class="menu-text">Projects</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="https://yyzhang2025.github.io/LearningNotes/"> 
-<span class="menu-text">100 PwC</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../../posts/CS336/index.html"> 
-<span class="menu-text">Stanford CS336</span></a>
-  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
+    <a href="" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-toggle-dark-mode"></i></a>
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">LLM Series Part1: Architecture and Training Stages</h1>
-        </a>     
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
-  <li><a href="#review-of-transformer-architecture" id="toc-review-of-transformer-architecture" class="nav-link" data-scroll-target="#review-of-transformer-architecture"><span class="header-section-number">2</span> Review of Transformer Architecture</a></li>
-  <li><a href="#word-embedding-layer" id="toc-word-embedding-layer" class="nav-link" data-scroll-target="#word-embedding-layer"><span class="header-section-number">3</span> Word Embedding Layer</a></li>
-  <li><a href="#position-encoding" id="toc-position-encoding" class="nav-link" data-scroll-target="#position-encoding"><span class="header-section-number">4</span> Position Encoding</a>
-  <ul>
-  <li><a href="#absolute-position-encoding" id="toc-absolute-position-encoding" class="nav-link" data-scroll-target="#absolute-position-encoding"><span class="header-section-number">4.1</span> Absolute Position Encoding</a></li>
-  <li><a href="#learnable-position-encoding" id="toc-learnable-position-encoding" class="nav-link" data-scroll-target="#learnable-position-encoding"><span class="header-section-number">4.2</span> Learnable Position Encoding</a></li>
-  <li><a href="#relative-position-encoding" id="toc-relative-position-encoding" class="nav-link" data-scroll-target="#relative-position-encoding"><span class="header-section-number">4.3</span> Relative Position Encoding</a></li>
-  <li><a href="#rope" id="toc-rope" class="nav-link" data-scroll-target="#rope"><span class="header-section-number">4.4</span> RoPE</a></li>
-  <li><a href="#position-interpolation" id="toc-position-interpolation" class="nav-link" data-scroll-target="#position-interpolation"><span class="header-section-number">4.5</span> Position Interpolation</a>
-  <ul>
-  <li><a href="#frequence-based-pi" id="toc-frequence-based-pi" class="nav-link" data-scroll-target="#frequence-based-pi"><span class="header-section-number">4.5.1</span> Frequence-Based PI</a></li>
-  <li><a href="#dynamic-scaling" id="toc-dynamic-scaling" class="nav-link" data-scroll-target="#dynamic-scaling"><span class="header-section-number">4.5.2</span> Dynamic-Scaling</a></li>
-  </ul></li>
-  <li><a href="#nope" id="toc-nope" class="nav-link" data-scroll-target="#nope"><span class="header-section-number">4.6</span> NoPE</a></li>
-  </ul></li>
-  <li><a href="#attention-mechanism" id="toc-attention-mechanism" class="nav-link" data-scroll-target="#attention-mechanism"><span class="header-section-number">5</span> Attention Mechanism</a>
-  <ul>
-  <li><a href="#multi-head-attentionmha" id="toc-multi-head-attentionmha" class="nav-link" data-scroll-target="#multi-head-attentionmha"><span class="header-section-number">5.0.1</span> Multi-Head Attention(MHA)</a></li>
-  <li><a href="#groped-query-attentiongqa" id="toc-groped-query-attentiongqa" class="nav-link" data-scroll-target="#groped-query-attentiongqa"><span class="header-section-number">5.0.2</span> Groped Query Attention(GQA)</a></li>
-  <li><a href="#multi-head-latent-attentionmla" id="toc-multi-head-latent-attentionmla" class="nav-link" data-scroll-target="#multi-head-latent-attentionmla"><span class="header-section-number">5.0.3</span> Multi-Head Latent Attention(MLA)</a></li>
-  <li><a href="#sliding-window-attention" id="toc-sliding-window-attention" class="nav-link" data-scroll-target="#sliding-window-attention"><span class="header-section-number">5.0.4</span> Sliding Window Attention</a></li>
-  <li><a href="#flash-attention" id="toc-flash-attention" class="nav-link" data-scroll-target="#flash-attention"><span class="header-section-number">5.0.5</span> Flash Attention</a></li>
-  <li><a href="#gated-attention" id="toc-gated-attention" class="nav-link" data-scroll-target="#gated-attention"><span class="header-section-number">5.0.6</span> Gated Attention</a></li>
-  </ul></li>
-  <li><a href="#feed-forward-network-ffn" id="toc-feed-forward-network-ffn" class="nav-link" data-scroll-target="#feed-forward-network-ffn"><span class="header-section-number">6</span> Feed-Forward Network (FFN)</a></li>
-  <li><a href="#mixture-of-expert" id="toc-mixture-of-expert" class="nav-link" data-scroll-target="#mixture-of-expert"><span class="header-section-number">7</span> Mixture of Expert</a></li>
-  <li><a href="#normalization-layer" id="toc-normalization-layer" class="nav-link" data-scroll-target="#normalization-layer"><span class="header-section-number">8</span> Normalization Layer</a></li>
-  <li><a href="#residual-connection" id="toc-residual-connection" class="nav-link" data-scroll-target="#residual-connection"><span class="header-section-number">9</span> Residual Connection</a>
-  <ul>
-  <li><a href="#mhc" id="toc-mhc" class="nav-link" data-scroll-target="#mhc"><span class="header-section-number">9.1</span> mHC</a></li>
-  <li><a href="#attention-residual" id="toc-attention-residual" class="nav-link" data-scroll-target="#attention-residual"><span class="header-section-number">9.2</span> Attention Residual</a></li>
-  </ul></li>
-  <li><a href="#output-layer" id="toc-output-layer" class="nav-link" data-scroll-target="#output-layer"><span class="header-section-number">10</span> Output Layer</a></li>
-  <li><a href="#other-architectures" id="toc-other-architectures" class="nav-link" data-scroll-target="#other-architectures"><span class="header-section-number">11</span> Other Architectures</a>
-  <ul>
-  <li><a href="#mamba-architecture" id="toc-mamba-architecture" class="nav-link" data-scroll-target="#mamba-architecture"><span class="header-section-number">11.1</span> Mamba Architecture</a></li>
-  <li><a href="#retnet-architecture" id="toc-retnet-architecture" class="nav-link" data-scroll-target="#retnet-architecture"><span class="header-section-number">11.2</span> RetNet Architecture</a></li>
-  </ul></li>
-  <li><a href="#training-objective" id="toc-training-objective" class="nav-link" data-scroll-target="#training-objective"><span class="header-section-number">12</span> Training Objective</a>
-  <ul>
-  <li><a href="#cross-entropy-loss" id="toc-cross-entropy-loss" class="nav-link" data-scroll-target="#cross-entropy-loss"><span class="header-section-number">12.1</span> Cross-Entropy Loss</a></li>
-  <li><a href="#diffusion-loss" id="toc-diffusion-loss" class="nav-link" data-scroll-target="#diffusion-loss"><span class="header-section-number">12.2</span> Diffusion Loss</a></li>
-  </ul></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">13</span> Conclusion</a></li>
-  <li><a href="#in-the-end" id="toc-in-the-end" class="nav-link" data-scroll-target="#in-the-end"><span class="header-section-number">14</span> In the end</a></li>
-  </ul>
-</nav>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">LLM Series Part1: Architecture and Training Stages</h1>
+<h1 class="title">LLM Series Part1: Architecture and Training Stages</h1>
 </div>
 
 <div>
   <div class="description">
-    在这篇文章中，我们将深入探讨不同的LLM的模型架构。随着LLM的不断发展，模型的架构也在不断的演变，我们将从最初的Transformer架构展开，逐步的介绍不同Component的演变和改进。在最后，我们还会介绍除了Transformer架构之外的其他架构，比如Mamba, RetNet等。最后我们还会介绍不同的Optimizer，Loss Functions: Cross-Entropy Loss，Diffusion Loss等，以及Regularization techniques在LLM训练中的应用。
+    Detailed exploration of LLM architectures from Transformer to Mamba, RetNet, and beyond, covering attention mechanisms, MoE, and the complete training pipeline.
   </div>
 </div>
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Yuyang Zhang </p>
+             <p>Qingsen Zhang </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">2026-03-20</p>
+      <p class="date">March 20, 2026</p>
     </div>
   </div>
   
-    <div>
-    <div class="quarto-title-meta-heading">Modified</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date-modified">2026-04-08</p>
-    </div>
-  </div>
     
   </div>
   
@@ -576,400 +362,12 @@ window.Quarto = {
 
 </header>
 
-<nav id="TOC-body" role="doc-toc">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#introduction" id="toc-introduction"><span class="header-section-number">1</span> Introduction</a></li>
-  <li><a href="#review-of-transformer-architecture" id="toc-review-of-transformer-architecture"><span class="header-section-number">2</span> Review of Transformer Architecture</a></li>
-  <li><a href="#word-embedding-layer" id="toc-word-embedding-layer"><span class="header-section-number">3</span> Word Embedding Layer</a></li>
-  <li><a href="#position-encoding" id="toc-position-encoding"><span class="header-section-number">4</span> Position Encoding</a>
-  <ul>
-  <li><a href="#absolute-position-encoding" id="toc-absolute-position-encoding"><span class="header-section-number">4.1</span> Absolute Position Encoding</a></li>
-  <li><a href="#learnable-position-encoding" id="toc-learnable-position-encoding"><span class="header-section-number">4.2</span> Learnable Position Encoding</a></li>
-  <li><a href="#relative-position-encoding" id="toc-relative-position-encoding"><span class="header-section-number">4.3</span> Relative Position Encoding</a></li>
-  <li><a href="#rope" id="toc-rope"><span class="header-section-number">4.4</span> RoPE</a></li>
-  <li><a href="#position-interpolation" id="toc-position-interpolation"><span class="header-section-number">4.5</span> Position Interpolation</a>
-  <ul>
-  <li><a href="#frequence-based-pi" id="toc-frequence-based-pi"><span class="header-section-number">4.5.1</span> Frequence-Based PI</a></li>
-  <li><a href="#dynamic-scaling" id="toc-dynamic-scaling"><span class="header-section-number">4.5.2</span> Dynamic-Scaling</a></li>
-  </ul></li>
-  <li><a href="#nope" id="toc-nope"><span class="header-section-number">4.6</span> NoPE</a></li>
-  </ul></li>
-  <li><a href="#attention-mechanism" id="toc-attention-mechanism"><span class="header-section-number">5</span> Attention Mechanism</a>
-  <ul>
-  <li><a href="#multi-head-attentionmha" id="toc-multi-head-attentionmha"><span class="header-section-number">5.0.1</span> Multi-Head Attention(MHA)</a></li>
-  <li><a href="#groped-query-attentiongqa" id="toc-groped-query-attentiongqa"><span class="header-section-number">5.0.2</span> Groped Query Attention(GQA)</a></li>
-  <li><a href="#multi-head-latent-attentionmla" id="toc-multi-head-latent-attentionmla"><span class="header-section-number">5.0.3</span> Multi-Head Latent Attention(MLA)</a></li>
-  <li><a href="#sliding-window-attention" id="toc-sliding-window-attention"><span class="header-section-number">5.0.4</span> Sliding Window Attention</a></li>
-  <li><a href="#flash-attention" id="toc-flash-attention"><span class="header-section-number">5.0.5</span> Flash Attention</a></li>
-  <li><a href="#gated-attention" id="toc-gated-attention"><span class="header-section-number">5.0.6</span> Gated Attention</a></li>
-  </ul></li>
-  <li><a href="#feed-forward-network-ffn" id="toc-feed-forward-network-ffn"><span class="header-section-number">6</span> Feed-Forward Network (FFN)</a></li>
-  <li><a href="#mixture-of-expert" id="toc-mixture-of-expert"><span class="header-section-number">7</span> Mixture of Expert</a></li>
-  <li><a href="#normalization-layer" id="toc-normalization-layer"><span class="header-section-number">8</span> Normalization Layer</a></li>
-  <li><a href="#residual-connection" id="toc-residual-connection"><span class="header-section-number">9</span> Residual Connection</a>
-  <ul>
-  <li><a href="#mhc" id="toc-mhc"><span class="header-section-number">9.1</span> mHC</a></li>
-  <li><a href="#attention-residual" id="toc-attention-residual"><span class="header-section-number">9.2</span> Attention Residual</a></li>
-  </ul></li>
-  <li><a href="#output-layer" id="toc-output-layer"><span class="header-section-number">10</span> Output Layer</a></li>
-  <li><a href="#other-architectures" id="toc-other-architectures"><span class="header-section-number">11</span> Other Architectures</a>
-  <ul>
-  <li><a href="#mamba-architecture" id="toc-mamba-architecture"><span class="header-section-number">11.1</span> Mamba Architecture</a></li>
-  <li><a href="#retnet-architecture" id="toc-retnet-architecture"><span class="header-section-number">11.2</span> RetNet Architecture</a></li>
-  </ul></li>
-  <li><a href="#training-objective" id="toc-training-objective"><span class="header-section-number">12</span> Training Objective</a>
-  <ul>
-  <li><a href="#cross-entropy-loss" id="toc-cross-entropy-loss"><span class="header-section-number">12.1</span> Cross-Entropy Loss</a></li>
-  <li><a href="#diffusion-loss" id="toc-diffusion-loss"><span class="header-section-number">12.2</span> Diffusion Loss</a></li>
-  </ul></li>
-  <li><a href="#conclusion" id="toc-conclusion"><span class="header-section-number">13</span> Conclusion</a></li>
-  <li><a href="#in-the-end" id="toc-in-the-end"><span class="header-section-number">14</span> In the end</a></li>
-  </ul>
-</nav>
-<section id="introduction" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
-<p>随着LLM的迅速发展，模型的架构也在不断的演变。不过万变不离其宗，基于Transformer <span class="citation" data-cites="AttentionAllYou2023vaswani">(<a href="#ref-AttentionAllYou2023vaswani" role="doc-biblioref">Vaswani et al. 2023</a>)</span> 的模型架构依然是现在主流的的基本框架，包括现在SOTA的LLM，比如ChatGPT，LLaMA，DeepSeek，Qwen等都是基于Transformer架构的模型。不过在这个基本框架之上，不同的模型在不同的Component上进行了不同的改进和优化。比如在Attention机制上，除了最初的<strong>Scaled Dot-Product Attention</strong>之外，还有一些改进的Attention机制，比如<strong>Sparse Attention</strong>，<strong>Linear Attention</strong>等，这些改进的Attention机制可以有效地减少计算复杂度，提高模型的效率。另外，在Feed-Forward Network（FFN）部分，也有一些改进的结构，比如<strong>Gated Linear Units（GLU）</strong>，<strong>Mixture of Experts（MoE）</strong>等，这些改进的结构可以提高模型的表达能力和性能。在这篇文章中，我们将深入探讨不同的LLM模型架构，介绍不同Component的演变和改进，以及除了Transformer架构之外的其他架构，比如Mamba架构。最后，我们还会介绍不同的Optimizer，Loss Functions和Regularization techniques在LLM训练中的应用。</p>
-<div id="fig-LLM-Architecture-Gallery.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-LLM-Architecture-Gallery.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/LLM-Architecture-Gallery.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: 不同的LLM模型的比较，可以看到，基本所有的模型都是基于Transformer框架的。 (Image Source: Sebastian Raschka)"><img src="./assets/LLM-Architecture-Gallery.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-LLM-Architecture-Gallery.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: 不同的LLM模型的比较，可以看到，基本所有的模型都是基于Transformer框架的。 (Image Source: <a href="https://sebastianraschka.com/llm-architecture-gallery/">Sebastian Raschka</a>)
-</figcaption>
-</figure>
-</div>
-<p>首先我们先来回顾一下Transformer架构的基本组成部分和工作原理。</p>
-</section>
-<section id="review-of-transformer-architecture" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Review of Transformer Architecture</h1>
-<p>Transformer的基本框架如下图所示：</p>
-<div id="fig-Transformer-overview.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-Transformer-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/Transformer-overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Transformer模型结构 （Image Source: [@AttentionAllYou2023vaswani])"><img src="./assets/Transformer-overview.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-Transformer-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Transformer模型结构 （Image Source: <span class="citation" data-cites="AttentionAllYou2023vaswani">(<a href="#ref-AttentionAllYou2023vaswani" role="doc-biblioref">Vaswani et al. 2023</a>)</span>)
-</figcaption>
-</figure>
-</div>
-<p>Transformer模型主要由以下几个部分组成：</p>
-<ul>
-<li><strong>Input Embedding</strong>：将输入的文本数据转换为向量表示，通常使用词嵌入（Word Embedding）。</li>
-<li><strong>Position Encoding</strong>：由于Transformer模型没有循环结构，因此需要通过位置编码来引入位置信息，使模型能够理解输入序列中各个元素的相对位置。</li>
-<li><strong>Attention Mechanism</strong>: Transformer模型的核心组件是Attention机制，最初的Transformer使用的是<strong>Scaled Dot-Product Attention</strong>，它通过计算输入序列中各个元素之间的相关性来捕捉上下文信息。随着模型的发展，出现了一些改进的Attention机制，比如<strong>Sparse Attention</strong>，<strong>Linear Attention</strong>等，这些改进的Attention机制可以有效地减少计算复杂度，提高模型的效率。</li>
-<li><strong>Feed-Forward Network (FFN)</strong>: 在每个Transformer层中，除了Attention机制之外，还有一个Feed-Forward Network（FFN）。</li>
-<li><strong>Normalization Layer</strong>: 在Transformer模型中，通常会在每个层的输入和输出之间添加一个Normalization Layer，它可以帮助模型更好地训练和收敛。</li>
-<li><strong>Residual Connection</strong>: 在Transformer模型中，通常会在每个层的输入和输出之间添加一个Residual Connection，用来训练模型更深的层数，避免梯度消失问题。</li>
-<li><strong>Output Layer</strong>: 最后，Transformer模型会通过一个输出层来生成最终的输出结果，通常是一个线性层或者一个Softmax层。</li>
-</ul>
-<p>相比于Transformer的Encoder和Decoder的架构，LLM通常采用<strong>Decoder-Only</strong>的架构，也就是只使用Transformer的Decoder部分来进行文本生成任务。</p>
-<p>接下来我们来逐一介绍Transformer的不同Component的演变和改进。</p>
-</section>
-<section id="word-embedding-layer" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Word Embedding Layer</h1>
-<p>所有的LLM的模型，不论是基于Transformer框架，还是其他框架，都会有一个Embedding Layer来将所有的输入Tokens（One hot encoding）转化为Dense Vector的形式。通常来说，Embedding Layer的输入是一个整数序列，表示输入文本中的每个Token的索引，输出是一个二维矩阵，每一行对应一个Token的向量表示。这个向量表示可以通过训练来学习得到，也可以使用预训练的词嵌入（Word Embedding）来初始化。数学的表达也很简单：</p>
-<p><span id="eq-embedding-mathematical-formula"><span class="math display">\[  
-x_i = E[t_i]
-\tag{1}\]</span></span></p>
-<p>其中：</p>
-<ul>
-<li><span class="math inline">\(t_i\)</span> 是输入文本中的第<span class="math inline">\(i\)</span>个Token的索引。</li>
-<li><span class="math inline">\(E\)</span> 是一个矩阵，表示词嵌入的权重矩</li>
-<li><span class="math inline">\(x_i\)</span> 是第<span class="math inline">\(i\)</span>个Token的向量表示。</li>
-<li><span class="math inline">\(E[t_i]\)</span> 表示从矩阵<span class="math inline">\(E\)</span>中取出第<span class="math inline">\(t_i\)</span>行的向量作为第<span class="math inline">\(i\)</span>个Token的向量表示。</li>
-</ul>
-<p>举个例子，假如我们有一个输入文本：</p>
-<div class="sourceCode" id="cb1" data-code-line-numbers=""><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1"></a>"I like LLMs."</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>第一步就是先将这个文本进行Tokenization，得到一个整数序列，比如：</p>
-<div class="sourceCode" id="cb2" data-code-line-numbers=""><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">[</span><span class="ot">101, 532, 8921, 4411</span><span class="co">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>这些数字只是词表里的索引，本身没有大小意义。也不能进行比较或者计算。接下来，我们就可以通过Embedding Layer来将这个整数序列转化为一个二维矩阵，每一行对应一个Token的向量表示，比如：</p>
-<div class="sourceCode" id="cb3" data-code-line-numbers=""><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1"></a>[<span class="co">[</span><span class="ot">0.1, 0.2, 0.3, 0.4</span><span class="co">]</span>,</span>
-<span id="cb3-2"><a href="#cb3-2"></a> <span class="co">[</span><span class="ot">0.5, 0.6, 0.7, 0.8</span><span class="co">]</span>,</span>
-<span id="cb3-3"><a href="#cb3-3"></a> <span class="co">[</span><span class="ot">0.9, 1.0, 1.1, 1.2</span><span class="co">]</span>,</span>
-<span id="cb3-4"><a href="#cb3-4"></a> <span class="co">[</span><span class="ot">1.3, 1.4, 1.5, 1.6</span><span class="co">]</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>这个二维矩阵就是输入文本的向量表示，可以作为后续模型的输入。通过训练，模型可以学习到更好的词嵌入，从而提高模型的性能和表达能力。</p>
-<p>那么Embedding Layer长什么样子呢？假如：</p>
-<ul>
-<li>vocab size = 10,000</li>
-<li>hidden size = 512</li>
-</ul>
-<p>那么Embedding Layer的权重矩阵<span class="math inline">\(E\)</span>的维度就是<span class="math inline">\(10,000 \times 512\)</span>，也就是说，<span class="math inline">\(E\)</span>是一个10,000行，512列的矩阵，每一行对应一个Token的向量表示，每一列对应一个隐藏维度。这个矩阵的大小取决于词表的大小和隐藏维度的大小。通常来说，词表越大，隐藏维度越大，模型的表达能力就越强，但同时也会增加模型的参数量和计算复杂度。因此，在设计Embedding Layer的时候，需要根据具体的任务和资源来选择合适的词表大小和隐藏维度大小。</p>
-</section>
-<section id="position-encoding" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> Position Encoding</h1>
-<p>在Transformer中，由于Attention机制是通过观察比较全局的输入序列来捕捉上下文信息的，因此模型本身并没有循环结构，也没有卷积结构，所以无法直接捕捉输入序列中各个元素的相对位置关系。为了引入位置信息，Transformer使用了Position Encoding来为输入序列中的每个Token添加位置信息，使模型能够理解输入序列中各个元素的相对位置。通过不同的实现方式，Position Encoding大致可以分为三类：</p>
-<ul>
-<li><strong>Absolute Position Encoding</strong>：给句子中的每个Token分配一个唯一的位置信息。</li>
-<li><strong>Learnable Position Encoding</strong>：将位置信息作为一个可学习的参数来训练模型。（其实也可以看成是Absolute Position Encoding的一种特殊情况）</li>
-<li><strong>Relative Position Encoding</strong>：通过计算输入序列中各个元素之间的相对位置关系来引入位置信息。</li>
-</ul>
-<p>接下来我们来逐一介绍这三种Position Encoding的实现方式和特点。</p>
-<section id="absolute-position-encoding" class="level2" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="absolute-position-encoding"><span class="header-section-number">4.1</span> Absolute Position Encoding</h2>
-<p>Absolute Position Encoding是Transformer中最初使用的Position Encoding方式，它通过给句子中的每个Token分配一个唯一的位置信息来引入位置信息。具体来说，Absolute Position Encoding使用一个固定的函数来计算每个Token的位置信息，通常使用正弦和余弦函数来计算位置信息。数学的表达如下：</p>
-<p><span id="eq-absolute-position-encoding-mathematical-formula"><span class="math display">\[
-\begin{split}
-PE_{(pos, 2i)} &amp; = \sin\left(\frac{pos}{10000^{2i /d_{model}}}\right) \\
-PE_{(pos, 2i+1)} &amp;= \cos\left(\frac{pos}{10000^{2i /d_{model}}}\right)
-\end{split}
-\tag{2}\]</span></span></p>
-<p>其中：</p>
-<ul>
-<li><span class="math inline">\(pos\)</span> 是Token在输入序列中的位置索引。</li>
-<li><span class="math inline">\(i\)</span> 是隐藏维度的索引。</li>
-<li><span class="math inline">\(d_{model}\)</span> 是模型的隐藏维度大小。</li>
-</ul>
-<p>我们可以看到，Absolute Position Encoding将Word Embedding的维度分成两个为一组，每组使用一个正弦函数和一个余弦函数来计算位置信息。这样做的好处是，模型可以通过观察输入序列中各个元素的位置信息来捕捉上下文信息，从而提高模型的性能和表达能力。</p>
-</section>
-<section id="learnable-position-encoding" class="level2" data-number="4.2">
-<h2 data-number="4.2" class="anchored" data-anchor-id="learnable-position-encoding"><span class="header-section-number">4.2</span> Learnable Position Encoding</h2>
-<p>Learnable Position Encoding是Absolute Position Encoding的一种特殊情况，它将位置信息作为一个可学习的参数来训练模型。具体来说，Learnable Position Encoding使用一个可学习的矩阵来存储位置信息，每一行对应一个位置索引，每一列对应一个隐藏维度。数学的表达如下：</p>
-<p><span id="eq-learnable-position-encoding-mathematical-formula"><span class="math display">\[
-PE_{(pos)} = P[pos]
-\tag{3}\]</span></span></p>
-<p>其中：</p>
-<ul>
-<li><span class="math inline">\(pos\)</span> 是Token在输入序列中的位置索引。</li>
-<li><span class="math inline">\(P\)</span> 是一个可学习的矩阵，表示位置信息的权重矩阵。</li>
-<li><span class="math inline">\(PE_{(pos)}\)</span> 是第<span class="math inline">\(pos\)</span>个位置的位置信息向量。</li>
-</ul>
-<p>其实在LLM的训练中，Learnable Position Encoding时很少见的Encoding方式，其原因就是它的参数量比较大，尤其是当输入序列的长度比较长的时候，Learnable Position Encoding的参数量会急剧增加，从而增加模型的计算复杂度和内存占用。因此，在实际应用中，Learnable Position Encoding通常不如Absolute Position Encoding常见。最常见的Learnable Position Encoding的应用场景是在Vision Transformer <span class="citation" data-cites="ImageWorth16x162021dosovitskiy">(<a href="#ref-ImageWorth16x162021dosovitskiy" role="doc-biblioref">Dosovitskiy et al. 2021</a>)</span>中，在Vision Transformer中，输入序列的长度通常比较短，因此Learnable Position Encoding的参数量相对较小。</p>
-<div id="fig-sinusoidal-position-embedding" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-sinusoidal-position-embedding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/sinusoidal_position_embedding_0_to_50.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: "><img src="./assets/sinusoidal_position_embedding_0_to_50.gif" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-sinusoidal-position-embedding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3
-</figcaption>
-</figure>
-</div>
-<div id="fig-sin-position-embedding-illustration.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-sin-position-embedding-illustration.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/sin-position-embedding-illustration.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: "><img src="./assets/sin-position-embedding-illustration.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-sin-position-embedding-illustration.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4
-</figcaption>
-</figure>
-</div>
-</section>
-<section id="relative-position-encoding" class="level2" data-number="4.3">
-<h2 data-number="4.3" class="anchored" data-anchor-id="relative-position-encoding"><span class="header-section-number">4.3</span> Relative Position Encoding</h2>
-<p>比如Alibili<span class="citation" data-cites="TrainShortTest2022press">(<a href="#ref-TrainShortTest2022press" role="doc-biblioref">Press, Smith, and Lewis 2022</a>)</span> 和 T5</p>
-</section>
-<section id="rope" class="level2" data-number="4.4">
-<h2 data-number="4.4" class="anchored" data-anchor-id="rope"><span class="header-section-number">4.4</span> RoPE</h2>
-</section>
-<section id="position-interpolation" class="level2" data-number="4.5">
-<h2 data-number="4.5" class="anchored" data-anchor-id="position-interpolation"><span class="header-section-number">4.5</span> Position Interpolation</h2>
-<p>在训练的时候，我们设定最长的长度，但是在Inference的时候，我们可能会遇到比Max Position更长的Sequence，</p>
-<section id="frequence-based-pi" class="level3" data-number="4.5.1">
-<h3 data-number="4.5.1" class="anchored" data-anchor-id="frequence-based-pi"><span class="header-section-number">4.5.1</span> Frequence-Based PI</h3>
-</section>
-<section id="dynamic-scaling" class="level3" data-number="4.5.2">
-<h3 data-number="4.5.2" class="anchored" data-anchor-id="dynamic-scaling"><span class="header-section-number">4.5.2</span> Dynamic-Scaling</h3>
-</section>
-</section>
-<section id="nope" class="level2" data-number="4.6">
-<h2 data-number="4.6" class="anchored" data-anchor-id="nope"><span class="header-section-number">4.6</span> NoPE</h2>
-</section>
-</section>
-<section id="attention-mechanism" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> Attention Mechanism</h1>
-<section id="multi-head-attentionmha" class="level3" data-number="5.0.1">
-<h3 data-number="5.0.1" class="anchored" data-anchor-id="multi-head-attentionmha"><span class="header-section-number">5.0.1</span> Multi-Head Attention(MHA)</h3>
-</section>
-<section id="groped-query-attentiongqa" class="level3" data-number="5.0.2">
-<h3 data-number="5.0.2" class="anchored" data-anchor-id="groped-query-attentiongqa"><span class="header-section-number">5.0.2</span> Groped Query Attention(GQA)</h3>
-<div id="fig-gqa-overview.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-gqa-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/gqa-overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: "><img src="./assets/gqa-overview.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-gqa-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5
-</figcaption>
-</figure>
-</div>
-</section>
-<section id="multi-head-latent-attentionmla" class="level3" data-number="5.0.3">
-<h3 data-number="5.0.3" class="anchored" data-anchor-id="multi-head-latent-attentionmla"><span class="header-section-number">5.0.3</span> Multi-Head Latent Attention(MLA)</h3>
-<div id="fig-mla-overview.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-mla-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/mla-overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;6: "><img src="./assets/mla-overview.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-mla-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6
-</figcaption>
-</figure>
-</div>
-<div id="fig-mla-kv-cache.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-mla-kv-cache.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/mla-kv-cache.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;7: "><img src="./assets/mla-kv-cache.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-mla-kv-cache.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7
-</figcaption>
-</figure>
-</div>
-</section>
-<section id="sliding-window-attention" class="level3" data-number="5.0.4">
-<h3 data-number="5.0.4" class="anchored" data-anchor-id="sliding-window-attention"><span class="header-section-number">5.0.4</span> Sliding Window Attention</h3>
-</section>
-<section id="flash-attention" class="level3" data-number="5.0.5">
-<h3 data-number="5.0.5" class="anchored" data-anchor-id="flash-attention"><span class="header-section-number">5.0.5</span> Flash Attention</h3>
-</section>
-<section id="gated-attention" class="level3" data-number="5.0.6">
-<h3 data-number="5.0.6" class="anchored" data-anchor-id="gated-attention"><span class="header-section-number">5.0.6</span> Gated Attention</h3>
-<div id="fig-qwen3-next-gated-attention.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-qwen3-next-gated-attention.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/qwen3-next-gated-attention.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;8: "><img src="./assets/qwen3-next-gated-attention.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-qwen3-next-gated-attention.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8
-</figcaption>
-</figure>
-</div>
-<hr>
-<p>当然，Attention的变形和种类还是很多的，比如：</p>
-<ul>
-<li><strong>Sparse Attention</strong>：通过只计算输入序列中部分元素之间的相关性来减少计算复杂度。</li>
-<li><strong>Linear Attention</strong>：通过使用线性函数来计算输入序列中各个元素之间的相关性来减少计算复杂度。</li>
-<li><strong>Memory-Augmented Attention</strong>：通过引入一个外部的记忆模块来存储输入序列中各个元素的相关信息，从而提高模型的表达能力</li>
-</ul>
-<p>在这里就不展开介绍了，不过万变不离其宗，基本上都是在原始的Scaled Dot-Product Attention的基础上进行改进和优化的。</p>
-</section>
-</section>
-<section id="feed-forward-network-ffn" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Feed-Forward Network (FFN)</h1>
-</section>
-<section id="mixture-of-expert" class="level1" data-number="7">
-<h1 data-number="7"><span class="header-section-number">7</span> Mixture of Expert</h1>
-<div id="fig-switch-transformer.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-switch-transformer.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/switch-transformer.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;9: "><img src="./assets/switch-transformer.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-switch-transformer.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9
-</figcaption>
-</figure>
-</div>
-<div id="fig-DeepSeek-moe.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-DeepSeek-moe.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/DeepSeek-moe.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;10: "><img src="./assets/DeepSeek-moe.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-DeepSeek-moe.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10
-</figcaption>
-</figure>
-</div>
-</section>
-<section id="normalization-layer" class="level1" data-number="8">
-<h1 data-number="8"><span class="header-section-number">8</span> Normalization Layer</h1>
-</section>
-<section id="residual-connection" class="level1" data-number="9">
-<h1 data-number="9"><span class="header-section-number">9</span> Residual Connection</h1>
-<section id="mhc" class="level2" data-number="9.1">
-<h2 data-number="9.1" class="anchored" data-anchor-id="mhc"><span class="header-section-number">9.1</span> mHC</h2>
-<div id="fig-mHC-overview.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-mHC-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/mHC-overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;11: "><img src="./assets/mHC-overview.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-mHC-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;11
-</figcaption>
-</figure>
-</div>
-</section>
-<section id="attention-residual" class="level2" data-number="9.2">
-<h2 data-number="9.2" class="anchored" data-anchor-id="attention-residual"><span class="header-section-number">9.2</span> Attention Residual</h2>
-<div id="fig-attention-residual.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-attention-residual.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/attention-residual.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;12: "><img src="./assets/attention-residual.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-attention-residual.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;12
-</figcaption>
-</figure>
-</div>
-</section>
-</section>
-<section id="output-layer" class="level1" data-number="10">
-<h1 data-number="10"><span class="header-section-number">10</span> Output Layer</h1>
-</section>
-<section id="other-architectures" class="level1" data-number="11">
-<h1 data-number="11"><span class="header-section-number">11</span> Other Architectures</h1>
-<section id="mamba-architecture" class="level2" data-number="11.1">
-<h2 data-number="11.1" class="anchored" data-anchor-id="mamba-architecture"><span class="header-section-number">11.1</span> Mamba Architecture</h2>
-</section>
-<section id="retnet-architecture" class="level2" data-number="11.2">
-<h2 data-number="11.2" class="anchored" data-anchor-id="retnet-architecture"><span class="header-section-number">11.2</span> RetNet Architecture</h2>
-</section>
-</section>
-<section id="training-objective" class="level1" data-number="12">
-<h1 data-number="12"><span class="header-section-number">12</span> Training Objective</h1>
-<section id="cross-entropy-loss" class="level2" data-number="12.1">
-<h2 data-number="12.1" class="anchored" data-anchor-id="cross-entropy-loss"><span class="header-section-number">12.1</span> Cross-Entropy Loss</h2>
-<p>之前提到的所有模型的训练目标都是基于Cross-Entropy Loss的，也就是最大化输入文本的条件概率。具体来说，给定一个输入文本序列<span class="math inline">\(X = (x_1, x_2, ..., x_n)\)</span>，模型的目标是最大化条件概率<span class="math inline">\(P(X) = P(x_1)P(x_2|x_1)P(x_3|x_1, x_2)...P(x_n|x_1, x_2, ..., x_{n-1})\)</span>。在训练过程中，我们通常会使用Cross-Entropy Loss来衡量模型生成的文本序列与真实文本序列之间的差异，从而指导模型的优化和训练。数学的表达如下：</p>
-<p><span class="math display">\[
-\mathcal{L} = -\sum_{i=1}^{n} \log P(x_i|x_1, x_2, ..., x_{i-1})
-\]</span></p>
-</section>
-<section id="diffusion-loss" class="level2" data-number="12.2">
-<h2 data-number="12.2" class="anchored" data-anchor-id="diffusion-loss"><span class="header-section-number">12.2</span> Diffusion Loss</h2>
-<p>现在的SOTA的模型，最大问题就是Auto-Regressive，要等到生成完一个Token之后才能生成下一个Token，这样的生成方式效率非常低，尤其是当输入文本序列比较长的时候，生成的时间会急剧增加。为了提高模型的生成效率，最近有一些研究提出了一些新的训练目标，比如Diffusion Loss，它通过引入一个噪声分布来模拟输入文本序列中的噪声，从而使模型能够在生成过程中更快地收敛和优化。具体来说，Diffusion Loss通过引入一个噪声分布来模拟输入文本序列中的噪声，从而使模型能够在生成过程中更快地收敛和优化。数学的表达如下：</p>
-<div id="fig-LLaDA-overview.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-LLaDA-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/LLaDA-overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;13: "><img src="./assets/LLaDA-overview.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-LLaDA-overview.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;13
-</figcaption>
-</figure>
-</div>
-</section>
-</section>
-<section id="conclusion" class="level1" data-number="13">
-<h1 data-number="13"><span class="header-section-number">13</span> Conclusion</h1>
-</section>
-<section id="in-the-end" class="level1" data-number="14">
-<h1 data-number="14"><span class="header-section-number">14</span> In the end</h1>
-<p>创作不易，如果你觉得内容对你有帮助，欢迎请我 <span class="hilite-teal">喝杯咖啡/支付宝红包</span>，支持我继续创作！你们的支持是我最大的动力！ :) <br></p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><a href="../../../style/AliPay.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-14"><img src="../../../style/AliPay.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img" width="400"></a></p>
-</figure>
-</div>
+
+<!-- Content: edit here -- LLM Architecture blog post -->
 
 
 
-</section>
-
-<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-ImageWorth16x162021dosovitskiy" class="csl-entry" role="listitem">
-Dosovitskiy, Alexey, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, et al. 2021. <span>“An <span>Image</span> Is <span>Worth</span> 16x16 <span>Words</span>: <span>Transformers</span> for <span>Image Recognition</span> at <span>Scale</span>.”</span> June 3, 2021. <a href="https://doi.org/10.48550/arXiv.2010.11929">https://doi.org/10.48550/arXiv.2010.11929</a>.
-</div>
-<div id="ref-TrainShortTest2022press" class="csl-entry" role="listitem">
-Press, Ofir, Noah A. Smith, and Mike Lewis. 2022. <span>“Train <span>Short</span>, <span>Test Long</span>: <span>Attention</span> with <span>Linear Biases Enables Input Length Extrapolation</span>.”</span> April 22, 2022. <a href="https://doi.org/10.48550/arXiv.2108.12409">https://doi.org/10.48550/arXiv.2108.12409</a>.
-</div>
-<div id="ref-AttentionAllYou2023vaswani" class="csl-entry" role="listitem">
-Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. 2023. <span>“Attention <span>Is All You Need</span>.”</span> August 2, 2023. <a href="https://doi.org/10.48550/arXiv.1706.03762">https://doi.org/10.48550/arXiv.1706.03762</a>.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -1034,13 +432,14 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -1055,7 +454,7 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/qsdong-bupt\.github\.io");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -1069,11 +468,6 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -1387,119 +781,39 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
     }
   });
   </script>
-<input type="hidden" id="giscus-base-theme" value="light">
-<input type="hidden" id="giscus-alt-theme" value="dark_dimmed">
-<script>
-  function loadGiscus() {
-    // Function to get the theme based on body class
-    const getTheme = () => {
-      let baseTheme = document.getElementById('giscus-base-theme').value;
-      let altTheme = document.getElementById('giscus-alt-theme').value;
-      if (authorPrefersDark) {
-          [baseTheme, altTheme] = [altTheme, baseTheme];
-      }
-      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
-    };
-    const script = document.createElement("script");
-    script.src = "https://giscus.app/client.js";
-    script.async = true;
-    script.dataset.repo = "YYZhang2025/YYZhang2025.github.io";
-    script.dataset.repoId = "R_kgDOQlDTcQ";
-    script.dataset.category = "General";
-    script.dataset.categoryId = "DIC_kwDOQlDTcc4C2MRz";
-    script.dataset.mapping = "title";
-    script.dataset.reactionsEnabled = "1";
-    script.dataset.emitMetadata = "0";
-    script.dataset.inputPosition = "top";
-    script.dataset.theme = getTheme();
-    script.dataset.lang = "en";
-    script.crossOrigin = "anonymous";
-    // Append the script to the desired div instead of at the end of the body
-    document.getElementById("quarto-content").appendChild(script);
-  }
-  loadGiscus();
-</script>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© CC-By Yuyang, 2025</p>
-</div>   
+      &nbsp;
+    </div>   
     <div class="nav-footer-center">
+<p>© 2025 Yuyang Zhang. Built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+    <div class="nav-footer-right">
       &nbsp;
     </div>
-    <div class="nav-footer-right">
-<p>This page is built with ❤️ and <a href="https://quarto.org/">Quarto</a>.</p>
-</div>
   </div>
 </footer>
-    <script type="text/javascript">
-    (function(d) {
-      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
-        let pseudocodeOptions = {
-          indentSize: el.dataset.indentSize,
-          commentDelimiter: el.dataset.commentDelimiter,
-          lineNumber: el.dataset.lineNumber.toLowerCase() === "true",
-          lineNumberPunc: el.dataset.lineNumberPunc,
-          noEnd: el.dataset.noEnd.toLowerCase() === "true",
-          titlePrefix: el.dataset.captionPrefix
-        };
-        pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
-      });
-    })(document);
-    (function(d) {
-      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
-        let captionSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
-        if (captionSpan !== null) {
-          let captionPrefix = el.dataset.captionPrefix + " ";
-          let captionNumber = "";
-          if (el.dataset.pseudocodeNumber) {
-            captionNumber = el.dataset.pseudocodeNumber + " ";
-            if (el.dataset.chapterLevel) {
-              captionNumber = el.dataset.chapterLevel + "." + captionNumber;
-            }
-          }
-          captionSpan.innerHTML = captionPrefix + captionNumber;
-        }
-      });
-    })(document);
-    </script>
-  
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
-(function() {
-  let previousOnload = window.onload;
-  window.onload = () => {
-    if (previousOnload) {
-      previousOnload();
-    }
-    lightboxQuarto.on('slide_before_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      const href = trigger.getAttribute('href');
-      if (href !== null) {
-        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
-        if (imgEl !== null) {
-          const srcAttr = imgEl.getAttribute("src");
-          if (srcAttr && srcAttr.startsWith("data:")) {
-            slideConfig.href = srcAttr;
-          }
-        }
-      } 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) block.classList.toggle("is-open");
     });
-  
-    lightboxQuarto.on('slide_after_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(slideNode);
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
       }
     });
-  
-  };
-  
-})();
-          </script>
+  });
+});
+</script>
 
 
 
 
-<script src="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
 </body></html>

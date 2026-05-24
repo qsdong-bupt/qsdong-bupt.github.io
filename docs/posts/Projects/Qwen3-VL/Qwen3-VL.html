@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -13,6 +13,9 @@
 
 <title>Qwen3-VL Inference</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -24,27 +27,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -54,27 +37,21 @@ div.csl-indent {
 <script src="../../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../../">
-<link href="../../.././style/icon.avif" rel="icon">
+<link href="../../../style/icon.avif" rel="icon">
 <script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/bootstrap/bootstrap-dark-44402bf054b1fe078bc4e7aebe64bce9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
-<script src="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.js"></script>
-<link href="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.css" rel="stylesheet">
-<script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
-<link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-0b09eb4da84538f8c2fd112b9812168b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -111,100 +88,31 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
 </script>
-<link href="https://fonts.cdnfonts.com/css/cmu-sans-serif" rel="stylesheet">
+<script>
+  MathJax = {
+    loader: { load: ['[tex]/boldsymbol'] },
+    tex: {
+      tags: "all",
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      packages: { '[+]': ['boldsymbol'] }
+    }
+  };
+</script>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<script>
-    MathJax = {
-        loader: {
-        load: ['[tex]/boldsymbol']
-        },
-        tex: {
-        tags: "all",
-        inlineMath: [['$','$'], ['\\(','\\)']],
-        displayMath: [['$$','$$'], ['\\[','\\]']],
-        processEscapes: true,
-        processEnvironments: true,
-        packages: {
-            '[+]': ['boldsymbol']
-        }
-        }
-    };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".foldable-header").forEach(header => {
-    header.addEventListener("click", () => {
-      const block = header.closest(".foldable");
-      if (block) {
-        block.classList.toggle("is-open");
-      }
-    });
-
-    // 可访问性（键盘）
-    header.setAttribute("tabindex", "0");
-    header.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        header.click();
-      }
-    });
-  });
-});
-</script>
-    <style type="text/css">
-    .ps-root .ps-algorithm {
-      border-top: 2px solid;
-      border-bottom: 2px solid;
-    }
-    .pseudocode-container {
-      text-align: left;
-    }
-    </style>
-  
-      <style type="text/css">
-      .ps-algorithm > .ps-line {
-        text-align: left;
-      }
-      </style>
-    
-
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
 <meta property="og:title" content="Qwen3-VL Inference">
 <meta property="og:description" content="Built a Qwen3-VL model from scratch in PyTorch, loaded the 14B (224x224) model, fine-tuned it with LoRA for specific tasks, and developed a Gradio app to showcase its capabilities.">
-<meta property="og:image" content="./assets/cover.png">
+<meta property="og:image" content="https://qsdong-bupt.github.io/posts/Projects/Qwen3-VL/assets/cover.png">
+<meta property="og:image:height" content="3413">
+<meta property="og:image:width" content="5908">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -399,80 +307,30 @@ window.Quarto = {
 <span class="menu-text">Blogs</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="https://yyzhang2025.github.io/LearningNotes/"> 
+    <a class="nav-link" href="../../../posts/Projects/projects_index.html"> 
 <span class="menu-text">Projects</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../.././posts/100PwC/index.qmd"> 
-<span class="menu-text">100 PwC</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../../posts/CS336/index.html"> 
-<span class="menu-text">Stanford CS336</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
+    <a href="" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-toggle-dark-mode"></i></a>
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Qwen3-VL Inference</h1>
-        </a>     
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#qwen3-vl-architecture" id="toc-qwen3-vl-architecture" class="nav-link active" data-scroll-target="#qwen3-vl-architecture"><span class="header-section-number">1</span> Qwen3-VL Architecture</a>
-  <ul>
-  <li><a href="#image-input-processing" id="toc-image-input-processing" class="nav-link" data-scroll-target="#image-input-processing"><span class="header-section-number">1.1</span> Image Input Processing</a></li>
-  <li><a href="#vision-encoder" id="toc-vision-encoder" class="nav-link" data-scroll-target="#vision-encoder"><span class="header-section-number">1.2</span> Vision Encoder</a>
-  <ul>
-  <li><a href="#d-rope" id="toc-d-rope" class="nav-link" data-scroll-target="#d-rope"><span class="header-section-number">1.2.1</span> 2D RoPE</a></li>
-  <li><a href="#position-interpolation" id="toc-position-interpolation" class="nav-link" data-scroll-target="#position-interpolation"><span class="header-section-number">1.2.2</span> Position Interpolation</a></li>
-  <li><a href="#patch-merger" id="toc-patch-merger" class="nav-link" data-scroll-target="#patch-merger"><span class="header-section-number">1.2.3</span> Patch Merger</a></li>
-  </ul></li>
-  <li><a href="#vision-language-fusion" id="toc-vision-language-fusion" class="nav-link" data-scroll-target="#vision-language-fusion"><span class="header-section-number">1.3</span> Vision Language Fusion</a>
-  <ul>
-  <li><a href="#deepstack" id="toc-deepstack" class="nav-link" data-scroll-target="#deepstack"><span class="header-section-number">1.3.1</span> DeepStack</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#related-resources" id="toc-related-resources" class="nav-link" data-scroll-target="#related-resources"><span class="header-section-number">2</span> Related Resources</a></li>
-  </ul>
-</nav>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Qwen3-VL Inference</h1>
+<h1 class="title">Qwen3-VL Inference</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Large Language Model</div>
     <div class="quarto-category">Multi-Modality</div>
@@ -487,7 +345,7 @@ window.Quarto = {
 </div>
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     <div>
     <div class="quarto-title-meta-heading">Author</div>
@@ -516,155 +374,12 @@ window.Quarto = {
 
 </header>
 
-<nav id="TOC-body" role="doc-toc">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#qwen3-vl-architecture" id="toc-qwen3-vl-architecture"><span class="header-section-number">1</span> Qwen3-VL Architecture</a>
-  <ul>
-  <li><a href="#image-input-processing" id="toc-image-input-processing"><span class="header-section-number">1.1</span> Image Input Processing</a></li>
-  <li><a href="#vision-encoder" id="toc-vision-encoder"><span class="header-section-number">1.2</span> Vision Encoder</a>
-  <ul>
-  <li><a href="#d-rope" id="toc-d-rope"><span class="header-section-number">1.2.1</span> 2D RoPE</a></li>
-  <li><a href="#position-interpolation" id="toc-position-interpolation"><span class="header-section-number">1.2.2</span> Position Interpolation</a></li>
-  <li><a href="#patch-merger" id="toc-patch-merger"><span class="header-section-number">1.2.3</span> Patch Merger</a></li>
-  </ul></li>
-  <li><a href="#vision-language-fusion" id="toc-vision-language-fusion"><span class="header-section-number">1.3</span> Vision Language Fusion</a>
-  <ul>
-  <li><a href="#deepstack" id="toc-deepstack"><span class="header-section-number">1.3.1</span> DeepStack</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#related-resources" id="toc-related-resources"><span class="header-section-number">2</span> Related Resources</a></li>
-  </ul>
-</nav>
-<section id="qwen3-vl-architecture" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Qwen3-VL Architecture</h1>
-<p>The Qwen3-VL model is a multi-modal large language model that integrates vision and language tasks. The architecture consists of:</p>
-<ul>
-<li>Vision Encoder</li>
-<li>MLP-based Vision-Language Merger</li>
-<li>Large Language Model backbone</li>
-</ul>
-<p>The overall architecture is illustrated below:</p>
-<div id="fig-qwen3-vl-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-qwen3-vl-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="assets/cover.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: The overview of Qwen3-VL model architecture"><img src="assets/cover.png" class="img-fluid figure-img" style="width:100.0%"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-qwen3-vl-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: The overview of Qwen3-VL model architecture
-</figcaption>
-</figure>
-</div>
-<section id="image-input-processing" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="image-input-processing"><span class="header-section-number">1.1</span> Image Input Processing</h2>
-</section>
-<section id="vision-encoder" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="vision-encoder"><span class="header-section-number">1.2</span> Vision Encoder</h2>
-<blockquote class="blockquote">
-<p>We utilize the SigLIP-2 architecture as our vision encoder and continue training it with dynamic input resolutions, initialized from official pretrained checkpoints. To accommodate dynamic resolutions effectively, we employ 2D-RoPE and interpolate absolute position embeddings based on input size, following the methodology of CoMP. <cite> Qwen3-VL Technical Report <span class="citation" data-cites="Qwen3VLTechnicalReport2025bai">(<a href="#ref-Qwen3VLTechnicalReport2025bai" role="doc-biblioref">Bai et al. 2025</a>)</span>, P3<cite></cite></cite></p>
-</blockquote>
-<p>The vision encoder is the SigLip-2 architecture <span class="citation" data-cites="SigLIP2Multilingual2025tschannen">(<a href="#ref-SigLIP2Multilingual2025tschannen" role="doc-biblioref">Tschannen et al. 2025</a>)</span>. As mentioned in the Qwen3-VL technical report <span class="citation" data-cites="Qwen3VLTechnicalReport2025bai">(<a href="#ref-Qwen3VLTechnicalReport2025bai" role="doc-biblioref">Bai et al. 2025</a>)</span>, the weight is loaded from the SigLip-2 pretrained checkpoint, but with the continuous training to fit the dynamic input resolutions. One of the key techniques is change the position encoding. It use:</p>
-<ul>
-<li>2D-RoPE (Rotary Position Embedding)<span class="citation" data-cites="RoFormerEnhancedTransformer2023su">(<a href="#ref-RoFormerEnhancedTransformer2023su" role="doc-biblioref">Su et al. 2023</a>)</span> to replace the original position encoding in ViT.</li>
-<li>Interpolate the absolute position embeddings based on input size.</li>
-</ul>
-<section id="d-rope" class="level3" data-number="1.2.1">
-<h3 data-number="1.2.1" class="anchored" data-anchor-id="d-rope"><span class="header-section-number">1.2.1</span> 2D RoPE</h3>
-<p>The 2D RoPe is an extension of the original RoPE <span class="citation" data-cites="RoFormerEnhancedTransformer2023su">(<a href="#ref-RoFormerEnhancedTransformer2023su" role="doc-biblioref">Su et al. 2023</a>)</span> to 2D inputs. The original RoPE is designed for 1D sequences, such as text. It encodes the position information by rotating the query and key vectors in the self-attention mechanism. The 2D RoPE extends this idea to 2D inputs, such as images. It encodes the position information by rotating the query and key vectors in both height and width dimensions. The mathematical formulation of 2D RoPE is as follows:</p>
-<p><span id="eq-2d-rope"><span class="math display">\[
-\text{RoPE}_{2D}(Q, K, pos_h, pos_w) = Q \cdot R(pos_h) \cdot R(pos_w), K \cdot R(pos_h) \cdot R(pos_w)
-\tag{1}\]</span></span></p>
-<p>where <span class="math inline">\(R(pos_h)\)</span> and <span class="math inline">\(R(pos_w)\)</span> are the rotation matrices for height and width positions, respectively. By applying 2D RoPE, the model can effectively capture the spatial relationships in images, which is crucial for vision tasks.</p>
-</section>
-<section id="position-interpolation" class="level3" data-number="1.2.2">
-<h3 data-number="1.2.2" class="anchored" data-anchor-id="position-interpolation"><span class="header-section-number">1.2.2</span> Position Interpolation</h3>
-<p>In addition to 2D RoPE, the Qwen3-VL model also uses position interpolation to handle dynamic input resolutions. The original ViT model uses absolute position embeddings, which are fixed for a specific input size. To accommodate dynamic input sizes, the Qwen3-VL model interpolates the absolute position embeddings based on the input size. The interpolation is done using bilinear interpolation, which allows the model to adapt to different input sizes without losing the positional information. The mathematical formulation of position interpolation is as follows:</p>
-<p><span id="eq-position-interpolation"><span class="math display">\[
-PE_{interp}(x, y) = \text{BilinearInterpolate}(PE, x, y)
-\tag{2}\]</span></span></p>
-<p>where <span class="math inline">\(PE\)</span> is the original position embedding matrix, and <span class="math inline">\((x, y)\)</span> are the coordinates in the interpolated space. By using position interpolation, the model can effectively handle images of varying sizes while maintaining the positional information necessary for accurate vision tasks.</p>
-<div id="fig-CoMP" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-CoMP-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="assets/CoMP.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: The illustration of CoMP"><img src="assets/CoMP.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-CoMP-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: The illustration of CoMP
-</figcaption>
-</figure>
-</div>
-<p><span id="eq-2d-rope-matrix"><span class="math display">\[
-\mathbf{R}_{x,y} =
-\left(\begin{array}{cc:cc}
-    \cos x\theta &amp; -\sin x\theta &amp; 0 &amp; 0 \\
-    \sin x\theta &amp; \cos x\theta &amp; 0 &amp; 0 \\
-    \hdashline
-    0 &amp; 0 &amp; \cos y\theta &amp; -\sin y\theta \\
-    0 &amp; 0 &amp; \sin y\theta &amp; \cos y\theta
-\end{array} \right)
-\tag{3}\]</span></span></p>
-<p>where <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> are the position indices in height and width dimensions, respectively, and <span class="math inline">\(\theta\)</span> is a predefined angle.</p>
-</section>
-<section id="patch-merger" class="level3" data-number="1.2.3">
-<h3 data-number="1.2.3" class="anchored" data-anchor-id="patch-merger"><span class="header-section-number">1.2.3</span> Patch Merger</h3>
-<div id="fig-patch-merger" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-patch-merger-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="assets/patch-merger.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: The function of Patch Merger. patch merging process, a down-sampling technique used in transformer architectures like the Swin Transformer. This operation reduces the spatial dimensions of the feature map while increasing the channel dimension."><img src="assets/patch-merger.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-patch-merger-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: The function of Patch Merger. patch merging process, a down-sampling technique used in transformer architectures like the Swin Transformer. This operation reduces the spatial dimensions of the feature map while increasing the channel dimension.
-</figcaption>
-</figure>
-</div>
-<p>However, unlike other patch merger such as the one in Swin Transformer <span class="citation" data-cites="SwinTransformerHierarchical2021liu">(<a href="#ref-SwinTransformerHierarchical2021liu" role="doc-biblioref">Liu et al. 2021</a>)</span>, the Patch Merger in Qwen3-VL is implemented as a linear layer that projects the concatenated patch embeddings into a lower-dimensional space. The adjcant patch embeddings are processed during the pre-processing step, and the Patch Merger layer simply reduces the dimensionality of the concatenated embeddings. Wewill see more</p>
-</section>
-</section>
-<section id="vision-language-fusion" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="vision-language-fusion"><span class="header-section-number">1.3</span> Vision Language Fusion</h2>
-<section id="deepstack" class="level3" data-number="1.3.1">
-<h3 data-number="1.3.1" class="anchored" data-anchor-id="deepstack"><span class="header-section-number">1.3.1</span> DeepStack</h3>
-<div id="fig-deeostack" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-deeostack-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="assets/deepstack.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: The architecture of DeepStack"><img src="assets/deepstack.png" class="img-fluid figure-img" style="width:100.0%"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-deeostack-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: The architecture of DeepStack
-</figcaption>
-</figure>
-</div>
-<p><span class="citation" data-cites="DeepStackDeeplyStacking2024meng">(<a href="#ref-DeepStackDeeplyStacking2024meng" role="doc-biblioref">Meng et al. 2024</a>)</span></p>
-<p>The DeepStack module is designed to effectively merge visual and textual information. It consists of multiple layers of cross-attention and feed-forward networks. The cross-attention mechanism allows the model to attend to relevant visual features based on the textual input, enabling a more comprehensive understanding of the multi-modal data. The feed-forward networks further process the combined features to enhance their representation.</p>
-</section>
-</section>
-</section>
-<section id="related-resources" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Related Resources</h1>
-<p>The huggingface <code>transformers</code> implementation of <a href="https://github.com/huggingface/transformers/tree/main/src/transformers/models/qwen3_vl">Qwen3-VL model</a></p>
+
+<!-- Content: edit here -- Qwen3-VL project page -->
 
 
 
-</section>
-
-<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-Qwen3VLTechnicalReport2025bai" class="csl-entry" role="listitem">
-Bai, Shuai, Yuxuan Cai, Ruizhe Chen, Keqin Chen, Xionghui Chen, Zesen Cheng, Lianghao Deng, et al. 2025. <span>“Qwen3-<span>VL Technical Report</span>.”</span> November 27, 2025. <a href="https://doi.org/10.48550/arXiv.2511.21631">https://doi.org/10.48550/arXiv.2511.21631</a>.
-</div>
-<div id="ref-SwinTransformerHierarchical2021liu" class="csl-entry" role="listitem">
-Liu, Ze, Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, and Baining Guo. 2021. <span>“Swin <span>Transformer</span>: <span>Hierarchical Vision Transformer</span> Using <span>Shifted Windows</span>.”</span> August 17, 2021. <a href="https://doi.org/10.48550/arXiv.2103.14030">https://doi.org/10.48550/arXiv.2103.14030</a>.
-</div>
-<div id="ref-DeepStackDeeplyStacking2024meng" class="csl-entry" role="listitem">
-Meng, Lingchen, Jianwei Yang, Rui Tian, Xiyang Dai, Zuxuan Wu, Jianfeng Gao, and Yu-Gang Jiang. 2024. <span>“<span>DeepStack</span>: <span>Deeply Stacking Visual Tokens</span> Is <span>Surprisingly Simple</span> and <span>Effective</span> for <span>LMMs</span>.”</span> June 6, 2024. <a href="https://doi.org/10.48550/arXiv.2406.04334">https://doi.org/10.48550/arXiv.2406.04334</a>.
-</div>
-<div id="ref-RoFormerEnhancedTransformer2023su" class="csl-entry" role="listitem">
-Su, Jianlin, Yu Lu, Shengfeng Pan, Ahmed Murtadha, Bo Wen, and Yunfeng Liu. 2023. <span>“<span>RoFormer</span>: <span>Enhanced Transformer</span> with <span>Rotary Position Embedding</span>.”</span> November 8, 2023. <a href="https://doi.org/10.48550/arXiv.2104.09864">https://doi.org/10.48550/arXiv.2104.09864</a>.
-</div>
-<div id="ref-SigLIP2Multilingual2025tschannen" class="csl-entry" role="listitem">
-Tschannen, Michael, Alexey Gritsenko, Xiao Wang, Muhammad Ferjad Naeem, Ibrahim Alabdulmohsin, Nikhil Parthasarathy, Talfan Evans, et al. 2025. <span>“<span>SigLIP</span> 2: <span>Multilingual Vision-Language Encoders</span> with <span>Improved Semantic Understanding</span>, <span>Localization</span>, and <span>Dense Features</span>.”</span> February 20, 2025. <a href="https://doi.org/10.48550/arXiv.2502.14786">https://doi.org/10.48550/arXiv.2502.14786</a>.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -729,13 +444,14 @@ Tschannen, Michael, Alexey Gritsenko, Xiao Wang, Muhammad Ferjad Naeem, Ibrahim 
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -750,7 +466,7 @@ Tschannen, Michael, Alexey Gritsenko, Xiao Wang, Muhammad Ferjad Naeem, Ibrahim 
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/qsdong-bupt\.github\.io");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -764,11 +480,6 @@ Tschannen, Michael, Alexey Gritsenko, Xiao Wang, Muhammad Ferjad Naeem, Ibrahim 
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -1082,119 +793,39 @@ Tschannen, Michael, Alexey Gritsenko, Xiao Wang, Muhammad Ferjad Naeem, Ibrahim 
     }
   });
   </script>
-<input type="hidden" id="giscus-base-theme" value="light">
-<input type="hidden" id="giscus-alt-theme" value="dark_dimmed">
-<script>
-  function loadGiscus() {
-    // Function to get the theme based on body class
-    const getTheme = () => {
-      let baseTheme = document.getElementById('giscus-base-theme').value;
-      let altTheme = document.getElementById('giscus-alt-theme').value;
-      if (authorPrefersDark) {
-          [baseTheme, altTheme] = [altTheme, baseTheme];
-      }
-      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
-    };
-    const script = document.createElement("script");
-    script.src = "https://giscus.app/client.js";
-    script.async = true;
-    script.dataset.repo = "YYZhang2025/YYZhang2025.github.io";
-    script.dataset.repoId = "R_kgDOQlDTcQ";
-    script.dataset.category = "General";
-    script.dataset.categoryId = "DIC_kwDOQlDTcc4C2MRz";
-    script.dataset.mapping = "title";
-    script.dataset.reactionsEnabled = "1";
-    script.dataset.emitMetadata = "0";
-    script.dataset.inputPosition = "top";
-    script.dataset.theme = getTheme();
-    script.dataset.lang = "en";
-    script.crossOrigin = "anonymous";
-    // Append the script to the desired div instead of at the end of the body
-    document.getElementById("quarto-content").appendChild(script);
-  }
-  loadGiscus();
-</script>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© CC-By Yuyang, 2025</p>
-</div>   
+      &nbsp;
+    </div>   
     <div class="nav-footer-center">
+<p>© 2025 Yuyang Zhang. Built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+    <div class="nav-footer-right">
       &nbsp;
     </div>
-    <div class="nav-footer-right">
-<p>This page is built with ❤️ and <a href="https://quarto.org/">Quarto</a>.</p>
-</div>
   </div>
 </footer>
-    <script type="text/javascript">
-    (function(d) {
-      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
-        let pseudocodeOptions = {
-          indentSize: el.dataset.indentSize,
-          commentDelimiter: el.dataset.commentDelimiter,
-          lineNumber: el.dataset.lineNumber.toLowerCase() === "true",
-          lineNumberPunc: el.dataset.lineNumberPunc,
-          noEnd: el.dataset.noEnd.toLowerCase() === "true",
-          titlePrefix: el.dataset.captionPrefix
-        };
-        pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
-      });
-    })(document);
-    (function(d) {
-      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
-        let captionSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
-        if (captionSpan !== null) {
-          let captionPrefix = el.dataset.captionPrefix + " ";
-          let captionNumber = "";
-          if (el.dataset.pseudocodeNumber) {
-            captionNumber = el.dataset.pseudocodeNumber + " ";
-            if (el.dataset.chapterLevel) {
-              captionNumber = el.dataset.chapterLevel + "." + captionNumber;
-            }
-          }
-          captionSpan.innerHTML = captionPrefix + captionNumber;
-        }
-      });
-    })(document);
-    </script>
-  
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
-(function() {
-  let previousOnload = window.onload;
-  window.onload = () => {
-    if (previousOnload) {
-      previousOnload();
-    }
-    lightboxQuarto.on('slide_before_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      const href = trigger.getAttribute('href');
-      if (href !== null) {
-        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
-        if (imgEl !== null) {
-          const srcAttr = imgEl.getAttribute("src");
-          if (srcAttr && srcAttr.startsWith("data:")) {
-            slideConfig.href = srcAttr;
-          }
-        }
-      } 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) block.classList.toggle("is-open");
     });
-  
-    lightboxQuarto.on('slide_after_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(slideNode);
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
       }
     });
-  
-  };
-  
-})();
-          </script>
+  });
+});
+</script>
 
 
 
 
-<script src="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
 </body></html>

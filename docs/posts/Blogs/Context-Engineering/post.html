@@ -2,16 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Yuyang Zhang">
+<meta name="author" content="Qingsen Zhang">
 <meta name="dcterms.date" content="2026-03-21">
-<meta name="description" content="随着OpenClaw在2026年初的爆火，Context Engineering和Harness Engineering的概念被提出并且重新被人关注。Context Engineering主要是指在使用LLM的过程中，如何有效地管理和利用上下文信息，以提高模型的性能和效率。而Harness Engineering则是指在使用LLM的过程中，如何设计和构建一个高效的系统架构，以支持模型的训练和部署。在这篇文章中，我们将深入探讨Context Engineering和Harness Engineering的概念，以及它们在LLM应用中的重要性和实践方法。">
+<meta name="description" content="随着OpenClaw在2026年初的爆火，Context Engineering和Harness Engineering的概念被提出并且重新被人关注。在这篇文章中，我们将深入探讨这两个概念在LLM应用中的重要性和实践方法。">
 
 <title>What is Context Engineering &amp; Harness Engineering?</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -33,27 +36,21 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../../">
-<link href="../../.././style/icon.avif" rel="icon">
+<link href="../../../style/icon.avif" rel="icon">
 <script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/bootstrap/bootstrap-dark-44402bf054b1fe078bc4e7aebe64bce9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
-<script src="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.js"></script>
-<link href="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.css" rel="stylesheet">
-<script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
-<link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-0b09eb4da84538f8c2fd112b9812168b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -90,71 +87,31 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
 </script>
-<link href="https://fonts.cdnfonts.com/css/cmu-sans-serif" rel="stylesheet">
+<script>
+  MathJax = {
+    loader: { load: ['[tex]/boldsymbol'] },
+    tex: {
+      tags: "all",
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      packages: { '[+]': ['boldsymbol'] }
+    }
+  };
+</script>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<script>
-    MathJax = {
-        loader: {
-        load: ['[tex]/boldsymbol']
-        },
-        tex: {
-        tags: "all",
-        inlineMath: [['$','$'], ['\\(','\\)']],
-        displayMath: [['$$','$$'], ['\\[','\\]']],
-        processEscapes: true,
-        processEnvironments: true,
-        packages: {
-            '[+]': ['boldsymbol']
-        }
-        }
-    };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".foldable-header").forEach(header => {
-    header.addEventListener("click", () => {
-      const block = header.closest(".foldable");
-      if (block) {
-        block.classList.toggle("is-open");
-      }
-    });
-
-    // 可访问性（键盘）
-    header.setAttribute("tabindex", "0");
-    header.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        header.click();
-      }
-    });
-  });
-});
-</script>
-    <style type="text/css">
-    .ps-root .ps-algorithm {
-      border-top: 2px solid;
-      border-bottom: 2px solid;
-    }
-    .pseudocode-container {
-      text-align: left;
-    }
-    </style>
-  
-      <style type="text/css">
-      .ps-algorithm > .ps-line {
-        text-align: left;
-      }
-      </style>
-    
-
-
 <meta property="og:title" content="What is Context Engineering &amp; Harness Engineering?">
-<meta property="og:description" content="随着OpenClaw在2026年初的爆火，Context Engineering和Harness Engineering的概念被提出并且重新被人关注。Context Engineering主要是指在使用LLM的过程中，如何有效地管理和利用上下文信息，以提高模型的性能和效率。而Harness Engineering则是指在使用LLM的过程中，如何设计和构建一个高效的系统架构，以支持模型的训练和部署。在这篇文章中，我们将深入探讨Context Engineering和Harness Engineering的概念，以及它们在LLM应用中的重要性和实践方法。">
-<meta property="og:image" content="./assets/context-length-information.png">
+<meta property="og:description" content="随着OpenClaw在2026年初的爆火，Context Engineering和Harness Engineering的概念被提出并且重新被人关注。在这篇文章中，我们将深入探讨这两个概念在LLM应用中的重要性和实践方法。">
+<meta property="og:image" content="https://qsdong-bupt.github.io/posts/Blogs/Context-Engineering/assets/context-length-information.png">
+<meta property="og:image:height" content="988">
+<meta property="og:image:width" content="1999">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -352,106 +309,52 @@ document.addEventListener("DOMContentLoaded", function () {
     <a class="nav-link" href="../../../posts/Projects/projects_index.html"> 
 <span class="menu-text">Projects</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="https://yyzhang2025.github.io/LearningNotes/"> 
-<span class="menu-text">100 PwC</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../../posts/CS336/index.html"> 
-<span class="menu-text">Stanford CS336</span></a>
-  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
+    <a href="" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-toggle-dark-mode"></i></a>
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">What is Context Engineering &amp; Harness Engineering?</h1>
-        </a>     
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#what-in-the-context" id="toc-what-in-the-context" class="nav-link active" data-scroll-target="#what-in-the-context"><span class="header-section-number">1</span> What in the Context?</a></li>
-  <li><a href="#context-engineering" id="toc-context-engineering" class="nav-link" data-scroll-target="#context-engineering"><span class="header-section-number">2</span> Context Engineering</a>
-  <ul>
-  <li><a href="#select" id="toc-select" class="nav-link" data-scroll-target="#select"><span class="header-section-number">2.1</span> Select</a></li>
-  <li><a href="#compress" id="toc-compress" class="nav-link" data-scroll-target="#compress"><span class="header-section-number">2.2</span> Compress</a>
-  <ul>
-  <li><a href="#tool-use-compression" id="toc-tool-use-compression" class="nav-link" data-scroll-target="#tool-use-compression"><span class="header-section-number">2.2.1</span> Tool Use Compression</a></li>
-  </ul></li>
-  <li><a href="#context-collapse" id="toc-context-collapse" class="nav-link" data-scroll-target="#context-collapse"><span class="header-section-number">2.3</span> Context Collapse</a></li>
-  <li><a href="#when-to-compress" id="toc-when-to-compress" class="nav-link" data-scroll-target="#when-to-compress"><span class="header-section-number">2.4</span> When to Compress?</a></li>
-  <li><a href="#multi-agent" id="toc-multi-agent" class="nav-link" data-scroll-target="#multi-agent"><span class="header-section-number">2.5</span> Multi-Agent</a></li>
-  </ul></li>
-  <li><a href="#agentic-context-engineering" id="toc-agentic-context-engineering" class="nav-link" data-scroll-target="#agentic-context-engineering"><span class="header-section-number">3</span> Agentic Context Engineering</a></li>
-  </ul>
-</nav>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">What is Context Engineering &amp; Harness Engineering?</h1>
+<h1 class="title">What is Context Engineering &amp; Harness Engineering?</h1>
 </div>
 
 <div>
   <div class="description">
-    随着OpenClaw在2026年初的爆火，Context Engineering和Harness Engineering的概念被提出并且重新被人关注。Context Engineering主要是指在使用LLM的过程中，如何有效地管理和利用上下文信息，以提高模型的性能和效率。而Harness Engineering则是指在使用LLM的过程中，如何设计和构建一个高效的系统架构，以支持模型的训练和部署。在这篇文章中，我们将深入探讨Context Engineering和Harness Engineering的概念，以及它们在LLM应用中的重要性和实践方法。
+    随着OpenClaw在2026年初的爆火，Context Engineering和Harness Engineering的概念被提出并且重新被人关注。在这篇文章中，我们将深入探讨这两个概念在LLM应用中的重要性和实践方法。
   </div>
 </div>
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Yuyang Zhang </p>
+             <p>Qingsen Zhang </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">2026-03-21</p>
+      <p class="date">March 21, 2026</p>
     </div>
   </div>
   
-    <div>
-    <div class="quarto-title-meta-heading">Modified</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date-modified">2026-04-13</p>
-    </div>
-  </div>
     
   </div>
   
@@ -459,135 +362,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </header>
 
-<nav id="TOC-body" role="doc-toc">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#what-in-the-context" id="toc-what-in-the-context"><span class="header-section-number">1</span> What in the Context?</a></li>
-  <li><a href="#context-engineering" id="toc-context-engineering"><span class="header-section-number">2</span> Context Engineering</a>
-  <ul>
-  <li><a href="#select" id="toc-select"><span class="header-section-number">2.1</span> Select</a></li>
-  <li><a href="#compress" id="toc-compress"><span class="header-section-number">2.2</span> Compress</a>
-  <ul>
-  <li><a href="#tool-use-compression" id="toc-tool-use-compression"><span class="header-section-number">2.2.1</span> Tool Use Compression</a></li>
-  </ul></li>
-  <li><a href="#context-collapse" id="toc-context-collapse"><span class="header-section-number">2.3</span> Context Collapse</a></li>
-  <li><a href="#when-to-compress" id="toc-when-to-compress"><span class="header-section-number">2.4</span> When to Compress?</a></li>
-  <li><a href="#multi-agent" id="toc-multi-agent"><span class="header-section-number">2.5</span> Multi-Agent</a></li>
-  </ul></li>
-  <li><a href="#agentic-context-engineering" id="toc-agentic-context-engineering"><span class="header-section-number">3</span> Agentic Context Engineering</a></li>
-  </ul>
-</nav>
-<section id="what-in-the-context" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> What in the Context?</h1>
-<ul>
-<li>User Prompt: 用户的输入文本，通常是一个自然语言的查询或者指令。</li>
-<li>System Prompt: 系统的输入文本，通常是一个预定义的文本，用来引导模型生成特定类型的输出。</li>
-</ul>
-<p>System Prompt 里面应该包含什么</p>
-<ul>
-<li>Dialogue History（Short Term Memory）: 之前的对话内容，可以帮助模型理解当前的对话上下文。</li>
-<li>Long Term Memory： 长期记忆，可以帮助模型在更长时间范围内保持对话的一致性和上下文理解。</li>
-<li>Other Information：从RAG，或者其他外部知识库中检索到的信息，可以帮助模型生成更准确和相关的输出。</li>
-<li>Tool Use：模型在生成输出的过程中，可能需要调用一些工具或者API来获取更多的信息或者执行一些操作，这些工具的使用信息也应该包含在System Prompt中。 （Prompt）：
-<ul>
-<li>如何使用工具</li>
-<li>特定工具的使用方法</li>
-</ul></li>
-</ul>
-<p><code>eval()</code> 可以执行工具</p>
-<p>Computer Use</p>
-<p>Reasoning Process</p>
-</section>
-<section id="context-engineering" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Context Engineering</h1>
-<p>Context Engineering主要是减少Context的长度，以及冗余信息。尽管现在的模型号称的Context Length已经达到了100K tokens，但是在实际的应用中，过长的Context会导致模型的效率降低，甚至无法处理。</p>
-<div id="fig-context-length-information.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-context-length-information.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/context-length-information.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: "><img src="./assets/context-length-information.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-context-length-information.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1
-</figcaption>
-</figure>
-</div>
-<p>可以发现，资料越来越多，模型的表现并没有表现的更好。</p>
-<p>Context Engineering 的实现，基本就是一句话:</p>
-<div class="highlight">
-<p>把需要的东西放进去，不需要的东西清理出来</p>
-</div>
-<section id="select" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="select"><span class="header-section-number">2.1</span> Select</h2>
-<p>别把所有的东西都放进去，挑选出最相关的东西放进去。比如在RAG的场景中，检索到的资料可能有很多，但是并不是所有的资料都是相关的，我们需要通过一些方法来挑选出最相关的资料放入Context中。</p>
-<p>除了RAG，我们还可以通过用LLM的方法，挑选我们需要的关键字，将其传入搜索引擎，并且用一个小的LLM来挑选出最相关的资料放入Context中，这个过程叫做Reranking</p>
-<p>Tool RAG 当我们工具越来越多的时候 ，模型需要调用的工具也会越来越多，这时候我们就需要通过一些方法来挑选出最相关的工具放入Context中，或者说在模型生成输出的过程中，模型需要调用哪些工具，这些工具的信息也应该包含在Context中。</p>
-<p>Memory RAG 当我们有一个长时间的对话或者交互的时候，模型需要记住之前的对话内容或者交互内容，这些内容可以帮助模型理解当前的对话上下文，这些内容也应该包含在Context中。</p>
-<p>按需加在 用AI动态输出自己需要什么工具</p>
-</section>
-<section id="compress" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="compress"><span class="header-section-number">2.2</span> Compress</h2>
-<p>也叫Compact 将久远的对话内容或者交互内容进行压缩，提取出其中的关键信息，放入Context中，这样可以减少Context的长度，同时又能保留重要的信息。 什么时候压缩？ - 当每多少回合对话或者交互之后，就进行一次压缩，提取出其中的关键信息，放入Context中。 - 固定一段时间就压缩</p>
-<section id="tool-use-compression" class="level3" data-number="2.2.1">
-<h3 data-number="2.2.1" class="anchored" data-anchor-id="tool-use-compression"><span class="header-section-number">2.2.1</span> Tool Use Compression</h3>
-<p>Computer Use的过程中时非常琐碎的内容，可能会有很多的细节信息，这些信息对于模型来说可能并不是非常重要，我们可以通过一些方法来压缩这些信息，提取出其中的关键信息，放入Context中，这样可以减少Context的长度，同时又能保留重要的信息.</p>
-<p>也可以把其放入RAG或者Log.txt</p>
-<div id="fig-replace-tool-output.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-replace-tool-output.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/replace-tool-output.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: "><img src="./assets/replace-tool-output.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-replace-tool-output.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2
-</figcaption>
-</figure>
-</div>
-<p>两个可以结合起来使用</p>
-<div id="fig-combine.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-combine.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/combine.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: "><img src="./assets/combine.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-combine.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3
-</figcaption>
-</figure>
-</div>
-<p>可以把Tool的输出存在Log.txt 中</p>
-</section>
-</section>
-<section id="context-collapse" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="context-collapse"><span class="header-section-number">2.3</span> Context Collapse</h2>
-<p>在压缩的时候，可能会损失一些重要的信息。</p>
-<p>当然，可以专门训练一个LLM来进行模型的压缩</p>
-</section>
-<section id="when-to-compress" class="level2" data-number="2.4">
-<h2 data-number="2.4" class="anchored" data-anchor-id="when-to-compress"><span class="header-section-number">2.4</span> When to Compress?</h2>
-<p>模型很难自己压缩，所以我们需要通过一些方法来判断什么时候需要压缩，什么时候不需要压缩，这样可以减少Context的长度，同时又能保留重要的信息。</p>
-</section>
-<section id="multi-agent" class="level2" data-number="2.5">
-<h2 data-number="2.5" class="anchored" data-anchor-id="multi-agent"><span class="header-section-number">2.5</span> Multi-Agent</h2>
-<p>当我们有多个Agent的时候，每个Agent可能需要不同的Context信息，这时候我们就需要通过一些方法来挑选出每个Agent需要的Context信息，放入Context中，这样可以减少Context的长度，同时又能保留重要的信息。</p>
-<p>比如Sub-agent，我们可以丢弃sub-agent的对话内容，只保存sub-agent的关键信息，返回Main Agent当中，这样可以减少Context的长度，同时又能保留重要的信息。</p>
-<div id="fig-sub-agent.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-sub-agent.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/sub-agent.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: "><img src="./assets/sub-agent.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-sub-agent.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4
-</figcaption>
-</figure>
-</div>
-</section>
-</section>
-<section id="agentic-context-engineering" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Agentic Context Engineering</h1>
+
+<!-- Content: edit here -- Context Engineering blog post -->
 
 
-</section>
 
-<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -652,13 +432,14 @@ Figure&nbsp;4
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -673,7 +454,7 @@ Figure&nbsp;4
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/qsdong-bupt\.github\.io");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -687,11 +468,6 @@ Figure&nbsp;4
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -1005,119 +781,39 @@ Figure&nbsp;4
     }
   });
   </script>
-<input type="hidden" id="giscus-base-theme" value="light">
-<input type="hidden" id="giscus-alt-theme" value="dark_dimmed">
-<script>
-  function loadGiscus() {
-    // Function to get the theme based on body class
-    const getTheme = () => {
-      let baseTheme = document.getElementById('giscus-base-theme').value;
-      let altTheme = document.getElementById('giscus-alt-theme').value;
-      if (authorPrefersDark) {
-          [baseTheme, altTheme] = [altTheme, baseTheme];
-      }
-      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
-    };
-    const script = document.createElement("script");
-    script.src = "https://giscus.app/client.js";
-    script.async = true;
-    script.dataset.repo = "YYZhang2025/YYZhang2025.github.io";
-    script.dataset.repoId = "R_kgDOQlDTcQ";
-    script.dataset.category = "General";
-    script.dataset.categoryId = "DIC_kwDOQlDTcc4C2MRz";
-    script.dataset.mapping = "title";
-    script.dataset.reactionsEnabled = "1";
-    script.dataset.emitMetadata = "0";
-    script.dataset.inputPosition = "top";
-    script.dataset.theme = getTheme();
-    script.dataset.lang = "en";
-    script.crossOrigin = "anonymous";
-    // Append the script to the desired div instead of at the end of the body
-    document.getElementById("quarto-content").appendChild(script);
-  }
-  loadGiscus();
-</script>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© CC-By Yuyang, 2025</p>
-</div>   
+      &nbsp;
+    </div>   
     <div class="nav-footer-center">
+<p>© 2025 Yuyang Zhang. Built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+    <div class="nav-footer-right">
       &nbsp;
     </div>
-    <div class="nav-footer-right">
-<p>This page is built with ❤️ and <a href="https://quarto.org/">Quarto</a>.</p>
-</div>
   </div>
 </footer>
-    <script type="text/javascript">
-    (function(d) {
-      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
-        let pseudocodeOptions = {
-          indentSize: el.dataset.indentSize,
-          commentDelimiter: el.dataset.commentDelimiter,
-          lineNumber: el.dataset.lineNumber.toLowerCase() === "true",
-          lineNumberPunc: el.dataset.lineNumberPunc,
-          noEnd: el.dataset.noEnd.toLowerCase() === "true",
-          titlePrefix: el.dataset.captionPrefix
-        };
-        pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
-      });
-    })(document);
-    (function(d) {
-      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
-        let captionSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
-        if (captionSpan !== null) {
-          let captionPrefix = el.dataset.captionPrefix + " ";
-          let captionNumber = "";
-          if (el.dataset.pseudocodeNumber) {
-            captionNumber = el.dataset.pseudocodeNumber + " ";
-            if (el.dataset.chapterLevel) {
-              captionNumber = el.dataset.chapterLevel + "." + captionNumber;
-            }
-          }
-          captionSpan.innerHTML = captionPrefix + captionNumber;
-        }
-      });
-    })(document);
-    </script>
-  
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
-(function() {
-  let previousOnload = window.onload;
-  window.onload = () => {
-    if (previousOnload) {
-      previousOnload();
-    }
-    lightboxQuarto.on('slide_before_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      const href = trigger.getAttribute('href');
-      if (href !== null) {
-        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
-        if (imgEl !== null) {
-          const srcAttr = imgEl.getAttribute("src");
-          if (srcAttr && srcAttr.startsWith("data:")) {
-            slideConfig.href = srcAttr;
-          }
-        }
-      } 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) block.classList.toggle("is-open");
     });
-  
-    lightboxQuarto.on('slide_after_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(slideNode);
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
       }
     });
-  
-  };
-  
-})();
-          </script>
+  });
+});
+</script>
 
 
 
 
-<script src="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
 </body></html>

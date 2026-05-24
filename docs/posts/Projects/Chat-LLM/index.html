@@ -2,17 +2,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Yuyang Zhang">
+<meta name="author" content="Dong qingsen">
 <meta name="dcterms.date" content="2026-03-01">
 <meta name="keywords" content="LLM, Pre-Training, Scaling Laws, SFT, GRPO, Mixed Precision Training, ZeRO-2">
 <meta name="description" content="Built an end-to-end ChatGPT-style LLM system from scratch, using scaling law experiments to choose compute-optimal model size and token budget, followed by pre-training and post-training with SFT and GRPO. Developed an interactive Gradio chat interface to showcase instruction following, reasoning, and conversational generation in a ChatGPT-like experience.">
 
 <title>MicroLLM: From-Scratch ChatGPT-Style LLM Stack</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -34,27 +37,21 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../../">
-<link href="../../.././style/icon.avif" rel="icon">
+<link href="../../../style/icon.avif" rel="icon">
 <script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/bootstrap/bootstrap-dark-44402bf054b1fe078bc4e7aebe64bce9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../../site_libs/bootstrap/bootstrap-8f792e8c3bace32b51045abf7f9a5a4f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
-<script src="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.js"></script>
-<link href="../../../site_libs/quarto-contrib/pseudocode-2.4.1/pseudocode.min.css" rel="stylesheet">
-<script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
-<link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-0b09eb4da84538f8c2fd112b9812168b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -91,71 +88,31 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
 </script>
-<link href="https://fonts.cdnfonts.com/css/cmu-sans-serif" rel="stylesheet">
+<script>
+  MathJax = {
+    loader: { load: ['[tex]/boldsymbol'] },
+    tex: {
+      tags: "all",
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      packages: { '[+]': ['boldsymbol'] }
+    }
+  };
+</script>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<script>
-    MathJax = {
-        loader: {
-        load: ['[tex]/boldsymbol']
-        },
-        tex: {
-        tags: "all",
-        inlineMath: [['$','$'], ['\\(','\\)']],
-        displayMath: [['$$','$$'], ['\\[','\\]']],
-        processEscapes: true,
-        processEnvironments: true,
-        packages: {
-            '[+]': ['boldsymbol']
-        }
-        }
-    };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".foldable-header").forEach(header => {
-    header.addEventListener("click", () => {
-      const block = header.closest(".foldable");
-      if (block) {
-        block.classList.toggle("is-open");
-      }
-    });
-
-    // 可访问性（键盘）
-    header.setAttribute("tabindex", "0");
-    header.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        header.click();
-      }
-    });
-  });
-});
-</script>
-    <style type="text/css">
-    .ps-root .ps-algorithm {
-      border-top: 2px solid;
-      border-bottom: 2px solid;
-    }
-    .pseudocode-container {
-      text-align: left;
-    }
-    </style>
-  
-      <style type="text/css">
-      .ps-algorithm > .ps-line {
-        text-align: left;
-      }
-      </style>
-    
-
-
 <meta property="og:title" content="MicroLLM: From-Scratch ChatGPT-Style LLM Stack">
 <meta property="og:description" content="Built an end-to-end ChatGPT-style LLM system from scratch, using scaling law experiments to choose compute-optimal model size and token budget, followed by pre-training and post-training with SFT and GRPO. Developed an interactive Gradio chat interface to showcase instruction following, reasoning, and conversational generation in a ChatGPT-like experience.">
-<meta property="og:image" content="./assets/cover.png">
+<meta property="og:image" content="https://qsdong-bupt.github.io/posts/Projects/Chat-LLM/assets/auto-research.png">
+<meta property="og:image:height" content="1180">
+<meta property="og:image:width" content="2382">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -350,94 +307,34 @@ document.addEventListener("DOMContentLoaded", function () {
 <span class="menu-text">Blogs</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="https://yyzhang2025.github.io/LearningNotes/"> 
+    <a class="nav-link" href="../../../posts/Projects/projects_index.html"> 
 <span class="menu-text">Projects</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../.././posts/100PwC/index.qmd"> 
-<span class="menu-text">100 PwC</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../../posts/CS336/index.html"> 
-<span class="menu-text">Stanford CS336</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
+    <a href="" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-toggle-dark-mode"></i></a>
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">MicroLLM: From-Scratch ChatGPT-Style LLM Stack</h1>
-        </a>     
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#about-this-project" id="toc-about-this-project" class="nav-link active" data-scroll-target="#about-this-project"><span class="header-section-number">1</span> About this Project</a></li>
-  <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model"><span class="header-section-number">2</span> Model</a></li>
-  <li><a href="#optimizer" id="toc-optimizer" class="nav-link" data-scroll-target="#optimizer"><span class="header-section-number">3</span> Optimizer</a></li>
-  <li><a href="#scaling-laws" id="toc-scaling-laws" class="nav-link" data-scroll-target="#scaling-laws"><span class="header-section-number">4</span> Scaling Laws</a></li>
-  <li><a href="#dataloader" id="toc-dataloader" class="nav-link" data-scroll-target="#dataloader"><span class="header-section-number">5</span> DataLoader</a></li>
-  <li><a href="#pre-training" id="toc-pre-training" class="nav-link" data-scroll-target="#pre-training"><span class="header-section-number">6</span> Pre-Training</a></li>
-  <li><a href="#instruction-tuning-sft" id="toc-instruction-tuning-sft" class="nav-link" data-scroll-target="#instruction-tuning-sft"><span class="header-section-number">7</span> Instruction-Tuning (SFT)</a>
-  <ul>
-  <li><a href="#dataset-preparation" id="toc-dataset-preparation" class="nav-link" data-scroll-target="#dataset-preparation"><span class="header-section-number">7.1</span> Dataset Preparation</a>
-  <ul>
-  <li><a href="#basic-task" id="toc-basic-task" class="nav-link" data-scroll-target="#basic-task"><span class="header-section-number">7.1.1</span> Basic Task</a></li>
-  <li><a href="#smoltalk" id="toc-smoltalk" class="nav-link" data-scroll-target="#smoltalk"><span class="header-section-number">7.1.2</span> SmolTalk</a></li>
-  <li><a href="#arc" id="toc-arc" class="nav-link" data-scroll-target="#arc"><span class="header-section-number">7.1.3</span> Arc</a></li>
-  <li><a href="#mmlu" id="toc-mmlu" class="nav-link" data-scroll-target="#mmlu"><span class="header-section-number">7.1.4</span> MMLU</a></li>
-  <li><a href="#gsm8k" id="toc-gsm8k" class="nav-link" data-scroll-target="#gsm8k"><span class="header-section-number">7.1.5</span> GSM8K</a></li>
-  <li><a href="#customized-instruction-dataset" id="toc-customized-instruction-dataset" class="nav-link" data-scroll-target="#customized-instruction-dataset"><span class="header-section-number">7.1.6</span> Customized Instruction Dataset</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#post-training-grpo" id="toc-post-training-grpo" class="nav-link" data-scroll-target="#post-training-grpo"><span class="header-section-number">8</span> Post-Training (GRPO)</a></li>
-  <li><a href="#gradio-chat-interface" id="toc-gradio-chat-interface" class="nav-link" data-scroll-target="#gradio-chat-interface"><span class="header-section-number">9</span> Gradio Chat Interface</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">10</span> Conclusion</a></li>
-  <li><a href="#whats-next" id="toc-whats-next" class="nav-link" data-scroll-target="#whats-next"><span class="header-section-number">11</span> What’s Next</a>
-  <ul>
-  <li><a href="#autoresearch" id="toc-autoresearch" class="nav-link" data-scroll-target="#autoresearch"><span class="header-section-number">11.1</span> AutoResearch</a></li>
-  <li><a href="#multi-modality-llm" id="toc-multi-modality-llm" class="nav-link" data-scroll-target="#multi-modality-llm"><span class="header-section-number">11.2</span> Multi-Modality LLM</a></li>
-  <li><a href="#inference-system" id="toc-inference-system" class="nav-link" data-scroll-target="#inference-system"><span class="header-section-number">11.3</span> Inference System</a></li>
-  </ul></li>
-  <li><a href="#in-the-end" id="toc-in-the-end" class="nav-link" data-scroll-target="#in-the-end"><span class="header-section-number">12</span> In the End</a></li>
-  </ul>
-</nav>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">MicroLLM: From-Scratch ChatGPT-Style LLM Stack</h1>
-</div>
+<h1 class="title">MicroLLM: From-Scratch ChatGPT-Style LLM Stack</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Large Language Model</div>
+  </div>
+  </div>
 
 <div>
   <div class="description">
@@ -446,12 +343,12 @@ document.addEventListener("DOMContentLoaded", function () {
 </div>
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Yuyang Zhang </p>
+             <p>Dong qingsen </p>
           </div>
   </div>
     
@@ -475,144 +372,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </header>
 
-<nav id="TOC-body" role="doc-toc">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#about-this-project" id="toc-about-this-project"><span class="header-section-number">1</span> About this Project</a></li>
-  <li><a href="#model" id="toc-model"><span class="header-section-number">2</span> Model</a></li>
-  <li><a href="#optimizer" id="toc-optimizer"><span class="header-section-number">3</span> Optimizer</a></li>
-  <li><a href="#scaling-laws" id="toc-scaling-laws"><span class="header-section-number">4</span> Scaling Laws</a></li>
-  <li><a href="#dataloader" id="toc-dataloader"><span class="header-section-number">5</span> DataLoader</a></li>
-  <li><a href="#pre-training" id="toc-pre-training"><span class="header-section-number">6</span> Pre-Training</a></li>
-  <li><a href="#instruction-tuning-sft" id="toc-instruction-tuning-sft"><span class="header-section-number">7</span> Instruction-Tuning (SFT)</a>
-  <ul>
-  <li><a href="#dataset-preparation" id="toc-dataset-preparation"><span class="header-section-number">7.1</span> Dataset Preparation</a>
-  <ul>
-  <li><a href="#basic-task" id="toc-basic-task"><span class="header-section-number">7.1.1</span> Basic Task</a></li>
-  <li><a href="#smoltalk" id="toc-smoltalk"><span class="header-section-number">7.1.2</span> SmolTalk</a></li>
-  <li><a href="#arc" id="toc-arc"><span class="header-section-number">7.1.3</span> Arc</a></li>
-  <li><a href="#mmlu" id="toc-mmlu"><span class="header-section-number">7.1.4</span> MMLU</a></li>
-  <li><a href="#gsm8k" id="toc-gsm8k"><span class="header-section-number">7.1.5</span> GSM8K</a></li>
-  <li><a href="#customized-instruction-dataset" id="toc-customized-instruction-dataset"><span class="header-section-number">7.1.6</span> Customized Instruction Dataset</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#post-training-grpo" id="toc-post-training-grpo"><span class="header-section-number">8</span> Post-Training (GRPO)</a></li>
-  <li><a href="#gradio-chat-interface" id="toc-gradio-chat-interface"><span class="header-section-number">9</span> Gradio Chat Interface</a></li>
-  <li><a href="#conclusion" id="toc-conclusion"><span class="header-section-number">10</span> Conclusion</a></li>
-  <li><a href="#whats-next" id="toc-whats-next"><span class="header-section-number">11</span> What’s Next</a>
-  <ul>
-  <li><a href="#autoresearch" id="toc-autoresearch"><span class="header-section-number">11.1</span> AutoResearch</a></li>
-  <li><a href="#multi-modality-llm" id="toc-multi-modality-llm"><span class="header-section-number">11.2</span> Multi-Modality LLM</a></li>
-  <li><a href="#inference-system" id="toc-inference-system"><span class="header-section-number">11.3</span> Inference System</a></li>
-  </ul></li>
-  <li><a href="#in-the-end" id="toc-in-the-end"><span class="header-section-number">12</span> In the End</a></li>
-  </ul>
-</nav>
-<section id="about-this-project" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> About this Project</h1>
-</section>
-<section id="model" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Model</h1>
-</section>
-<section id="optimizer" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Optimizer</h1>
-</section>
-<section id="scaling-laws" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> Scaling Laws</h1>
-</section>
-<section id="dataloader" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> DataLoader</h1>
-</section>
-<section id="pre-training" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Pre-Training</h1>
-</section>
-<section id="instruction-tuning-sft" class="level1" data-number="7">
-<h1 data-number="7"><span class="header-section-number">7</span> Instruction-Tuning (SFT)</h1>
-<p>在我们Pre-Training结束之后，我们得到了一个基础的LLM，这个语言模型可以做词语接龙，比如：</p>
-<div class="highlight">
-<p>猫猫是一个 猫猫是一个很 猫猫是一个很可 猫猫是一个很可爱…</p>
-</div>
-<p>这距离我们的ChatGPT-Style LLM的目标还有一段距离，我们需要让模型可以输出特定的格式，能够理解指令，并且能够对话生成。为此，我们需要进行Instruction-Tuning，也就是SFT（Supervised Fine-Tuning）。我们会使用一些公开的指令数据集，比如Alpaca、ShareGPT等，来对模型进行微调，让它能够更好地理解和执行各种指令。</p>
-<section id="dataset-preparation" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="dataset-preparation"><span class="header-section-number">7.1</span> Dataset Preparation</h2>
-<section id="basic-task" class="level3" data-number="7.1.1">
-<h3 data-number="7.1.1" class="anchored" data-anchor-id="basic-task"><span class="header-section-number">7.1.1</span> Basic Task</h3>
-</section>
-<section id="smoltalk" class="level3" data-number="7.1.2">
-<h3 data-number="7.1.2" class="anchored" data-anchor-id="smoltalk"><span class="header-section-number">7.1.2</span> SmolTalk</h3>
-</section>
-<section id="arc" class="level3" data-number="7.1.3">
-<h3 data-number="7.1.3" class="anchored" data-anchor-id="arc"><span class="header-section-number">7.1.3</span> Arc</h3>
-</section>
-<section id="mmlu" class="level3" data-number="7.1.4">
-<h3 data-number="7.1.4" class="anchored" data-anchor-id="mmlu"><span class="header-section-number">7.1.4</span> MMLU</h3>
-</section>
-<section id="gsm8k" class="level3" data-number="7.1.5">
-<h3 data-number="7.1.5" class="anchored" data-anchor-id="gsm8k"><span class="header-section-number">7.1.5</span> GSM8K</h3>
-</section>
-<section id="customized-instruction-dataset" class="level3" data-number="7.1.6">
-<h3 data-number="7.1.6" class="anchored" data-anchor-id="customized-instruction-dataset"><span class="header-section-number">7.1.6</span> Customized Instruction Dataset</h3>
-<p>除了上述的公开集，我们还可以自己构建一些</p>
-</section>
-</section>
-</section>
-<section id="post-training-grpo" class="level1" data-number="8">
-<h1 data-number="8"><span class="header-section-number">8</span> Post-Training (GRPO)</h1>
-</section>
-<section id="gradio-chat-interface" class="level1" data-number="9">
-<h1 data-number="9"><span class="header-section-number">9</span> Gradio Chat Interface</h1>
-</section>
-<section id="conclusion" class="level1" data-number="10">
-<h1 data-number="10"><span class="header-section-number">10</span> Conclusion</h1>
-</section>
-<section id="whats-next" class="level1" data-number="11">
-<h1 data-number="11"><span class="header-section-number">11</span> What’s Next</h1>
-<p>完成了这个Project之后，我们真正的理解了如何从0训练一个ChatGPT-Style的LLM系统，基本上市面上所有的SOTA的模型，都是基于这一套技术。当然，学无止境，在这个项目的基础上，我们还有很多可以继续深入的方向：</p>
-<ul>
-<li>AutoResearch：Karpathy大神开源的AutoResearch工具，可以自动迭代模型结构、优化器、超参数等，来找到最优的训练方案。</li>
-<li>Multi-Modality LLM：目前我们训练的模型主要是基于文本的，但未来我们可以尝试训练一个多模态的LLM，能够处理图像、视频、音频等多种输入形式。</li>
-<li>Inference Optimization：优化模型的推理过程</li>
-<li>Reasoning Capabilities：尽管我们实现了GRPO的算法，但是模型的推理能力还有很大的提升空间，比如我们可以尝试新的推理算法，或者引入别的训练数据。</li>
-</ul>
-<section id="autoresearch" class="level2" data-number="11.1">
-<h2 data-number="11.1" class="anchored" data-anchor-id="autoresearch"><span class="header-section-number">11.1</span> AutoResearch</h2>
-<p>在这个nanoChat项目之后，Karpathy大神有开源了一个叫做<a href="https://github.com/karpathy/autoresearch">AutoResearch</a>的神器（GitHub上的Stars比这个项目还高），它通过定义简单的三个文件：</p>
-<ul>
-<li><code>prepare.py</code>：数据准备脚本</li>
-<li><code>train.py</code>：训练脚本</li>
-<li><code>program.md</code>: 告诉Agent该怎么做</li>
-</ul>
-<p>通过这个方法，Agent自动迭代模型结构、优化器、超参数、训练循环、batch size、model size 等等，来找到最优的训练方案。不过我觉得最有创新的方法就是它可以通过git来回滚，保留好的结果，回滚坏的结果。通过这种方式，AutoResearch可以在没有人类干预的情况下自动进行实验和优化，并提高了模型的性能，如下图所示：</p>
-<div id="fig-auto-research.png" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-auto-research.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="./assets/auto-research.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: "><img src="./assets/auto-research.png" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-auto-research.png-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1
-</figcaption>
-</figure>
-</div>
-</section>
-<section id="multi-modality-llm" class="level2" data-number="11.2">
-<h2 data-number="11.2" class="anchored" data-anchor-id="multi-modality-llm"><span class="header-section-number">11.2</span> Multi-Modality LLM</h2>
-<p>基于文本的LLM已经非常强大了，但未来我们可以尝试训练一个多模态的LLM，能够处理图像、视频、音频等多种输入形式。比如我们可以训练一个模型，输入一张图片，它能够生成对这张图片的描述，或者输入一段视频，它能够总结视频的内容，甚至输入一段音频，它能够转录成文本并进行分析。常见的MLLM的框架有：</p>
-<ul>
-<li>LLaVA</li>
-</ul>
-</section>
-<section id="inference-system" class="level2" data-number="11.3">
-<h2 data-number="11.3" class="anchored" data-anchor-id="inference-system"><span class="header-section-number">11.3</span> Inference System</h2>
-</section>
-</section>
-<section id="in-the-end" class="level1" data-number="12">
-<h1 data-number="12"><span class="header-section-number">12</span> In the End</h1>
+
+<!-- Content: edit here -- Chat-LLM project page -->
 
 
-</section>
 
-<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -677,13 +442,14 @@ Figure&nbsp;1
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -698,7 +464,7 @@ Figure&nbsp;1
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/qsdong-bupt\.github\.io");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -712,11 +478,6 @@ Figure&nbsp;1
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -1030,119 +791,39 @@ Figure&nbsp;1
     }
   });
   </script>
-<input type="hidden" id="giscus-base-theme" value="light">
-<input type="hidden" id="giscus-alt-theme" value="dark_dimmed">
-<script>
-  function loadGiscus() {
-    // Function to get the theme based on body class
-    const getTheme = () => {
-      let baseTheme = document.getElementById('giscus-base-theme').value;
-      let altTheme = document.getElementById('giscus-alt-theme').value;
-      if (authorPrefersDark) {
-          [baseTheme, altTheme] = [altTheme, baseTheme];
-      }
-      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
-    };
-    const script = document.createElement("script");
-    script.src = "https://giscus.app/client.js";
-    script.async = true;
-    script.dataset.repo = "YYZhang2025/YYZhang2025.github.io";
-    script.dataset.repoId = "R_kgDOQlDTcQ";
-    script.dataset.category = "General";
-    script.dataset.categoryId = "DIC_kwDOQlDTcc4C2MRz";
-    script.dataset.mapping = "title";
-    script.dataset.reactionsEnabled = "1";
-    script.dataset.emitMetadata = "0";
-    script.dataset.inputPosition = "top";
-    script.dataset.theme = getTheme();
-    script.dataset.lang = "en";
-    script.crossOrigin = "anonymous";
-    // Append the script to the desired div instead of at the end of the body
-    document.getElementById("quarto-content").appendChild(script);
-  }
-  loadGiscus();
-</script>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© CC-By Yuyang, 2025</p>
-</div>   
+      &nbsp;
+    </div>   
     <div class="nav-footer-center">
+<p>© 2025 Yuyang Zhang. Built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+    <div class="nav-footer-right">
       &nbsp;
     </div>
-    <div class="nav-footer-right">
-<p>This page is built with ❤️ and <a href="https://quarto.org/">Quarto</a>.</p>
-</div>
   </div>
 </footer>
-    <script type="text/javascript">
-    (function(d) {
-      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
-        let pseudocodeOptions = {
-          indentSize: el.dataset.indentSize,
-          commentDelimiter: el.dataset.commentDelimiter,
-          lineNumber: el.dataset.lineNumber.toLowerCase() === "true",
-          lineNumberPunc: el.dataset.lineNumberPunc,
-          noEnd: el.dataset.noEnd.toLowerCase() === "true",
-          titlePrefix: el.dataset.captionPrefix
-        };
-        pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
-      });
-    })(document);
-    (function(d) {
-      d.querySelectorAll(".pseudocode-container").forEach(function(el) {
-        let captionSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
-        if (captionSpan !== null) {
-          let captionPrefix = el.dataset.captionPrefix + " ";
-          let captionNumber = "";
-          if (el.dataset.pseudocodeNumber) {
-            captionNumber = el.dataset.pseudocodeNumber + " ";
-            if (el.dataset.chapterLevel) {
-              captionNumber = el.dataset.chapterLevel + "." + captionNumber;
-            }
-          }
-          captionSpan.innerHTML = captionPrefix + captionNumber;
-        }
-      });
-    })(document);
-    </script>
-  
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
-(function() {
-  let previousOnload = window.onload;
-  window.onload = () => {
-    if (previousOnload) {
-      previousOnload();
-    }
-    lightboxQuarto.on('slide_before_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      const href = trigger.getAttribute('href');
-      if (href !== null) {
-        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
-        if (imgEl !== null) {
-          const srcAttr = imgEl.getAttribute("src");
-          if (srcAttr && srcAttr.startsWith("data:")) {
-            slideConfig.href = srcAttr;
-          }
-        }
-      } 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) block.classList.toggle("is-open");
     });
-  
-    lightboxQuarto.on('slide_after_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(slideNode);
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
       }
     });
-  
-  };
-  
-})();
-          </script>
+  });
+});
+</script>
 
 
 
 
-<script src="../../../site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
 </body></html>
