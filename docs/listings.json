@@ -7,17 +7,6 @@
   },
   {
     "listing": "/posts/Blogs/blogs_index.html",
-    "items": [
-      "/posts/Blogs/Roadmap-of-LLM/post.html",
-      "/posts/Blogs/LLM-Inference/post.html",
-      "/posts/Blogs/Context-Engineering/post.html",
-      "/posts/Blogs/LLM-Architecture/post.html",
-      "/posts/Blogs/LLM-RL/post.html",
-      "/posts/Blogs/KL-Divergence/post.html",
-      "/posts/Blogs/Learnings-in-DeepLearning/post.html",
-      "/posts/Blogs/Position-Embedding/post.html",
-      "/posts/Blogs/Diffusion-Models/Diffusion-Model.html",
-      "/posts/Blogs/Speed-up-training/post.html"
-    ]
+    "items": []
   }
 ]
