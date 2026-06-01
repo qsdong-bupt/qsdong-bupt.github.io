@@ -651,7 +651,19 @@ x_2 &amp; x_3 &amp; x_4 &amp; \dots &amp; x_1
 </table>
 <section id="系统架构与主循环" class="level3">
 <h3 class="anchored" data-anchor-id="系统架构与主循环">3.1 系统架构与主循环</h3>
-<p>主程序 <code>run.py</code> 负责视频读取、目标初始化、跟踪循环与结果可视化。其核心逻辑如下： * <strong>初始化</strong>：读取视频第一帧，用户框选初始目标区域 <code>roi_0 = (x, y, w, h)</code>。 * <strong>跟踪器构建</strong>：将首帧和 <code>roi_0</code> 传入 <code>Tracker</code> 类，完成特征提取、高斯标签生成和滤波器训练，得到初始特征 <code>x_0</code> 与频域系数 <code>alphaf_0</code>。 * <strong>逐帧跟踪</strong>：对每一帧调用 <code>tracker.update(frame)</code> 1. 基于上一帧状态 <span class="math inline">\((roi_{n-1}, x_{n-1}, alphaf_{n-1})\)</span> 提取候选区域特征。 2. 通过快速检测得到响应图，定位目标新位置 <span class="math inline">\(roi_n\)</span>。 3. 提取当前最优特征 <span class="math inline">\(x_n\)</span>，并加权更新模板和滤波器。 4. 返回 <span class="math inline">\(roi_n\)</span> 并在图像上绘制矩形显示。 * <strong>退出</strong>：按 <code>ESC</code> 或 <code>q</code> 键终止循环，释放资源。</p>
+<p>主程序 <code>run.py</code> 负责视频读取、目标初始化、跟踪循环与结果可视化。其核心逻辑如下：</p>
+<ul>
+<li><p><strong>初始化</strong>：读取视频第一帧，用户框选初始目标区域 <code>roi_0 = (x, y, w, h)</code>。</p></li>
+<li><p><strong>跟踪器构建</strong>：将首帧和 <code>roi_0</code> 传入 <code>Tracker</code> 类，完成特征提取、高斯标签生成和滤波器训练，得到初始特征 <code>x_0</code> 与频域系数 <code>alphaf_0</code>。</p></li>
+<li><p><strong>逐帧跟踪</strong>：对每一帧调用 <code>tracker.update(frame)</code></p>
+<ol type="1">
+<li>基于上一帧状态 <span class="math inline">\((roi_{n-1}, x_{n-1}, alphaf_{n-1})\)</span> 提取候选区域特征。</li>
+<li>通过快速检测得到响应图，定位目标新位置 <span class="math inline">\(roi_n\)</span>。</li>
+<li>提取当前最优特征 <span class="math inline">\(x_n\)</span>，并加权更新模板和滤波器。</li>
+<li>返回 <span class="math inline">\(roi_n\)</span> 并在图像上绘制矩形显示.</li>
+</ol></li>
+<li><p><strong>退出</strong>：按 <code>ESC</code> 或 <code>q</code> 键终止循环，释放资源。</p></li>
+</ul>
 </section>
 <section id="hog-类" class="level3">
 <h3 class="anchored" data-anchor-id="hog-类">3.2 HOG 类</h3>
