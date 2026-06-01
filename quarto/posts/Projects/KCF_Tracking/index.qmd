@@ -413,6 +413,7 @@ $$ \hat{\mathbf{f}}(\mathbf{z}) = \hat{\mathbf{k}}^{zx} \odot \hat{\boldsymbol{\
 
 **失败案例**：揭示了在目标遇到长时间完全遮挡或快速离开视野时的跟踪脱落情况。
 <video src="assets/失败案例.mp4" controls="controls" width="800"></video>
+
 改变参数后，跟踪器在同一视频上表现差异不大。
 
 ## 5 结论
