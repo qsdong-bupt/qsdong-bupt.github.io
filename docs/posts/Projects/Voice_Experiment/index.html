@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="董庆森">
+<meta name="dcterms.date" content="2026-05-31">
+
+<title>第三次语音实验</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../style/icon.avif" rel="icon">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-0b09eb4da84538f8c2fd112b9812168b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-E8EJCZTZG1"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
+</script>
+<script>
+  MathJax = {
+    loader: { load: ['[tex]/boldsymbol'] },
+    tex: {
+      tags: "all",
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      packages: { '[+]': ['boldsymbol'] }
+    }
+  };
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<meta property="og:title" content="第三次语音实验">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://qsdong-bupt.github.io/posts/Projects/Voice_Experiment/assets/images/nfft720_win720_hop160_iter10.png">
+<meta property="og:image:height" content="1048">
+<meta property="og:image:width" content="1257">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/qsdong-bupt"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/qingsen-dong-9aab2520b/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../posts/Blogs/blogs_index.html"> 
+<span class="menu-text">Blogs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../posts/Projects/projects_index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-toggle-dark-mode"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#实验目标" id="toc-实验目标" class="nav-link active" data-scroll-target="#实验目标"><span class="header-section-number">1</span> 实验目标</a></li>
+  <li><a href="#实验一griffin-lim-算法实现声码器" id="toc-实验一griffin-lim-算法实现声码器" class="nav-link" data-scroll-target="#实验一griffin-lim-算法实现声码器"><span class="header-section-number">2</span> 实验一：Griffin-Lim 算法实现声码器</a>
+  <ul class="collapse">
+  <li><a href="#实验原理" id="toc-实验原理" class="nav-link" data-scroll-target="#实验原理"><span class="header-section-number">2.1</span> 实验原理</a>
+  <ul class="collapse">
+  <li><a href="#短时傅里叶变换stft" id="toc-短时傅里叶变换stft" class="nav-link" data-scroll-target="#短时傅里叶变换stft"><span class="header-section-number">2.1.1</span> 短时傅里叶变换（STFT）</a></li>
+  <li><a href="#griffin-lim-算法" id="toc-griffin-lim-算法" class="nav-link" data-scroll-target="#griffin-lim-算法"><span class="header-section-number">2.1.2</span> Griffin-Lim 算法</a></li>
+  </ul></li>
+  <li><a href="#实验流程" id="toc-实验流程" class="nav-link" data-scroll-target="#实验流程"><span class="header-section-number">2.2</span> 实验流程</a>
+  <ul class="collapse">
+  <li><a href="#定义-stftistft-辅助函数与参数" id="toc-定义-stftistft-辅助函数与参数" class="nav-link" data-scroll-target="#定义-stftistft-辅助函数与参数"><span class="header-section-number">2.2.1</span> 定义 STFT/ISTFT 辅助函数与参数</a></li>
+  <li><a href="#griffin-lim-核心算法实现" id="toc-griffin-lim-核心算法实现" class="nav-link" data-scroll-target="#griffin-lim-核心算法实现"><span class="header-section-number">2.2.2</span> Griffin-Lim 核心算法实现</a></li>
+  <li><a href="#加载音频并计算-stft" id="toc-加载音频并计算-stft" class="nav-link" data-scroll-target="#加载音频并计算-stft"><span class="header-section-number">2.2.3</span> 加载音频并计算 STFT</a></li>
+  <li><a href="#运行-griffin-lim-迭代重建" id="toc-运行-griffin-lim-迭代重建" class="nav-link" data-scroll-target="#运行-griffin-lim-迭代重建"><span class="header-section-number">2.2.4</span> 运行 Griffin-Lim 迭代重建</a></li>
+  </ul></li>
+  <li><a href="#实验结果及分析" id="toc-实验结果及分析" class="nav-link" data-scroll-target="#实验结果及分析"><span class="header-section-number">2.3</span> 实验结果及分析</a>
+  <ul class="collapse">
+  <li><a href="#迭代次数对重建质量的影响" id="toc-迭代次数对重建质量的影响" class="nav-link" data-scroll-target="#迭代次数对重建质量的影响"><span class="header-section-number">2.3.1</span> 迭代次数对重建质量的影响</a></li>
+  <li><a href="#stft-参数对重建质量的影响" id="toc-stft-参数对重建质量的影响" class="nav-link" data-scroll-target="#stft-参数对重建质量的影响"><span class="header-section-number">2.3.2</span> STFT 参数对重建质量的影响</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#实验二部署并微调-rvc-声音转换模型" id="toc-实验二部署并微调-rvc-声音转换模型" class="nav-link" data-scroll-target="#实验二部署并微调-rvc-声音转换模型"><span class="header-section-number">3</span> 实验二：部署并微调 RVC 声音转换模型</a>
+  <ul class="collapse">
+  <li><a href="#实验原理-1" id="toc-实验原理-1" class="nav-link" data-scroll-target="#实验原理-1"><span class="header-section-number">3.1</span> 实验原理</a>
+  <ul class="collapse">
+  <li><a href="#rvc-模型架构概述" id="toc-rvc-模型架构概述" class="nav-link" data-scroll-target="#rvc-模型架构概述"><span class="header-section-number">3.1.1</span> RVC 模型架构概述</a></li>
+  <li><a href="#关键组件" id="toc-关键组件" class="nav-link" data-scroll-target="#关键组件"><span class="header-section-number">3.1.2</span> 关键组件</a></li>
+  <li><a href="#训练目标" id="toc-训练目标" class="nav-link" data-scroll-target="#训练目标"><span class="header-section-number">3.1.3</span> 训练目标</a></li>
+  </ul></li>
+  <li><a href="#实验流程-1" id="toc-实验流程-1" class="nav-link" data-scroll-target="#实验流程-1"><span class="header-section-number">3.2</span> 实验流程</a>
+  <ul class="collapse">
+  <li><a href="#环境配置" id="toc-环境配置" class="nav-link" data-scroll-target="#环境配置"><span class="header-section-number">3.2.1</span> 环境配置</a></li>
+  <li><a href="#训练流程" id="toc-训练流程" class="nav-link" data-scroll-target="#训练流程"><span class="header-section-number">3.2.2</span> 训练流程</a></li>
+  <li><a href="#推理流程" id="toc-推理流程" class="nav-link" data-scroll-target="#推理流程"><span class="header-section-number">3.2.3</span> 推理流程</a></li>
+  <li><a href="#验证集补充实验任务" id="toc-验证集补充实验任务" class="nav-link" data-scroll-target="#验证集补充实验任务"><span class="header-section-number">3.2.4</span> 验证集补充（实验任务）</a></li>
+  </ul></li>
+  <li><a href="#实验结果及分析-1" id="toc-实验结果及分析-1" class="nav-link" data-scroll-target="#实验结果及分析-1"><span class="header-section-number">3.3</span> 实验结果及分析</a>
+  <ul class="collapse">
+  <li><a href="#实验环境部署结果" id="toc-实验环境部署结果" class="nav-link" data-scroll-target="#实验环境部署结果"><span class="header-section-number">3.3.1</span> 实验环境部署结果</a></li>
+  <li><a href="#预训练权重对训练效果的影响" id="toc-预训练权重对训练效果的影响" class="nav-link" data-scroll-target="#预训练权重对训练效果的影响"><span class="header-section-number">3.3.2</span> 预训练权重对训练效果的影响</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#总结" id="toc-总结" class="nav-link" data-scroll-target="#总结"><span class="header-section-number">4</span> 总结</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.docx"><i class="bi bi-file-word"></i>MS Word</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content column-page-left" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">第三次语音实验</h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-page-left">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>董庆森 </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 31, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="实验目标" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> 实验目标</h1>
+<p>通过本实验，深入学习和实践语音信息处理中有关语音合成与转换的核心方法：</p>
+<ol type="1">
+<li>基于 Griffin-Lim 算法的声码器实现，从幅度频谱图中迭代重建相位信息并生成语音；</li>
+<li>部署并微调 RVC（Retrieval-based Voice Conversion）声音转换模型，理解内容特征提取、F0 建模和特征检索融合的完整流程；</li>
+<li>（选做）探索基于深度学习的语音合成模型。</li>
+</ol>
+<p>实验的核心目标是掌握从频域表示恢复时域波形的相位重建算法原理，以及现代语音转换系统中特征解耦与检索增强的技术路线。</p>
+</section>
+<section id="实验一griffin-lim-算法实现声码器" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> 实验一：Griffin-Lim 算法实现声码器</h1>
+<section id="实验原理" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="实验原理"><span class="header-section-number">2.1</span> 实验原理</h2>
+<section id="短时傅里叶变换stft" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="短时傅里叶变换stft"><span class="header-section-number">2.1.1</span> 短时傅里叶变换（STFT）</h3>
+<p><strong>基本原理</strong>：语音信号是非平稳信号，但其统计特性在短时间内（约 20–50ms）近似平稳。STFT 通过在信号上滑动窗函数，将长时域信号分割为一系列短时帧，对每一帧分别计算傅里叶变换，从而获得时变频谱表示。</p>
+<p><strong>数学表达</strong>：对于信号 <span class="math inline">\(x[n]\)</span>，其 STFT 定义为：</p>
+<p><span class="math display">\[X(m, k) = \sum_{n=-\infty}^{\infty} x[n] w[n - mH] e^{-j 2\pi k n / N}\]</span></p>
+<p>其中 <span class="math inline">\(w[n]\)</span> 为分析窗函数（如汉明窗），<span class="math inline">\(H\)</span> 为帧移（hop length），<span class="math inline">\(N\)</span> 为 FFT 点数，<span class="math inline">\(m\)</span> 和 <span class="math inline">\(k\)</span> 分别为时间和频率索引。</p>
+<p><strong>频谱图与相位</strong>：STFT 结果为复数矩阵 <span class="math inline">\(X(m,k) = |X(m,k)| \cdot e^{j\phi(m,k)}\)</span>，其中幅度谱 <span class="math inline">\(|X(m,k)|\)</span> 反映各频段的能量分布，相位谱 <span class="math inline">\(\phi(m,k)\)</span> 编码信号的时域结构细节。在语音合成与转换任务中，幅度谱通常作为操作对象，而相位信息则需要额外的方法来恢复。</p>
+</section>
+<section id="griffin-lim-算法" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="griffin-lim-算法"><span class="header-section-number">2.1.2</span> Griffin-Lim 算法</h3>
+<p><strong>基本原理</strong>：Griffin-Lim 算法是一种从已知幅度谱中迭代重建时域信号的经典方法。其核心思想是利用 STFT 与逆 STFT（ISTFT）之间的对偶关系，通过交替投影的方式在时域和频域之间迭代，使得重建信号的 STFT 幅度谱逐步逼近目标幅度谱。</p>
+<p><strong>数学表达</strong>：设目标幅度谱为 <span class="math inline">\(S = |X(m,k)|\)</span>，从随机初始化相位开始迭代：</p>
+<ol type="1">
+<li>初始化：随机生成相位 <span class="math inline">\(\phi_0(m,k) \sim U(0, 2\pi)\)</span></li>
+<li>频域合成：<span class="math inline">\(\hat{X}_i(m,k) = S \cdot e^{j\phi_i(m,k)}\)</span></li>
+<li>逆变换到时域：<span class="math inline">\(y_i[n] = \text{ISTFT}(\hat{X}_i)\)</span></li>
+<li>再次 STFT：<span class="math inline">\(X_{i+1}(m,k) = \text{STFT}(y_i)\)</span></li>
+<li>提取新相位：<span class="math inline">\(\phi_{i+1}(m,k) = \angle X_{i+1}(m,k)\)</span></li>
+<li>重复步骤 2–5 直至收敛</li>
+</ol>
+<p>该迭代过程等价于在约束集上寻找满足以下最小化目标的解：</p>
+<p><span class="math display">\[\min_{y} \sum_{m,k} \left( |\text{STFT}(y)(m,k)| - S(m,k) \right)^2\]</span></p>
+<p><strong>收敛性</strong>：Griffin 和 Lim 在原始论文中证明了该算法在每次迭代后均方误差单调不增，保证收敛到局部最优解。收敛速度取决于帧移相对于窗长的比例——帧移越小（帧间重叠越大），收敛越快，因为相邻帧相位之间的冗余约束增强。</p>
+</section>
+</section>
+<section id="实验流程" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="实验流程"><span class="header-section-number">2.2</span> 实验流程</h2>
+<section id="定义-stftistft-辅助函数与参数" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="定义-stftistft-辅助函数与参数"><span class="header-section-number">2.2.1</span> 定义 STFT/ISTFT 辅助函数与参数</h3>
+<p>首先设定 STFT 的关键参数 <code>n_fft</code>（FFT 点数 <span class="math inline">\(N\)</span>）、<code>hop_length</code>（帧移 <span class="math inline">\(H\)</span>）、<code>win_length</code>（窗长 <span class="math inline">\(L\)</span>），并封装 <code>librosa.stft</code> 和 <code>librosa.istft</code>。STFT 将时域信号 <span class="math inline">\(x[n]\)</span> 变换到时频域：</p>
+<p><span class="math display">\[X(m,k) = \sum_{n=-\infty}^{\infty} x[n]\, w[n - mH]\, e^{-j 2\pi kn/N}\]</span></p>
+<p>其中 <span class="math inline">\(w[n]\)</span> 为窗函数，<span class="math inline">\(m\)</span> 为帧索引，<span class="math inline">\(k\)</span> 为频率索引。ISTFT 则通过重叠相加（overlap-add）将复数频谱重建回时域波形。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n_fft, hop_length, win_length <span class="op">=</span> <span class="dv">720</span>, <span class="dv">160</span>, <span class="dv">720</span>  <span class="co"># </span><span class="al">TODO</span><span class="co"> 尝试改变参数</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _stft(y):</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> librosa.stft(y<span class="op">=</span>y, n_fft<span class="op">=</span>n_fft,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                        hop_length<span class="op">=</span>hop_length,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                        win_length<span class="op">=</span>win_length)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _istft(y):</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> librosa.istft(y, hop_length<span class="op">=</span>hop_length,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                         win_length<span class="op">=</span>win_length)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="griffin-lim-核心算法实现" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="griffin-lim-核心算法实现"><span class="header-section-number">2.2.2</span> Griffin-Lim 核心算法实现</h3>
+<p>这是实验的核心——实现 <code>_griffin_lim(S, gl_iters)</code> 函数。Griffin-Lim 的优化目标是使重建信号的幅度谱逼近给定的目标幅度谱：</p>
+<p><span class="math display">\[\min_{y}\; \sum_{m,k} \Big( |\text{STFT}(y)(m,k)| - |S(m,k)| \Big)^2\]</span></p>
+<p>迭代中保持幅度不变、逐步修正相位。下面对照代码逐行说明数学原理。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _griffin_lim(S, gl_iters):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co"> 随机生成一个与频谱图S形状相同的复数数组</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    angles <span class="op">=</span> np.exp(<span class="ot">2j</span> <span class="op">*</span> np.pi <span class="op">*</span> np.random.random_sample(S.shape))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>随机初始化相位 <span class="math inline">\(\phi_0(m,k) \sim U(0, 2\pi)\)</span>，并以复数指数形式表示 <span class="math inline">\(e^{j\phi_0(m,k)}\)</span>。由于真实相位未知，从随机起点出发，迭代收敛到满足幅度约束的可行解。</p>
+</blockquote>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co"> 计算频谱图S的绝对值，然后将其转换为双精度复数类型</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    S_complex <span class="op">=</span> np.<span class="bu">abs</span>(S).astype(np.complex128)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>从复数谱 <span class="math inline">\(S \in \mathbb{C}^{F \times T}\)</span> 中提取幅度 <span class="math inline">\(|S|\)</span>，记为 <span class="math inline">\(A(m,k) = |S(m,k)|\)</span>。迭代全程中幅度 <span class="math inline">\(A\)</span> 固定不变，仅更新相位估计。</p>
+</blockquote>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co"> 使用ISTFT转换回音频</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> _istft(S_complex <span class="op">*</span> angles)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>初始重建 <span class="math inline">\(y_0 = \text{ISTFT}\big(A \cdot e^{j\phi_0}\big)\)</span>。将固定的目标幅度与随机相位结合，通过 ISTFT 得到第一个时域估计。</p>
+</blockquote>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(gl_iters):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>        <span class="co"># </span><span class="al">TODO</span><span class="co"> 对当前音频信号y进行STFT，取其相位角，</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># np.exp(1j * ...)将相位角转换回复数形式，与幅度谱匹配</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        angles <span class="op">=</span> np.exp(<span class="ot">1j</span> <span class="op">*</span> np.angle(_stft(y)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>第 <span class="math inline">\(i\)</span> 次迭代中，对当前估计 <span class="math inline">\(y_i\)</span> 做 STFT 得到 <span class="math inline">\(\hat{X}_i = \text{STFT}(y_i) = |\hat{X}_i| \cdot e^{j\angle\hat{X}_i}\)</span>， 丢弃其幅度 <span class="math inline">\(|\hat{X}_i|\)</span>，仅提取相位 <span class="math inline">\(\phi_{i+1} = \angle\hat{X}_i\)</span> 作为新的相位估计。</p>
+</blockquote>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> _istft(S_complex <span class="op">*</span> angles)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>用固定幅度 <span class="math inline">\(A\)</span> 与新相位 <span class="math inline">\(\phi_{i+1}\)</span> 组合 <span class="math inline">\(A \cdot e^{j\phi_{i+1}}\)</span>，经 ISTFT 得到更新后的时域信号 <span class="math inline">\(y_{i+1} = \text{ISTFT}(A \cdot e^{j\phi_{i+1}})\)</span>。重复此过程直至达到设定迭代次数。</p>
+</blockquote>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="加载音频并计算-stft" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="加载音频并计算-stft"><span class="header-section-number">2.2.3</span> 加载音频并计算 STFT</h3>
+<p>加载音频并重采样至 16kHz 单声道，得到时域信号 <span class="math inline">\(x[n]\)</span>。通过 STFT 获得复数频谱 <span class="math inline">\(D(m,k)\)</span>：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>AudioData, sr <span class="op">=</span> librosa.load(input_path, sr<span class="op">=</span><span class="dv">16000</span>, mono<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>D <span class="op">=</span> librosa.stft(AudioData, n_fft<span class="op">=</span>n_fft,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                 hop_length<span class="op">=</span>hop_length, win_length<span class="op">=</span>win_length)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>STFT 输出 <span class="math inline">\(D \in \mathbb{C}^{F \times T}\)</span>，其中 <span class="math inline">\(F = N/2 + 1\)</span>（仅保留正频率），<span class="math inline">\(T\)</span> 为帧数，每一帧 <span class="math inline">\(t\)</span> 的频率分量 <span class="math inline">\(D(:,t)\)</span> 均为复数。</p>
+</section>
+<section id="运行-griffin-lim-迭代重建" class="level3" data-number="2.2.4">
+<h3 data-number="2.2.4" class="anchored" data-anchor-id="运行-griffin-lim-迭代重建"><span class="header-section-number">2.2.4</span> 运行 Griffin-Lim 迭代重建</h3>
+<p>设定迭代次数 <span class="math inline">\(\text{iters} = 200\)</span>，调用 <code>_griffin_lim</code> 从频谱 <span class="math inline">\(D\)</span> 重建波形：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>gl_iters <span class="op">=</span> <span class="dv">200</span>  <span class="co"># </span><span class="al">TODO</span><span class="co"> 设置 Griffin-Lim 算法重复迭代的次数</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ReAudio <span class="op">=</span> _griffin_lim(D, gl_iters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>每次迭代均使 <span class="math inline">\(\sum_{m,k}\big(|\text{STFT}(y_i)| - |D|\big)^2\)</span> 单调不增，200 次迭代后相位估计基本收敛，重建波形在包络上与原始信号高度吻合。</p>
+</section>
+</section>
+<section id="实验结果及分析" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="实验结果及分析"><span class="header-section-number">2.3</span> 实验结果及分析</h2>
+<section id="迭代次数对重建质量的影响" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="迭代次数对重建质量的影响"><span class="header-section-number">2.3.1</span> 迭代次数对重建质量的影响</h3>
+<p>实验固定 STFT 参数为 <code>n_fft=720, win_length=720, hop_length=160</code>（窗长 45ms，帧移 10ms），在 4 种不同迭代次数下运行 Griffin-Lim 算法，对比重建效果。</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>迭代次数</th>
+<th>重建效果主观评价</th>
+<th>波形与原始吻合程度</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>音频刺耳、有明显金属音，语音内容勉强可辨</td>
+<td>波形包络模糊，细节丢失严重</td>
+</tr>
+<tr class="even">
+<td>50</td>
+<td>金属音减弱，音质有所改善但仍有失真</td>
+<td>包络基本可见，辅音段细节不足</td>
+</tr>
+<tr class="odd">
+<td>200</td>
+<td>音质较自然，与原始音频听感接近</td>
+<td>波形包络与原始高度吻合</td>
+</tr>
+<tr class="even">
+<td>1000</td>
+<td>音质与 200 次接近，改善幅度很小</td>
+<td>与 200 次差异肉眼难辨，边际收益递减</td>
+</tr>
+</tbody>
+</table>
+<section id="迭代-10-次" class="level4" data-number="2.3.1.1">
+<h4 data-number="2.3.1.1" class="anchored" data-anchor-id="迭代-10-次"><span class="header-section-number">2.3.1.1</span> 迭代 10 次</h4>
+<p><img src="assets/images/nfft720_win720_hop160_iter10.png" class="img-fluid" style="width:80.0%"></p>
+<audio controls="" style="width:80%">
+<source src="assets/audios/nfft720_win720_hop160_iter10.wav" type="audio/wav">
+</audio>
+</section>
+<section id="迭代-50-次" class="level4" data-number="2.3.1.2">
+<h4 data-number="2.3.1.2" class="anchored" data-anchor-id="迭代-50-次"><span class="header-section-number">2.3.1.2</span> 迭代 50 次</h4>
+<p><img src="assets/images/nfft720_win720_hop160_iter50.png" class="img-fluid" style="width:80.0%"></p>
+<audio controls="" style="width:80%">
+<source src="assets/audios/nfft720_win720_hop160_iter50.wav" type="audio/wav">
+</audio>
+</section>
+<section id="迭代-200-次" class="level4" data-number="2.3.1.3">
+<h4 data-number="2.3.1.3" class="anchored" data-anchor-id="迭代-200-次"><span class="header-section-number">2.3.1.3</span> 迭代 200 次</h4>
+<p><img src="assets/images/nfft720_win720_hop160_iter200.png" class="img-fluid" style="width:80.0%"></p>
+<audio controls="" style="width:80%">
+<source src="assets/audios/nfft720_win720_hop160_iter200.wav" type="audio/wav">
+</audio>
+</section>
+<section id="迭代-1000-次" class="level4" data-number="2.3.1.4">
+<h4 data-number="2.3.1.4" class="anchored" data-anchor-id="迭代-1000-次"><span class="header-section-number">2.3.1.4</span> 迭代 1000 次</h4>
+<p><img src="assets/images/nfft720_win720_hop160_iter1000.png" class="img-fluid" style="width:80.0%"></p>
+<audio controls="" style="width:80%">
+<source src="assets/audios/nfft720_win720_hop160_iter1000.wav" type="audio/wav">
+</audio>
+</section>
+<section id="结果分析" class="level4" data-number="2.3.1.5">
+<h4 data-number="2.3.1.5" class="anchored" data-anchor-id="结果分析"><span class="header-section-number">2.3.1.5</span> 结果分析</h4>
+<p><strong>迭代次数对重建质量的影响</strong></p>
+<p>Griffin-Lim 算法以交替投影方式逐步逼近真实相位。从上述四组实验可以清晰观察到迭代次数对重建质量的边际收益递减规律：</p>
+<ul>
+<li><strong>10 次迭代</strong>：相位远未收敛，重建音频存在严重的金属音伪影。波形的宏观包络尚可分辨，但微观振荡模式与原始信号差异显著。此时 MSE（均方误差）仍处于高位。</li>
+<li><strong>50 次迭代</strong>：相位估计已有明显改善，金属音减弱，语音内容清晰可辨。波形包络基本正确，但在清辅音等弱能量段的细节恢复仍不充分。</li>
+<li><strong>200 次迭代</strong>：相位基本收敛，重建音质自然度较高，与原始音频听感差距很小。波形对比图中上（原始）下（重建）两条曲线高度一致。此时优化目标 <span class="math inline">\(\sum_{m,k}\big(|\text{STFT}(y)| - |D|\big)^2\)</span> 已下降至低点。</li>
+<li><strong>1000 次迭代</strong>：继续增加迭代次数带来的改善微乎其微，人耳难以察觉差异。这表明算法已收敛到局部最优解，受限于幅度约束本身无法唯一确定真实相位，进一步迭代无意义。</li>
+</ul>
+<p>该趋势符合 Griffin &amp; Lim 原始论文中证明的均方误差单调递减且收敛到驻点的理论结论。</p>
+<p><strong>收敛速度与帧移的关系</strong></p>
+<p>本实验中 hop_length=160（帧移 10ms），帧间重叠率为 <span class="math inline">\(\frac{720-160}{720} \approx 77.8\%\)</span>。高重叠率为相邻帧的相位提供了强冗余约束，使得算法在 200 次迭代内即可基本收敛。若使用更大的帧移（如 hop_length=360，重叠率 50%），收敛速度将显著减慢，需更多迭代次数才能达到相似质量。</p>
+<p><strong>算法局限性</strong></p>
+<p>Griffin-Lim 算法不能保证恢复真实相位——它只保证收敛到满足幅度约束的某个可行解。这在语音信号中表现为：即使波形看上去相似，听感上仍可能存在轻微的”相位失真”痕迹（一种不自然的音色）。现代神经声码器（如 HiFi-GAN）通过数据驱动的方式学习幅度到相位的映射，正是为了突破这一局限。</p>
+</section>
+</section>
+<section id="stft-参数对重建质量的影响" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="stft-参数对重建质量的影响"><span class="header-section-number">2.3.2</span> STFT 参数对重建质量的影响</h3>
+<p>前面的实验固定了 <code>n_fft=720, hop_length=160, win_length=720</code>，本节分析这三个参数各自的物理含义和对 Griffin-Lim 重建质量的影响，并给出三组推荐配置的对比实验。</p>
+<section id="参数物理含义采样率-16khz-下" class="level4" data-number="2.3.2.1">
+<h4 data-number="2.3.2.1" class="anchored" data-anchor-id="参数物理含义采样率-16khz-下"><span class="header-section-number">2.3.2.1</span> 参数物理含义（采样率 16kHz 下）</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 22%">
+<col style="width: 17%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>参数</th>
+<th>公式</th>
+<th>物理含义</th>
+<th>当前值</th>
+<th>对应时间/频率</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>n_fft</code></td>
+<td><span class="math inline">\(N\)</span></td>
+<td>FFT 点数，决定频率分辨率</td>
+<td>720</td>
+<td><span class="math inline">\(\Delta f = f_s / N = 16000/720 \approx 22.2\text{ Hz}\)</span></td>
+</tr>
+<tr class="even">
+<td><code>win_length</code></td>
+<td><span class="math inline">\(L\)</span></td>
+<td>窗长度（每帧分析的样本数）</td>
+<td>720</td>
+<td><span class="math inline">\(T_w = L / f_s = 45\text{ ms}\)</span></td>
+</tr>
+<tr class="odd">
+<td><code>hop_length</code></td>
+<td><span class="math inline">\(H\)</span></td>
+<td>帧移（相邻帧起始位置间隔）</td>
+<td>160</td>
+<td><span class="math inline">\(T_h = H / f_s = 10\text{ ms}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键关系</strong>：</p>
+<ul>
+<li><p><strong>频率分辨率与时间分辨率权衡</strong>：<span class="math inline">\(\Delta f = f_s / N\)</span>，<span class="math inline">\(N\)</span> 越大频率分辨率越高，但时间分辨率不变（由 <span class="math inline">\(L\)</span> 决定）。当 <span class="math inline">\(N &gt; L\)</span> 时进行零填充，在频域获得更细的插值但不增加新信息；当 <span class="math inline">\(N &lt; L\)</span> 时截断，丢失高频细节。</p></li>
+<li><p><strong>窗长决定准平稳假设</strong>：语音在 20–50ms 内近似平稳。<span class="math inline">\(L=720 \Rightarrow 45\text{ms}\)</span> 落在此范围内，兼顾了频率分辨率（<span class="math inline">\(\Delta f \approx 22.2\text{Hz}\)</span>）和时间平稳性。</p></li>
+<li><p><strong>帧移决定帧间重叠</strong>：重叠率 <span class="math inline">\(= (L - H) / L = (720 - 160) / 720 \approx 77.8\%\)</span>。高重叠率为 Griffin-Lim 的相邻帧相位提供强冗余约束，是算法快速收敛的关键。</p></li>
+<li><p><strong>n_fft 与 win_length 关系</strong>：当 <span class="math inline">\(N = L\)</span> 时不进行零填充，无频域插值；当 <span class="math inline">\(N &gt; L\)</span> 时，窗后补零使频谱更平滑（不影响实际频率分辨率，仅插值）；当 <span class="math inline">\(N &lt; L\)</span> 时截断窗，信息丢失。</p></li>
+</ul>
+</section>
+<section id="三组推荐配置对比" class="level4" data-number="2.3.2.2">
+<h4 data-number="2.3.2.2" class="anchored" data-anchor-id="三组推荐配置对比"><span class="header-section-number">2.3.2.2</span> 三组推荐配置对比</h4>
+<p>为直观对比不同参数配置对 Griffin-Lim 重建质量的影响，在采样率 16kHz 下测试了三组常用配置。以下均在 <strong>50 次迭代</strong> 下进行公平对比：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 10%">
+<col style="width: 17%">
+<col style="width: 7%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>n_fft</th>
+<th>hop_length</th>
+<th>win_length</th>
+<th>窗长</th>
+<th>帧移</th>
+<th>重叠率</th>
+<th><span class="math inline">\(\Delta f\)</span></th>
+<th>帧率</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>720</td>
+<td>160</td>
+<td>720</td>
+<td>45ms</td>
+<td>10ms</td>
+<td>77.8%</td>
+<td>22.2Hz</td>
+<td>100fps</td>
+<td>语音/人声/音乐通用</td>
+</tr>
+<tr class="even">
+<td>512</td>
+<td>128</td>
+<td>512</td>
+<td>32ms</td>
+<td>8ms</td>
+<td>75%</td>
+<td>31.25Hz</td>
+<td>125fps</td>
+<td>帧数更多但每帧点数少，总体计算量略小</td>
+</tr>
+<tr class="odd">
+<td>1024</td>
+<td>128</td>
+<td>1024</td>
+<td>64ms</td>
+<td>8ms</td>
+<td>87.5%</td>
+<td>15.6Hz</td>
+<td>125fps</td>
+<td>最长窗+最高重叠，收敛最快，适合音乐</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="配置一高质量n_fft720-hop_length160-win_length720-迭代-50-次" class="level4" data-number="2.3.2.3">
+<h4 data-number="2.3.2.3" class="anchored" data-anchor-id="配置一高质量n_fft720-hop_length160-win_length720-迭代-50-次"><span class="header-section-number">2.3.2.3</span> 配置一：高质量（<code>n_fft=720, hop_length=160, win_length=720</code>）— 迭代 50 次</h4>
+<p><img src="assets/images/nfft720_win720_hop160_iter50.png" class="img-fluid" style="width:80.0%"></p>
+<audio controls="" style="width:80%">
+<source src="assets/audios/nfft720_win720_hop160_iter50.wav" type="audio/wav">
+</audio>
+<p><strong>分析</strong>：45ms 窗长 + 10ms 帧移是语音处理的经典配置，在频率分辨率（22.2Hz）和时间分辨率之间取得了良好平衡。77.8% 的高重叠率为 Griffin-Lim 提供了充足的帧间相位约束，50 次迭代后语音内容已清晰可辨，金属音伪影明显减弱。推荐作为语音和人声处理的默认配置。</p>
+</section>
+<section id="配置二更快n_fft512-hop_length128-win_length512-迭代-50-次" class="level4" data-number="2.3.2.4">
+<h4 data-number="2.3.2.4" class="anchored" data-anchor-id="配置二更快n_fft512-hop_length128-win_length512-迭代-50-次"><span class="header-section-number">2.3.2.4</span> 配置二：更快（<code>n_fft=512, hop_length=128, win_length=512</code>）— 迭代 50 次</h4>
+<p><img src="assets/images/nfft512_win512_hop128_iter50.png" class="img-fluid" style="width:80.0%"></p>
+<audio controls="" style="width:80%">
+<source src="assets/audios/nfft512_win512_hop128_iter50.wav" type="audio/wav">
+</audio>
+<p><strong>分析</strong>：<span class="math inline">\(N=512\)</span> 为 2 的幂，可利用 FFT 的基数-2 算法提高计算效率。32ms 窗长仍处于语音准平稳范围内，但频率分辨率下降至 31.25Hz——低频段的谐波结构分辨能力稍弱。8ms 帧移产生 125fps 的帧率，帧数增多但每帧 FFT 点数减少至 512（vs 720），整体计算量略有下降。75% 重叠率仍然提供良好的帧间约束。听感上音质与配置一接近，是一个在效率和质量之间取得良好折中的方案。</p>
+</section>
+<section id="配置三超高音质n_fft1024-hop_length128-win_length1024-迭代-50-次" class="level4" data-number="2.3.2.5">
+<h4 data-number="2.3.2.5" class="anchored" data-anchor-id="配置三超高音质n_fft1024-hop_length128-win_length1024-迭代-50-次"><span class="header-section-number">2.3.2.5</span> 配置三：超高音质（<code>n_fft=1024, hop_length=128, win_length=1024</code>）— 迭代 50 次</h4>
+<p><img src="assets/images/nfft1024_win1024_hop128_iter50.png" class="img-fluid" style="width:80.0%"></p>
+<audio controls="" style="width:80%">
+<source src="assets/audios/nfft1024_win1024_hop128_iter50.wav" type="audio/wav">
+</audio>
+<p><strong>分析</strong>：<span class="math inline">\(N=1024\)</span> 也是 2 的幂，频域计算高效。64ms 窗长超出了语音准平稳假设的推荐上限（50ms），对于快速变化的语音段（如爆破音）可能引入时域模糊，但为稳态元音提供了更精细的频率分辨率（15.6Hz）。87.5% 的极高重叠率为 Griffin-Lim 提供了最强帧间约束——在相同迭代次数下收敛最快、相位误差最小。适合音乐信号或对音质有极致要求的场景，但需注意 FFT 点数增大带来的计算量增加和瞬态成分可能的时间模糊。</p>
+</section>
+<section id="参数选择总结" class="level4" data-number="2.3.2.6">
+<h4 data-number="2.3.2.6" class="anchored" data-anchor-id="参数选择总结"><span class="header-section-number">2.3.2.6</span> 参数选择总结</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 45%">
+<col style="width: 27%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>场景</th>
+<th>推荐配置</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>日常语音处理</td>
+<td><code>n_fft=720, hop_length=160, win_length=720</code></td>
+<td>各项指标均衡，45ms 窗+10ms 帧移为语音经典标准</td>
+</tr>
+<tr class="even">
+<td>实时/低延迟应用</td>
+<td><code>n_fft=512, hop_length=128, win_length=512</code></td>
+<td>FFT 基数-2 加速，总体计算量较小，质量损失可接受</td>
+</tr>
+<tr class="odd">
+<td>音乐/高保真需求</td>
+<td><code>n_fft=1024, hop_length=128, win_length=1024</code></td>
+<td>最高频率分辨率 + 最高重叠率，收敛最快，质量最佳</td>
+</tr>
+<tr class="even">
+<td>极低延迟</td>
+<td><code>n_fft=256, hop_length=64, win_length=256</code></td>
+<td>16ms 窗+4ms 帧移，延迟最低但频率分辨率差（62.5Hz）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心规律</strong>：</p>
+<ol type="1">
+<li><p><strong>n_fft 越大，频率分辨率越高</strong>，低频谐波的分离能力越强，但 <span class="math inline">\(N &gt; L\)</span> 时的零填充仅提供插值、不增加信息量。<span class="math inline">\(N\)</span> 取 2 的幂（如 512、1024）可获得最佳 FFT 计算效率。</p></li>
+<li><p><strong>hop_length 越小（即重叠率越高），Griffin-Lim 收敛越快</strong>。因为帧间重叠引入了冗余的相位约束——每一帧的相位不仅要满足自身的幅度约束，还需与相邻帧在时域重叠区域保持一致。重叠率从 75% 提升到 87.5% 时，同等迭代次数下相位估计更精确。</p></li>
+<li><p><strong>win_length 需平衡时域分辨率与频域分辨率</strong>。<span class="math inline">\(L\)</span> 越大，单帧内频率分辨能力越强（<span class="math inline">\(\Delta f\)</span> 变小），但帧内信号不再平稳的风险增大；<span class="math inline">\(L\)</span> 越小，时域定位越精确，但频率分辨能力不足。语音处理中 20–50ms 是经验最优区间。</p></li>
+</ol>
+</section>
+</section>
+</section>
+</section>
+<section id="实验二部署并微调-rvc-声音转换模型" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> 实验二：部署并微调 RVC 声音转换模型</h1>
+<section id="实验原理-1" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="实验原理-1"><span class="header-section-number">3.1</span> 实验原理</h2>
+<section id="rvc-模型架构概述" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="rvc-模型架构概述"><span class="header-section-number">3.1.1</span> RVC 模型架构概述</h3>
+<p>RVC（Retrieval-based Voice Conversion）是一种基于内容特征解耦与特征检索的声音转换框架。其核心思想是将语音信号分解为三个独立成分：<strong>内容特征</strong>（由 HuBERT 提取的语义/音素信息）、<strong>F0 基频特征</strong>（由 RMVPE/Harvest 等算法提取的韵律信息）和<strong>音色特征</strong>（通过检索机制从目标说话人特征库中获取）。</p>
+</section>
+<section id="关键组件" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="关键组件"><span class="header-section-number">3.1.2</span> 关键组件</h3>
+<p><strong>内容特征提取（HuBERT）</strong></p>
+<p>使用预训练的 HuBERT 模型提取语音的内容表征。HuBERT 通过自监督学习从大量未标注语音中学习到丰富的音素和语义表示，其隐藏层输出能够有效保留语言内容信息同时抑制说话人身份信息。RVC 将 16kHz 音频输入 HuBERT，提取第 9 层（或第 12 层）的隐藏状态作为内容特征。</p>
+<p><strong>F0 基频提取</strong></p>
+<p>F0（基频）是语音韵律的核心载体，决定了语调的高低变化和重音模式。RVC 支持多种 F0 提取方法：</p>
+<ul>
+<li><strong>Harvest</strong>：高精度的时域基频估计算法，适合干净语音</li>
+<li><strong>RMVPE</strong>：基于深度学习的鲁棒基频估计，对噪声环境更友好</li>
+<li><strong>DIO</strong>：计算效率较高的频域方法</li>
+</ul>
+<p>提取的 F0 特征与内容特征一同作为生成器的输入条件。</p>
+<p><strong>特征检索机制（FAISS）</strong></p>
+<p>在训练完成后，RVC 对训练集中所有帧的内容特征建立 FAISS 索引。推理时，对于输入语音的每一帧内容特征，从索引中检索与之最相似的 K 个目标说话人特征，通过加权融合得到该帧对应的音色嵌入向量。这一机制有效缓解了内容泄露（content leakage）问题——即转换后的语音保留了源说话人的音色痕迹。</p>
+<p><strong>生成器与判别器</strong></p>
+<p>RVC 采用基于 HiFi-GAN 的生成器架构，接收内容特征、F0 特征和音色嵌入，通过多尺度上采样生成目标采样率的高质量波形。训练过程中，多周期判别器（MPD）和多尺度判别器（MSD）对生成波形进行对抗性训练，结合 Mel 频谱损失和特征匹配损失进行多目标优化。</p>
+</section>
+<section id="训练目标" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="训练目标"><span class="header-section-number">3.1.3</span> 训练目标</h3>
+<p>RVC 的训练损失函数由以下分量组成：</p>
+<p><span class="math display">\[\mathcal{L}_{total} = \lambda_{mel}\mathcal{L}_{mel} + \lambda_{GAN}\mathcal{L}_{GAN} + \lambda_{FM}\mathcal{L}_{FM}\]</span></p>
+<p>其中 <span class="math inline">\(\mathcal{L}_{mel}\)</span> 为生成音频与真实音频在 Mel 频谱域的 L1 损失，<span class="math inline">\(\mathcal{L}_{GAN}\)</span> 为对抗损失，<span class="math inline">\(\mathcal{L}_{FM}\)</span> 为判别器的特征匹配损失。</p>
+</section>
+</section>
+<section id="实验流程-1" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="实验流程-1"><span class="header-section-number">3.2</span> 实验流程</h2>
+<section id="环境配置" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="环境配置"><span class="header-section-number">3.2.1</span> 环境配置</h3>
+<ol type="1">
+<li>使用 conda 创建 Python 3.10 环境：<code>conda create -n rvc python=3.10</code></li>
+<li>安装依赖：<code>pip install -r requirements.txt</code></li>
+<li>安装 FFmpeg 并验证：<code>ffmpeg -version</code></li>
+<li>下载预训练权重：<code>python tools/download.py</code></li>
+</ol>
+</section>
+<section id="训练流程" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="训练流程"><span class="header-section-number">3.2.2</span> 训练流程</h3>
+<p>用提供的数据集（AISLEE3-SSB0011，单说话人，不少于10分钟）完成训练， 用训练好的模型执行推理，完成声音转换</p>
+<p><code>tools/train_cli.py</code> 串联以下步骤：</p>
+<ol type="1">
+<li><strong>数据预处理</strong>：将原始音频切分为短片段，统一重采样到目标采样率（40kHz 或 48kHz）</li>
+<li><strong>F0 提取</strong>：对每个音频片段提取基频曲线</li>
+<li><strong>HuBERT 特征提取</strong>：将音频降采样至 16kHz，通过 HuBERT 提取内容特征</li>
+<li><strong>模型训练</strong>：生成器与判别器交替优化，每个 epoch 后保存检查点</li>
+<li><strong>索引建立</strong>：训练完成后建立 FAISS 特征检索索引</li>
+</ol>
+</section>
+<section id="推理流程" class="level3" data-number="3.2.3">
+<h3 data-number="3.2.3" class="anchored" data-anchor-id="推理流程"><span class="header-section-number">3.2.3</span> 推理流程</h3>
+<p><code>tools/infer_cli.py</code> 加载训练好的说话人模型权重和特征索引，对输入音频执行：</p>
+<ol type="1">
+<li>提取输入音频的内容特征（HuBERT）和 F0</li>
+<li>通过 FAISS 检索目标说话人的音色嵌入</li>
+<li>生成器利用内容 + F0 + 音色嵌入生成目标说话人的语音</li>
+</ol>
+</section>
+<section id="验证集补充实验任务" class="level3" data-number="3.2.4">
+<h3 data-number="3.2.4" class="anchored" data-anchor-id="验证集补充实验任务"><span class="header-section-number">3.2.4</span> 验证集补充（实验任务）</h3>
+<p>原始代码仅将所有样本写入单一的 <code>filelist.txt</code>，缺少验证/测试集划分以及训练过程中的验证评估环节。本实验共修改两处文件、补充三个函数，实现完整的训练/验证/测试集划分和每轮训练后的验证评估。</p>
+<section id="数据划分write_filelist-toolstrain_cli.py" class="level4" data-number="3.2.4.1">
+<h4 data-number="3.2.4.1" class="anchored" data-anchor-id="数据划分write_filelist-toolstrain_cli.py"><span class="header-section-number">3.2.4.1</span> 1. 数据划分：<code>write_filelist()</code> — <code>tools/train_cli.py</code></h4>
+<p>将匹配到的样本名打乱后按 <strong>8:1:1</strong> 比例划分为训练集、验证集和测试集，静音样本仅追加到训练集。代码修改如下：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> write_filelist(exp_dir, sr, version, if_f0, speaker_id):</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ... 收集所有匹配的样本名到 rows 列表（同上）...</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 打乱并按照 8:1:1 的比例划分为训练集、验证集和测试集</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    shuffle(rows)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    n_total <span class="op">=</span> <span class="bu">len</span>(rows)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    n_train <span class="op">=</span> <span class="bu">int</span>(n_total <span class="op">*</span> <span class="fl">0.8</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    n_val <span class="op">=</span> <span class="bu">int</span>(n_total <span class="op">*</span> <span class="fl">0.1</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    train_rows <span class="op">=</span> rows[:n_train]</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    val_rows <span class="op">=</span> rows[n_train : n_train <span class="op">+</span> n_val]</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    test_rows <span class="op">=</span> rows[n_train <span class="op">+</span> n_val:]</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 静音样本只追加到训练集</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    mute_rows <span class="op">=</span> [...]  <span class="co"># 2 条静音样本</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    train_rows.extend(mute_rows)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    shuffle(train_rows)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 分别写入三个文件</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    (exp_dir <span class="op">/</span> <span class="st">"filelist.txt"</span>).write_text(...)       <span class="co"># 训练集（含静音）</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    (exp_dir <span class="op">/</span> <span class="st">"filelist_val.txt"</span>).write_text(...)   <span class="co"># 验证集</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    (exp_dir <span class="op">/</span> <span class="st">"filelist_test.txt"</span>).write_text(...)  <span class="co"># 测试集</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>80/10/10 比例说明：80% 训练集用于模型参数更新，10% 验证集用于每轮训练后评估泛化性能，剩余 10% 作为测试集保留供最终评估使用。静音样本仅加入训练集，确保验证/测试集完全由真实语音样本组成，评估结果更具参考价值。</p>
+</blockquote>
+</section>
+<section id="构造验证集-dataloaderbuild_eval_loader-train.py" class="level4" data-number="3.2.4.2">
+<h4 data-number="3.2.4.2" class="anchored" data-anchor-id="构造验证集-dataloaderbuild_eval_loader-train.py"><span class="header-section-number">3.2.4.2</span> 2. 构造验证集 DataLoader：<code>build_eval_loader()</code> — <code>train.py</code></h4>
+<p>从 <code>filelist_val.txt</code> 读取验证样本，根据 <code>if_f0</code> 标志选择合适的 Dataset 和 Collate 类，构造验证专用 DataLoader：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_eval_loader(hps):</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    eval_filelist <span class="op">=</span> os.path.join(hps.model_dir, <span class="st">"filelist_val.txt"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> os.path.exists(eval_filelist):</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span>  <span class="co"># 验证集不存在则跳过评估</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> hps.if_f0 <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        eval_dataset <span class="op">=</span> TextAudioLoaderMultiNSFsid(eval_filelist, hps.data)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        collate_fn <span class="op">=</span> TextAudioCollateMultiNSFsid()</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        eval_dataset <span class="op">=</span> TextAudioLoader(eval_filelist, hps.data)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        collate_fn <span class="op">=</span> TextAudioCollate()</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    eval_loader <span class="op">=</span> DataLoader(</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        eval_dataset,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        num_workers<span class="op">=</span><span class="dv">2</span>,                          <span class="co"># 较少 worker 避免与训练争抢资源</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        shuffle<span class="op">=</span><span class="va">False</span>,                          <span class="co"># 验证不打乱，保证可复现</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        pin_memory<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        collate_fn<span class="op">=</span>collate_fn,</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        batch_size<span class="op">=</span>hps.train.batch_size,</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> eval_loader</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>验证集 DataLoader 与训练集核心区别：(1) <code>shuffle=False</code> 保证每次评估结果可复现；(2) 不使用 <code>DistributedBucketSampler</code>，因为验证不需要按长度分桶且样本量较小；(3) <code>num_workers=2</code> 减少资源占用。</p>
+</blockquote>
+</section>
+<section id="验证评估逻辑evaluate-train.py" class="level4" data-number="3.2.4.3">
+<h4 data-number="3.2.4.3" class="anchored" data-anchor-id="验证评估逻辑evaluate-train.py"><span class="header-section-number">3.2.4.3</span> 3. 验证评估逻辑：<code>evaluate()</code> — <code>train.py</code></h4>
+<p>在 <code>torch.no_grad()</code> 下遍历验证集，兼容 <code>if_f0=0/1</code> 两种 batch 格式，计算平均 Mel L1 损失并记录到日志和 TensorBoard：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate(epoch, hps, net_g, eval_loader, logger, writer_eval, rank):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> eval_loader <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    net_g.<span class="bu">eval</span>()                              <span class="co"># 1. 切换 eval 模式</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    total_mel_loss <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():                     <span class="co"># 2. 不进行梯度更新</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> info <span class="kw">in</span> eval_loader:</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 3. 兼容 if_f0 == 0 和 if_f0 == 1 两种 batch</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>            <span class="co"># ... 解包 batch → 移到 GPU → net_g 前向推理 ...</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 4. 计算 mel L1 loss</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>            mel <span class="op">=</span> spec_to_mel_torch(spec, ...)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>            y_mel <span class="op">=</span> commons.slice_segments(mel, ids_slice, ...)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            y_hat_mel <span class="op">=</span> mel_spectrogram_torch(y_hat, ...)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            loss_mel <span class="op">=</span> F.l1_loss(y_mel, y_hat_mel)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            total_mel_loss <span class="op">+=</span> loss_mel.item()</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    avg_mel_loss <span class="op">=</span> total_mel_loss <span class="op">/</span> num_batches</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 5. 记录到日志和 TensorBoard</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    logger.info(<span class="ss">f"Epoch </span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss"> | Val Loss (mel): </span><span class="sc">{</span>avg_mel_loss<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    writer_eval.add_scalar(<span class="st">"val/loss_mel"</span>, avg_mel_loss, epoch)</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    net_g.train()                             <span class="co"># 6. 切回 train 模式</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>评估仅计算 Mel L1 损失（<code>loss_mel</code>），不包含 GAN 损失和 KL 散度——因为 Mel 损失直接衡量生成频谱与真实频谱的幅度差异，是衡量重建质量的核心指标，且计算稳定、不受判别器状态影响。</p>
+</blockquote>
+</section>
+<section id="接入训练主循环" class="level4" data-number="3.2.4.4">
+<h4 data-number="3.2.4.4" class="anchored" data-anchor-id="接入训练主循环"><span class="header-section-number">3.2.4.4</span> 4. 接入训练主循环</h4>
+<p>在 <code>run()</code> 函数中构造 <code>eval_loader</code>，传入 <code>train_and_evaluate()</code>，并在每个 epoch 结束后调用 <code>evaluate()</code>：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run() 中：</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>eval_loader <span class="op">=</span> build_eval_loader(hps) <span class="cf">if</span> rank <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ... 将 eval_loader 传入 train_and_evaluate 替代原来的 None</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># train_and_evaluate() 末尾：</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> rank <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    logger.info(<span class="st">"====&gt; Epoch: </span><span class="sc">{}</span><span class="st"> </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(epoch, ...))</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> eval_loader <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        evaluate(epoch, hps, net_g, eval_loader, logger, writer_eval, rank)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>验证仅在 rank=0（主进程）上执行，避免多 GPU 训练的重复计算。评估发生在每个 epoch 的所有训练 step 完成后，不影响训练的正常梯度更新流程。</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="实验结果及分析-1" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="实验结果及分析-1"><span class="header-section-number">3.3</span> 实验结果及分析</h2>
+<section id="实验环境部署结果" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="实验环境部署结果"><span class="header-section-number">3.3.1</span> 实验环境部署结果</h3>
+<p>按照任务要求完成以下环境配置步骤：</p>
+<ol type="1">
+<li>创建 Python 3.10 虚拟环境，安装 <code>requirements.txt</code> 中的依赖</li>
+<li>安装 FFmpeg 并配置系统 PATH</li>
+<li>运行 <code>python tools/download.py</code> 下载 HuBERT 基础模型和 RVC v2 预训练权重</li>
+<li>验证环境可用：成功运行推理脚本，完成原始音频到目标音色的转换</li>
+</ol>
+</section>
+<section id="预训练权重对训练效果的影响" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="预训练权重对训练效果的影响"><span class="header-section-number">3.3.2</span> 预训练权重对训练效果的影响</h3>
+<p>为探究预训练权重对 RVC 模型训练效率和最终效果的影响，本实验设置了两个对比组，均使用相同的数据集（AISLEE3-SSB0011，单说话人，约 10 分钟）、相同的训练配置（v2 模型，40kHz 采样率，batch_size=4，epochs=20）和验证集划分（80% 训练 / 10% 验证 / 10% 测试），唯一变量为是否加载预训练权重：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>实验组</th>
+<th>预训练 G</th>
+<th>预训练 D</th>
+<th>实验目的</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>主实验（预训练组）</td>
+<td><code>assets/pretrained_v2/G40k.pth</code></td>
+<td><code>assets/pretrained_v2/D40k.pth</code></td>
+<td>验证预训练权重的迁移效果</td>
+</tr>
+<tr class="even">
+<td>辅助实验（无预训练组）</td>
+<td>无（随机初始化）</td>
+<td>无（随机初始化）</td>
+<td>作为基线，衡量预训练的增益</td>
+</tr>
+</tbody>
+</table>
+<section id="训练损失对比" class="level4" data-number="3.3.2.1">
+<h4 data-number="3.3.2.1" class="anchored" data-anchor-id="训练损失对比"><span class="header-section-number">3.3.2.1</span> 训练损失对比</h4>
+<section id="总损失对比lossgtotal-与-lossdtotal" class="level5" data-number="3.3.2.1.1">
+<h5 data-number="3.3.2.1.1" class="anchored" data-anchor-id="总损失对比lossgtotal-与-lossdtotal"><span class="header-section-number">3.3.2.1.1</span> 总损失对比（<code>loss/g/total</code> 与 <code>loss/d/total</code>）</h5>
+<p><strong>预训练组：</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="assets/images/pretrain_total.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>预训练模型总损失</figcaption>
+</figure>
+</div>
+<p><strong>无预训练组：</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="assets/images/exp_total.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>无预训练模型总损失</figcaption>
+</figure>
+</div>
+<p>总损失包含生成器总损失（<code>loss/g/total</code> = Mel 损失 + GAN 损失 + 特征匹配损失 + KL 散度）和判别器总损失（<code>loss/d/total</code>）。对比显示：</p>
+<ul>
+<li><strong>预训练组</strong>：生成器和判别器的总损失均处于较低水平且保持稳定，说明两者在预训练阶段已达到较好的博弈均衡，微调仅需小幅度调整。</li>
+<li><strong>无预训练组</strong>：生成器总损失起始较高且逐步下降，判别器总损失波动更大——这符合 GAN 训练初期的典型模式：生成器质量较差时判别器容易区分真假，双方剧烈博弈后逐渐趋于均衡。</li>
+</ul>
+</section>
+<section id="mel-频谱损失lossgmel" class="level5" data-number="3.3.2.1.2">
+<h5 data-number="3.3.2.1.2" class="anchored" data-anchor-id="mel-频谱损失lossgmel"><span class="header-section-number">3.3.2.1.2</span> Mel 频谱损失（<code>loss/g/mel</code>）</h5>
+<p>Mel 频谱损失直接衡量生成器输出音频的 Mel 频谱与真实音频 Mel 频谱之间的 L1 距离，是评估生成音质的核心指标。</p>
+<p><strong>预训练组：</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="assets/images/pretrain_mel.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>预训练模型训练 Mel Loss</figcaption>
+</figure>
+</div>
+<p><strong>无预训练组：</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="assets/images/exp_mel.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>无预训练模型训练 Mel Loss</figcaption>
+</figure>
+</div>
+<p>对比可见，两组在 Mel 损失上的差异极为显著：</p>
+<ul>
+<li><strong>预训练组</strong>：<code>loss/g/mel</code> 从训练开始即处于极低水平，且全程保持稳定，几乎无明显下降趋势。这说明预训练生成器已经具备良好的 Mel 频谱建模能力，微调阶段只需要对目标说话人的音色特征做小幅适配。</li>
+<li><strong>无预训练组</strong>：<code>loss/g/mel</code> 从较高值开始，随着训练步数增加呈现明显下降趋势，最终降至约3.8左右。这表明随机初始化的生成器需要从零开始学习 Mel 频谱的映射关系，训练过程中的波动幅度也明显更大。</li>
+</ul>
+</section>
+</section>
+<section id="验证损失对比" class="level4" data-number="3.3.2.2">
+<h4 data-number="3.3.2.2" class="anchored" data-anchor-id="验证损失对比"><span class="header-section-number">3.3.2.2</span> 验证损失对比</h4>
+<p>每个 epoch 结束后，在预留的 10% 验证集上计算 <code>val/loss_mel</code>（仅在 <code>torch.no_grad()</code> 下计算 Mel L1 损失，不含 GAN 损失），用于评估模型在未见数据上的泛化性能。</p>
+<p><strong>预训练组：</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="assets/images/pretrain_val_mel.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>预训练模型验证 Loss</figcaption>
+</figure>
+</div>
+<p><strong>无预训练组：</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="assets/images/exp_val_mel.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>无预训练模型验证 Loss</figcaption>
+</figure>
+</div>
+<p>两组验证损失的对比进一步验证了预训练权重的优势：</p>
+<ul>
+<li><strong>预训练组</strong>：验证 Mel 损失极低，且与训练 Mel 损失几乎无差距。这说明预训练模型泛化能力优秀，在未见过的验证样本上同样表现良好，未出现过拟合迹象。</li>
+<li><strong>无预训练组</strong>：验证 Mel 损失起始较高，随 epoch 增加逐步下降，与训练损失的下降趋势一致。但由于训练样本量有限（仅约 10 分钟语音），随机初始化模型在训练集上的拟合尚不充分，验证损失整体高于预训练组。</li>
+</ul>
+</section>
+<section id="推理音频对比" class="level4" data-number="3.3.2.3">
+<h4 data-number="3.3.2.3" class="anchored" data-anchor-id="推理音频对比"><span class="header-section-number">3.3.2.3</span> 推理音频对比</h4>
+<p>训练完成后，使用两组模型分别对同一输入音频进行推理（声音转换），输出音频如下：</p>
+<p><strong>输入音频（源说话人）：</strong></p>
+<audio controls="" style="width:80%">
+<source src="assets/audios/input.wav" type="audio/wav">
+</audio>
+<p><strong>预训练组推理输出：</strong></p>
+<audio controls="" style="width:80%">
+<source src="assets/audios/output_pretrain.wav" type="audio/wav">
+</audio>
+<p><strong>无预训练组推理输出：</strong></p>
+<audio controls="" style="width:80%">
+<source src="assets/audios/output_exp.wav" type="audio/wav">
+</audio>
+<p>在听感上，预训练组输出的音质自然，目标说话人音色还原度高，但无预训练组无法输出正常的音频。</p>
+</section>
+<section id="结果分析-1" class="level4" data-number="3.3.2.4">
+<h4 data-number="3.3.2.4" class="anchored" data-anchor-id="结果分析-1"><span class="header-section-number">3.3.2.4</span> 结果分析</h4>
+<p>实验结果表明，预训练权重在小数据集场景下是 RVC 模型正常工作的<strong>必要条件</strong>而非可选项。</p>
+<ul>
+<li><strong>预训练组</strong>：损失从训练开始即处于低水平且保持稳定，验证损失与训练损失几乎无差距，推理输出音质自然、音色还原度高。预训练生成器已具备通用的频谱到波形映射能力，微调仅需适配目标说话人的频谱分布。</li>
+<li><strong>无预训练组</strong>：虽然损失曲线呈下降趋势，但推理时完全无法输出正常音频。原因是：(1) 生成器参数量大（数千万级），仅 10 分钟数据远不足以从零学习频谱-波形映射，神经声码器通常需数十小时以上数据；(2) GAN 在小数据集上易不稳定——判别器快速过拟合导致生成器收到噪声梯度；(3) Mel 损失虽从高位下降，但最终约 3.8 的水平仍远超可用阈值（预训练组约 0.25–0.35），频谱偏差过大无法形成可辨识语音。</li>
+</ul>
+<p>本质上，预训练权重在大规模数据上完成了”学会如何生成语音”这一最困难的任务，微调阶段仅需解决”学会生成谁的语音”。脱离预训练，仅凭 10 分钟数据几乎不可能获得可用模型。此外，验证损失可作为高效的”哨兵”指标——异常偏高的损失值足以预判模型尚未达到可用状态，无需等待推理验证。</p>
+</section>
+</section>
+</section>
+</section>
+<section id="总结" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> 总结</h1>
+<p>本次实验覆盖了语音合成与转换领域的三个关键技术层次：</p>
+<p><strong>实验一（Griffin-Lim 算法）</strong> 从理论基础出发，实现了基于迭代相位估计的经典声码器。实验表明，Griffin-Lim 算法能够在无需神经网络的情况下从幅度谱恢复可理解的重建语音——迭代次数决定了相位收敛程度，帧移和窗长等 STFT 参数直接影响重建质量。该算法虽已被现代神经声码器取代，但其背后的交替投影思想仍然是理解频域-时域对偶关系的重要基础。</p>
+<p><strong>实验二（RVC 声音转换）</strong> 深入实践了当前主流的声音转换框架。RVC 的核心创新在于将内容特征与音色特征解耦，并通过 FAISS 检索机制从目标说话人特征库中获取音色信息，有效缓解了内容泄露问题。实验中补充了验证集划分逻辑，为模型选择提供了客观的泛化性能指标。</p>
+<p>总体而言，本次实验构建了从经典信号处理到现代深度学习的完整知识链：频谱分析 <span class="math inline">\(\rightarrow\)</span> 相位重建 <span class="math inline">\(\rightarrow\)</span> 特征解耦 <span class="math inline">\(\rightarrow\)</span> 检索增强生成 <span class="math inline">\(\rightarrow\)</span> 端到端 TTS，为后续在语音合成、声音克隆和音频生成领域的深入研究和应用奠定了坚实基础。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/qsdong-bupt\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025 Qingsen Dong. Built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) block.classList.toggle("is-open");
+    });
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
+      }
+    });
+  });
+});
+</script>
+
+
+
+
+</body></html>
