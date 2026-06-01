@@ -409,6 +409,7 @@ window.Quarto = {
   <li><a href="#实验界面介绍" id="toc-实验界面介绍" class="nav-link" data-scroll-target="#实验界面介绍">实验界面介绍</a></li>
   <li><a href="#实验结果展示" id="toc-实验结果展示" class="nav-link" data-scroll-target="#实验结果展示">实验结果展示</a></li>
   </ul></li>
+  <li><a href="#结论" id="toc-结论" class="nav-link" data-scroll-target="#结论">5 结论</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -873,7 +874,12 @@ x_2 &amp; x_3 &amp; x_4 &amp; \dots &amp; x_1
 <section id="实验结果展示" class="level3">
 <h3 class="anchored" data-anchor-id="实验结果展示">实验结果展示</h3>
 <p><strong>成功案例</strong>：展示了系统在目标发生尺度变化、形变或背景复杂时的有效追踪。 <video src="assets/成功案例.mp4" controls="controls" width="800"></video></p>
-<p><strong>失败案例</strong>：揭示了在目标遇到长时间完全遮挡或快速离开视野时的跟踪脱落情况。 <video src="assets/失败案例.mp4" controls="controls" width="800"></video> 改变参数后，跟踪器在同一视频上表现差异不大。 ## 5 结论 本项目成功复现了 KCF 算法的核心机制，充分验证了循环矩阵和离散傅里叶变换在提高计算效率中的决定性作用，并通过引入非线性核提升了抗干扰能力，对实时跟踪系统的工程实现具有很好的参考价值。</p>
+<p><strong>失败案例</strong>：揭示了在目标遇到长时间完全遮挡或快速离开视野时的跟踪脱落情况。 <video src="assets/失败案例.mp4" controls="controls" width="800"></video> 改变参数后，跟踪器在同一视频上表现差异不大。</p>
+</section>
+</section>
+<section id="结论" class="level2">
+<h2 class="anchored" data-anchor-id="结论">5 结论</h2>
+<p>本项目成功复现了 KCF 算法的核心机制，充分验证了循环矩阵和离散傅里叶变换在提高计算效率中的决定性作用，并通过引入非线性核提升了抗干扰能力，对实时跟踪系统的工程实现具有很好的参考价值。</p>
 <p><strong>KCF算法的优点：</strong> 1. <strong>高实时性</strong>：巧妙运用循环矩阵和快速傅里叶变换（FFT），极大地降低了计算复杂度，运行速度极快。 2. <strong>鲁棒性较好</strong>：结合 HOG 多通道特征和核函数映射，对光照变化和一定的目标形变具有较强的抗干扰能力。</p>
 <p><strong>KCF算法的缺点：</strong> 1. <strong>遮挡极易跟丢</strong>：作为局部跟踪器，缺乏全局重检测机制，一旦目标被长时间完全遮挡或移出视野，跟踪器极易失效且无法自主恢复。 2. <strong>尺度适应受限</strong>：标准 KCF 算法采用固定大小的跟踪框，在面临目标尺度发生剧烈变化时，容易引入过多的背景噪声或丢失部分目标信息，导致跟踪漂移。</p>
 <p>KCF 自 2015 年发表以来，以其简洁高效的框架深刻影响了视觉目标跟踪领域，催生了大量后续工作。以下按演进脉络梳理最具影响力的几项代表性工作。</p>
@@ -888,7 +894,6 @@ x_2 &amp; x_3 &amp; x_4 &amp; \dots &amp; x_1
 <p>总的来看，KCF 的核心贡献——<strong>将跟踪转化为判别式滤波器学习、利用循环结构高效采样、通过频域运算实现实时推理</strong>——构成了相关滤波跟踪家族的基石。</p>
 
 
-</section>
 </section>
 </section>
 
