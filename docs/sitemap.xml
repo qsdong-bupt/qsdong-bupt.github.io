@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://qsdong-bupt.github.io/posts/Projects/projects_index.html</loc>
-    <lastmod>2026-06-01T10:02:58.941Z</lastmod>
+    <lastmod>2026-06-01T15:41:14.734Z</lastmod>
   </url>
   <url>
     <loc>https://qsdong-bupt.github.io/posts/Blogs/blogs_index.html</loc>
@@ -19,5 +19,9 @@
   <url>
     <loc>https://qsdong-bupt.github.io/posts/Projects/Voice_Experiment/index.html</loc>
     <lastmod>2026-06-01T10:07:51.065Z</lastmod>
+  </url>
+  <url>
+    <loc>https://qsdong-bupt.github.io/posts/Projects/KCF_Tracking/index.html</loc>
+    <lastmod>2026-06-01T15:41:13.132Z</lastmod>
   </url>
 </urlset>

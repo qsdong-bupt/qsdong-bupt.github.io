@@ -2,6 +2,7 @@
   {
     "listing": "/posts/Projects/projects_index.html",
     "items": [
+      "/posts/Projects/KCF_Tracking/index.html",
       "/posts/Projects/Voice_Experiment/index.html",
       "/posts/Projects/LLM_Pre-Training/index.html"
     ]
