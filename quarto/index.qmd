@@ -1,0 +1,19 @@
+---
+title: "About QINGSEN"
+about:
+  template: solana
+  image: style/profile.png
+  image-width: 15em
+  links:
+    - icon: linkedin
+      href: https://www.linkedin.com/in/qingsen-dong/
+    - icon: github
+      href: https://github.com/qsdong-bupt
+    - icon: envelope
+      href: mailto:qsdong@bupt.edu.cn
+---
+
+<span style="font-size: 1.3em;">
+I am an undergraduate student at Beijing University of Posts and Telecommunications (BUPT), School of Artificial Intelligence. With a strong foundation in machine learning, deep learning, and large language models, I have hands-on experience in building AI-driven solutions. I am currently seeking full-time opportunities in the AI field where I can contribute, grow, and make a meaningful impact. **Open to Work** -- feel free to reach out at [qsdong@bupt.edu.cn](mailto:qsdong@bupt.edu.cn)!
+</span>
+

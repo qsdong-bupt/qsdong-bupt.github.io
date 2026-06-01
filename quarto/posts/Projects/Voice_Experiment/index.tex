@@ -1,0 +1,1256 @@
+% Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  english,
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+
+
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off]{babel}
+\else
+\usepackage[bidi=default,shorthands=off]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
+
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={第三次语音实验},
+  pdfauthor={董庆森},
+  pdflang={en},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{第三次语音实验}
+\author{董庆森}
+\date{2026-05-31}
+\begin{document}
+\maketitle
+
+\renewcommand*\contentsname{Table of contents}
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+
+\section{实验目标}\label{ux5b9eux9a8cux76eeux6807}
+
+通过本实验，深入学习和实践语音信息处理中有关语音合成与转换的核心方法：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  基于 Griffin-Lim
+  算法的声码器实现，从幅度频谱图中迭代重建相位信息并生成语音；
+\item
+  部署并微调 RVC（Retrieval-based Voice
+  Conversion）声音转换模型，理解内容特征提取、F0
+  建模和特征检索融合的完整流程；
+\item
+  （选做）探索基于深度学习的语音合成模型。
+\end{enumerate}
+
+实验的核心目标是掌握从频域表示恢复时域波形的相位重建算法原理，以及现代语音转换系统中特征解耦与检索增强的技术路线。
+
+\section{实验一：Griffin-Lim
+算法实现声码器}\label{ux5b9eux9a8cux4e00griffin-lim-ux7b97ux6cd5ux5b9eux73b0ux58f0ux7801ux5668}
+
+\subsection{实验原理}\label{ux5b9eux9a8cux539fux7406}
+
+\subsubsection{短时傅里叶变换（STFT）}\label{ux77edux65f6ux5085ux91ccux53f6ux53d8ux6362stft}
+
+\textbf{基本原理}：语音信号是非平稳信号，但其统计特性在短时间内（约
+20--50ms）近似平稳。STFT
+通过在信号上滑动窗函数，将长时域信号分割为一系列短时帧，对每一帧分别计算傅里叶变换，从而获得时变频谱表示。
+
+\textbf{数学表达}：对于信号 \(x[n]\)，其 STFT 定义为：
+
+\[X(m, k) = \sum_{n=-\infty}^{\infty} x[n] w[n - mH] e^{-j 2\pi k n / N}\]
+
+其中 \(w[n]\) 为分析窗函数（如汉明窗），\(H\) 为帧移（hop
+length），\(N\) 为 FFT 点数，\(m\) 和 \(k\) 分别为时间和频率索引。
+
+\textbf{频谱图与相位}：STFT 结果为复数矩阵
+\(X(m,k) = |X(m,k)| \cdot e^{j\phi(m,k)}\)，其中幅度谱 \(|X(m,k)|\)
+反映各频段的能量分布，相位谱 \(\phi(m,k)\)
+编码信号的时域结构细节。在语音合成与转换任务中，幅度谱通常作为操作对象，而相位信息则需要额外的方法来恢复。
+
+\subsubsection{Griffin-Lim 算法}\label{griffin-lim-ux7b97ux6cd5}
+
+\textbf{基本原理}：Griffin-Lim
+算法是一种从已知幅度谱中迭代重建时域信号的经典方法。其核心思想是利用
+STFT 与逆
+STFT（ISTFT）之间的对偶关系，通过交替投影的方式在时域和频域之间迭代，使得重建信号的
+STFT 幅度谱逐步逼近目标幅度谱。
+
+\textbf{数学表达}：设目标幅度谱为
+\(S = |X(m,k)|\)，从随机初始化相位开始迭代：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  初始化：随机生成相位 \(\phi_0(m,k) \sim U(0, 2\pi)\)
+\item
+  频域合成：\(\hat{X}_i(m,k) = S \cdot e^{j\phi_i(m,k)}\)
+\item
+  逆变换到时域：\(y_i[n] = \text{ISTFT}(\hat{X}_i)\)
+\item
+  再次 STFT：\(X_{i+1}(m,k) = \text{STFT}(y_i)\)
+\item
+  提取新相位：\(\phi_{i+1}(m,k) = \angle X_{i+1}(m,k)\)
+\item
+  重复步骤 2--5 直至收敛
+\end{enumerate}
+
+该迭代过程等价于在约束集上寻找满足以下最小化目标的解：
+
+\[\min_{y} \sum_{m,k} \left( |\text{STFT}(y)(m,k)| - S(m,k) \right)^2\]
+
+\textbf{收敛性}：Griffin 和 Lim
+在原始论文中证明了该算法在每次迭代后均方误差单调不增，保证收敛到局部最优解。收敛速度取决于帧移相对于窗长的比例------帧移越小（帧间重叠越大），收敛越快，因为相邻帧相位之间的冗余约束增强。
+
+\subsection{实验流程}\label{ux5b9eux9a8cux6d41ux7a0b}
+
+\subsubsection{定义 STFT/ISTFT
+辅助函数与参数}\label{ux5b9aux4e49-stftistft-ux8f85ux52a9ux51fdux6570ux4e0eux53c2ux6570}
+
+首先设定 STFT 的关键参数 \texttt{n\_fft}（FFT 点数
+\(N\)）、\texttt{hop\_length}（帧移 \(H\)）、\texttt{win\_length}（窗长
+\(L\)），并封装 \texttt{librosa.stft} 和 \texttt{librosa.istft}。STFT
+将时域信号 \(x[n]\) 变换到时频域：
+
+\[X(m,k) = \sum_{n=-\infty}^{\infty} x[n]\, w[n - mH]\, e^{-j 2\pi kn/N}\]
+
+其中 \(w[n]\) 为窗函数，\(m\) 为帧索引，\(k\) 为频率索引。ISTFT
+则通过重叠相加（overlap-add）将复数频谱重建回时域波形。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n\_fft, hop\_length, win\_length }\OperatorTok{=} \DecValTok{720}\NormalTok{, }\DecValTok{160}\NormalTok{, }\DecValTok{720}  \CommentTok{\# }\AlertTok{TODO}\CommentTok{ 尝试改变参数}
+
+\KeywordTok{def}\NormalTok{ \_stft(y):}
+    \ControlFlowTok{return}\NormalTok{ librosa.stft(y}\OperatorTok{=}\NormalTok{y, n\_fft}\OperatorTok{=}\NormalTok{n\_fft,}
+\NormalTok{                        hop\_length}\OperatorTok{=}\NormalTok{hop\_length,}
+\NormalTok{                        win\_length}\OperatorTok{=}\NormalTok{win\_length)}
+
+\KeywordTok{def}\NormalTok{ \_istft(y):}
+    \ControlFlowTok{return}\NormalTok{ librosa.istft(y, hop\_length}\OperatorTok{=}\NormalTok{hop\_length,}
+\NormalTok{                         win\_length}\OperatorTok{=}\NormalTok{win\_length)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Griffin-Lim
+核心算法实现}\label{griffin-lim-ux6838ux5fc3ux7b97ux6cd5ux5b9eux73b0}
+
+这是实验的核心------实现 \texttt{\_griffin\_lim(S,\ gl\_iters)}
+函数。Griffin-Lim 的优化目标是使重建信号的幅度谱逼近给定的目标幅度谱：
+
+\[\min_{y}\; \sum_{m,k} \Big( |\text{STFT}(y)(m,k)| - |S(m,k)| \Big)^2\]
+
+迭代中保持幅度不变、逐步修正相位。下面对照代码逐行说明数学原理。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ \_griffin\_lim(S, gl\_iters):}
+    \CommentTok{\# }\AlertTok{TODO}\CommentTok{ 随机生成一个与频谱图S形状相同的复数数组}
+\NormalTok{    angles }\OperatorTok{=}\NormalTok{ np.exp(}\OtherTok{2j} \OperatorTok{*}\NormalTok{ np.pi }\OperatorTok{*}\NormalTok{ np.random.random\_sample(S.shape))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+随机初始化相位 \(\phi_0(m,k) \sim U(0, 2\pi)\)，并以复数指数形式表示
+\(e^{j\phi_0(m,k)}\)。由于真实相位未知，从随机起点出发，迭代收敛到满足幅度约束的可行解。
+\end{quote}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \CommentTok{\# }\AlertTok{TODO}\CommentTok{ 计算频谱图S的绝对值，然后将其转换为双精度复数类型}
+\NormalTok{    S\_complex }\OperatorTok{=}\NormalTok{ np.}\BuiltInTok{abs}\NormalTok{(S).astype(np.complex128)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+从复数谱 \(S \in \mathbb{C}^{F \times T}\) 中提取幅度 \(|S|\)，记为
+\(A(m,k) = |S(m,k)|\)。迭代全程中幅度 \(A\) 固定不变，仅更新相位估计。
+\end{quote}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \CommentTok{\# }\AlertTok{TODO}\CommentTok{ 使用ISTFT转换回音频}
+\NormalTok{    y }\OperatorTok{=}\NormalTok{ \_istft(S\_complex }\OperatorTok{*}\NormalTok{ angles)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+初始重建
+\(y_0 = \text{ISTFT}\big(A \cdot e^{j\phi_0}\big)\)。将固定的目标幅度与随机相位结合，通过
+ISTFT 得到第一个时域估计。
+\end{quote}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(gl\_iters):}
+        \CommentTok{\# }\AlertTok{TODO}\CommentTok{ 对当前音频信号y进行STFT，取其相位角，}
+        \CommentTok{\# np.exp(1j * ...)将相位角转换回复数形式，与幅度谱匹配}
+\NormalTok{        angles }\OperatorTok{=}\NormalTok{ np.exp(}\OtherTok{1j} \OperatorTok{*}\NormalTok{ np.angle(\_stft(y)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+第 \(i\) 次迭代中，对当前估计 \(y_i\) 做 STFT 得到
+\(\hat{X}_i = \text{STFT}(y_i) = |\hat{X}_i| \cdot e^{j\angle\hat{X}_i}\)，
+丢弃其幅度 \(|\hat{X}_i|\)，仅提取相位 \(\phi_{i+1} = \angle\hat{X}_i\)
+作为新的相位估计。
+\end{quote}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{        y }\OperatorTok{=}\NormalTok{ \_istft(S\_complex }\OperatorTok{*}\NormalTok{ angles)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+用固定幅度 \(A\) 与新相位 \(\phi_{i+1}\) 组合
+\(A \cdot e^{j\phi_{i+1}}\)，经 ISTFT 得到更新后的时域信号
+\(y_{i+1} = \text{ISTFT}(A \cdot e^{j\phi_{i+1}})\)。重复此过程直至达到设定迭代次数。
+\end{quote}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \ControlFlowTok{return}\NormalTok{ y}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{加载音频并计算
+STFT}\label{ux52a0ux8f7dux97f3ux9891ux5e76ux8ba1ux7b97-stft}
+
+加载音频并重采样至 16kHz 单声道，得到时域信号 \(x[n]\)。通过 STFT
+获得复数频谱 \(D(m,k)\)：
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{AudioData, sr }\OperatorTok{=}\NormalTok{ librosa.load(input\_path, sr}\OperatorTok{=}\DecValTok{16000}\NormalTok{, mono}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{D }\OperatorTok{=}\NormalTok{ librosa.stft(AudioData, n\_fft}\OperatorTok{=}\NormalTok{n\_fft,}
+\NormalTok{                 hop\_length}\OperatorTok{=}\NormalTok{hop\_length, win\_length}\OperatorTok{=}\NormalTok{win\_length)}
+\end{Highlighting}
+\end{Shaded}
+
+STFT 输出 \(D \in \mathbb{C}^{F \times T}\)，其中
+\(F = N/2 + 1\)（仅保留正频率），\(T\) 为帧数，每一帧 \(t\) 的频率分量
+\(D(:,t)\) 均为复数。
+
+\subsubsection{运行 Griffin-Lim
+迭代重建}\label{ux8fd0ux884c-griffin-lim-ux8fedux4ee3ux91cdux5efa}
+
+设定迭代次数 \(\text{iters} = 200\)，调用 \texttt{\_griffin\_lim} 从频谱
+\(D\) 重建波形：
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gl\_iters }\OperatorTok{=} \DecValTok{200}  \CommentTok{\# }\AlertTok{TODO}\CommentTok{ 设置 Griffin{-}Lim 算法重复迭代的次数}
+\NormalTok{ReAudio }\OperatorTok{=}\NormalTok{ \_griffin\_lim(D, gl\_iters)}
+\end{Highlighting}
+\end{Shaded}
+
+每次迭代均使 \(\sum_{m,k}\big(|\text{STFT}(y_i)| - |D|\big)^2\)
+单调不增，200
+次迭代后相位估计基本收敛，重建波形在包络上与原始信号高度吻合。
+
+\subsection{实验结果及分析}\label{ux5b9eux9a8cux7ed3ux679cux53caux5206ux6790}
+
+\subsubsection{迭代次数对重建质量的影响}\label{ux8fedux4ee3ux6b21ux6570ux5bf9ux91cdux5efaux8d28ux91cfux7684ux5f71ux54cd}
+
+实验固定 STFT 参数为
+\texttt{n\_fft=720,\ win\_length=720,\ hop\_length=160}（窗长 45ms，帧移
+10ms），在 4 种不同迭代次数下运行 Griffin-Lim 算法，对比重建效果。
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+迭代次数
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+重建效果主观评价
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+波形与原始吻合程度
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+10 & 音频刺耳、有明显金属音，语音内容勉强可辨 &
+波形包络模糊，细节丢失严重 \\
+50 & 金属音减弱，音质有所改善但仍有失真 &
+包络基本可见，辅音段细节不足 \\
+200 & 音质较自然，与原始音频听感接近 & 波形包络与原始高度吻合 \\
+1000 & 音质与 200 次接近，改善幅度很小 & 与 200
+次差异肉眼难辨，边际收益递减 \\
+\end{longtable}
+}
+
+\paragraph{迭代 10 次}\label{ux8fedux4ee3-10-ux6b21}
+
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{assets/images/nfft720_win720_hop160_iter10.png}
+
+\paragraph{迭代 50 次}\label{ux8fedux4ee3-50-ux6b21}
+
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{assets/images/nfft720_win720_hop160_iter50.png}
+
+\paragraph{迭代 200 次}\label{ux8fedux4ee3-200-ux6b21}
+
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{assets/images/nfft720_win720_hop160_iter200.png}
+
+\paragraph{迭代 1000 次}\label{ux8fedux4ee3-1000-ux6b21}
+
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{assets/images/nfft720_win720_hop160_iter1000.png}
+
+\paragraph{结果分析}\label{ux7ed3ux679cux5206ux6790}
+
+\textbf{迭代次数对重建质量的影响}
+
+Griffin-Lim
+算法以交替投影方式逐步逼近真实相位。从上述四组实验可以清晰观察到迭代次数对重建质量的边际收益递减规律：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{10
+  次迭代}：相位远未收敛，重建音频存在严重的金属音伪影。波形的宏观包络尚可分辨，但微观振荡模式与原始信号差异显著。此时
+  MSE（均方误差）仍处于高位。
+\item
+  \textbf{50
+  次迭代}：相位估计已有明显改善，金属音减弱，语音内容清晰可辨。波形包络基本正确，但在清辅音等弱能量段的细节恢复仍不充分。
+\item
+  \textbf{200
+  次迭代}：相位基本收敛，重建音质自然度较高，与原始音频听感差距很小。波形对比图中上（原始）下（重建）两条曲线高度一致。此时优化目标
+  \(\sum_{m,k}\big(|\text{STFT}(y)| - |D|\big)^2\) 已下降至低点。
+\item
+  \textbf{1000
+  次迭代}：继续增加迭代次数带来的改善微乎其微，人耳难以察觉差异。这表明算法已收敛到局部最优解，受限于幅度约束本身无法唯一确定真实相位，进一步迭代无意义。
+\end{itemize}
+
+该趋势符合 Griffin \& Lim
+原始论文中证明的均方误差单调递减且收敛到驻点的理论结论。
+
+\textbf{收敛速度与帧移的关系}
+
+本实验中 hop\_length=160（帧移 10ms），帧间重叠率为
+\(\frac{720-160}{720} \approx 77.8\%\)。高重叠率为相邻帧的相位提供了强冗余约束，使得算法在
+200 次迭代内即可基本收敛。若使用更大的帧移（如 hop\_length=360，重叠率
+50\%），收敛速度将显著减慢，需更多迭代次数才能达到相似质量。
+
+\textbf{算法局限性}
+
+Griffin-Lim
+算法不能保证恢复真实相位------它只保证收敛到满足幅度约束的某个可行解。这在语音信号中表现为：即使波形看上去相似，听感上仍可能存在轻微的''相位失真''痕迹（一种不自然的音色）。现代神经声码器（如
+HiFi-GAN）通过数据驱动的方式学习幅度到相位的映射，正是为了突破这一局限。
+
+\subsubsection{STFT
+参数对重建质量的影响}\label{stft-ux53c2ux6570ux5bf9ux91cdux5efaux8d28ux91cfux7684ux5f71ux54cd}
+
+前面的实验固定了
+\texttt{n\_fft=720,\ hop\_length=160,\ win\_length=720}，本节分析这三个参数各自的物理含义和对
+Griffin-Lim 重建质量的影响，并给出三组推荐配置的对比实验。
+
+\paragraph{参数物理含义（采样率 16kHz
+下）}\label{ux53c2ux6570ux7269ux7406ux542bux4e49ux91c7ux6837ux7387-16khz-ux4e0b}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2222}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1778}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+参数
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+公式
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+物理含义
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+当前值
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+对应时间/频率
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{n\_fft} & \(N\) & FFT 点数，决定频率分辨率 & 720 &
+\(\Delta f = f_s / N = 16000/720 \approx 22.2\text{ Hz}\) \\
+\texttt{win\_length} & \(L\) & 窗长度（每帧分析的样本数） & 720 &
+\(T_w = L / f_s = 45\text{ ms}\) \\
+\texttt{hop\_length} & \(H\) & 帧移（相邻帧起始位置间隔） & 160 &
+\(T_h = H / f_s = 10\text{ ms}\) \\
+\end{longtable}
+}
+
+\textbf{关键关系}：
+
+\begin{itemize}
+\item
+  \textbf{频率分辨率与时间分辨率权衡}：\(\Delta f = f_s / N\)，\(N\)
+  越大频率分辨率越高，但时间分辨率不变（由 \(L\) 决定）。当 \(N > L\)
+  时进行零填充，在频域获得更细的插值但不增加新信息；当 \(N < L\)
+  时截断，丢失高频细节。
+\item
+  \textbf{窗长决定准平稳假设}：语音在 20--50ms
+  内近似平稳。\(L=720 \Rightarrow 45\text{ms}\)
+  落在此范围内，兼顾了频率分辨率（\(\Delta f \approx 22.2\text{Hz}\)）和时间平稳性。
+\item
+  \textbf{帧移决定帧间重叠}：重叠率
+  \(= (L - H) / L = (720 - 160) / 720 \approx 77.8\%\)。高重叠率为
+  Griffin-Lim 的相邻帧相位提供强冗余约束，是算法快速收敛的关键。
+\item
+  \textbf{n\_fft 与 win\_length 关系}：当 \(N = L\)
+  时不进行零填充，无频域插值；当 \(N > L\)
+  时，窗后补零使频谱更平滑（不影响实际频率分辨率，仅插值）；当 \(N < L\)
+  时截断窗，信息丢失。
+\end{itemize}
+
+\paragraph{三组推荐配置对比}\label{ux4e09ux7ec4ux63a8ux8350ux914dux7f6eux5bf9ux6bd4}
+
+为直观对比不同参数配置对 Griffin-Lim 重建质量的影响，在采样率 16kHz
+下测试了三组常用配置。以下均在 \textbf{50 次迭代} 下进行公平对比：
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0921}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1579}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1579}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0789}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0789}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1053}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1711}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0789}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0789}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+n\_fft
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+hop\_length
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+win\_length
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+窗长
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+帧移
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+重叠率
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(\Delta f\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+帧率
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+特点
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+720 & 160 & 720 & 45ms & 10ms & 77.8\% & 22.2Hz & 100fps &
+语音/人声/音乐通用 \\
+512 & 128 & 512 & 32ms & 8ms & 75\% & 31.25Hz & 125fps &
+帧数更多但每帧点数少，总体计算量略小 \\
+1024 & 128 & 1024 & 64ms & 8ms & 87.5\% & 15.6Hz & 125fps &
+最长窗+最高重叠，收敛最快，适合音乐 \\
+\end{longtable}
+}
+
+\paragraph{\texorpdfstring{配置一：高质量（\texttt{n\_fft=720,\ hop\_length=160,\ win\_length=720}）---
+迭代 50
+次}{配置一：高质量（n\_fft=720, hop\_length=160, win\_length=720）--- 迭代 50 次}}\label{ux914dux7f6eux4e00ux9ad8ux8d28ux91cfn_fft720-hop_length160-win_length720-ux8fedux4ee3-50-ux6b21}
+
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{assets/images/nfft720_win720_hop160_iter50.png}
+
+\textbf{分析}：45ms 窗长 + 10ms
+帧移是语音处理的经典配置，在频率分辨率（22.2Hz）和时间分辨率之间取得了良好平衡。77.8\%
+的高重叠率为 Griffin-Lim 提供了充足的帧间相位约束，50
+次迭代后语音内容已清晰可辨，金属音伪影明显减弱。推荐作为语音和人声处理的默认配置。
+
+\paragraph{\texorpdfstring{配置二：更快（\texttt{n\_fft=512,\ hop\_length=128,\ win\_length=512}）---
+迭代 50
+次}{配置二：更快（n\_fft=512, hop\_length=128, win\_length=512）--- 迭代 50 次}}\label{ux914dux7f6eux4e8cux66f4ux5febn_fft512-hop_length128-win_length512-ux8fedux4ee3-50-ux6b21}
+
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{assets/images/nfft512_win512_hop128_iter50.png}
+
+\textbf{分析}：\(N=512\) 为 2 的幂，可利用 FFT 的基数-2
+算法提高计算效率。32ms 窗长仍处于语音准平稳范围内，但频率分辨率下降至
+31.25Hz------低频段的谐波结构分辨能力稍弱。8ms 帧移产生 125fps
+的帧率，帧数增多但每帧 FFT 点数减少至 512（vs
+720），整体计算量略有下降。75\%
+重叠率仍然提供良好的帧间约束。听感上音质与配置一接近，是一个在效率和质量之间取得良好折中的方案。
+
+\paragraph{\texorpdfstring{配置三：超高音质（\texttt{n\_fft=1024,\ hop\_length=128,\ win\_length=1024}）---
+迭代 50
+次}{配置三：超高音质（n\_fft=1024, hop\_length=128, win\_length=1024）--- 迭代 50 次}}\label{ux914dux7f6eux4e09ux8d85ux9ad8ux97f3ux8d28n_fft1024-hop_length128-win_length1024-ux8fedux4ee3-50-ux6b21}
+
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{assets/images/nfft1024_win1024_hop128_iter50.png}
+
+\textbf{分析}：\(N=1024\) 也是 2 的幂，频域计算高效。64ms
+窗长超出了语音准平稳假设的推荐上限（50ms），对于快速变化的语音段（如爆破音）可能引入时域模糊，但为稳态元音提供了更精细的频率分辨率（15.6Hz）。87.5\%
+的极高重叠率为 Griffin-Lim
+提供了最强帧间约束------在相同迭代次数下收敛最快、相位误差最小。适合音乐信号或对音质有极致要求的场景，但需注意
+FFT 点数增大带来的计算量增加和瞬态成分可能的时间模糊。
+
+\paragraph{参数选择总结}\label{ux53c2ux6570ux9009ux62e9ux603bux7ed3}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2727}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4545}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2727}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+场景
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+推荐配置
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+理由
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+日常语音处理 & \texttt{n\_fft=720,\ hop\_length=160,\ win\_length=720} &
+各项指标均衡，45ms 窗+10ms 帧移为语音经典标准 \\
+实时/低延迟应用 &
+\texttt{n\_fft=512,\ hop\_length=128,\ win\_length=512} & FFT 基数-2
+加速，总体计算量较小，质量损失可接受 \\
+音乐/高保真需求 &
+\texttt{n\_fft=1024,\ hop\_length=128,\ win\_length=1024} &
+最高频率分辨率 + 最高重叠率，收敛最快，质量最佳 \\
+极低延迟 & \texttt{n\_fft=256,\ hop\_length=64,\ win\_length=256} & 16ms
+窗+4ms 帧移，延迟最低但频率分辨率差（62.5Hz） \\
+\end{longtable}
+}
+
+\textbf{核心规律}：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{n\_fft 越大，频率分辨率越高}，低频谐波的分离能力越强，但
+  \(N > L\) 时的零填充仅提供插值、不增加信息量。\(N\) 取 2 的幂（如
+  512、1024）可获得最佳 FFT 计算效率。
+\item
+  \textbf{hop\_length 越小（即重叠率越高），Griffin-Lim
+  收敛越快}。因为帧间重叠引入了冗余的相位约束------每一帧的相位不仅要满足自身的幅度约束，还需与相邻帧在时域重叠区域保持一致。重叠率从
+  75\% 提升到 87.5\% 时，同等迭代次数下相位估计更精确。
+\item
+  \textbf{win\_length 需平衡时域分辨率与频域分辨率}。\(L\)
+  越大，单帧内频率分辨能力越强（\(\Delta f\)
+  变小），但帧内信号不再平稳的风险增大；\(L\)
+  越小，时域定位越精确，但频率分辨能力不足。语音处理中 20--50ms
+  是经验最优区间。
+\end{enumerate}
+
+\section{实验二：部署并微调 RVC
+声音转换模型}\label{ux5b9eux9a8cux4e8cux90e8ux7f72ux5e76ux5faeux8c03-rvc-ux58f0ux97f3ux8f6cux6362ux6a21ux578b}
+
+\subsection{实验原理}\label{ux5b9eux9a8cux539fux7406-1}
+
+\subsubsection{RVC
+模型架构概述}\label{rvc-ux6a21ux578bux67b6ux6784ux6982ux8ff0}
+
+RVC（Retrieval-based Voice
+Conversion）是一种基于内容特征解耦与特征检索的声音转换框架。其核心思想是将语音信号分解为三个独立成分：\textbf{内容特征}（由
+HuBERT 提取的语义/音素信息）、\textbf{F0 基频特征}（由 RMVPE/Harvest
+等算法提取的韵律信息）和\textbf{音色特征}（通过检索机制从目标说话人特征库中获取）。
+
+\subsubsection{关键组件}\label{ux5173ux952eux7ec4ux4ef6}
+
+\textbf{内容特征提取（HuBERT）}
+
+使用预训练的 HuBERT 模型提取语音的内容表征。HuBERT
+通过自监督学习从大量未标注语音中学习到丰富的音素和语义表示，其隐藏层输出能够有效保留语言内容信息同时抑制说话人身份信息。RVC
+将 16kHz 音频输入 HuBERT，提取第 9 层（或第 12
+层）的隐藏状态作为内容特征。
+
+\textbf{F0 基频提取}
+
+F0（基频）是语音韵律的核心载体，决定了语调的高低变化和重音模式。RVC
+支持多种 F0 提取方法：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Harvest}：高精度的时域基频估计算法，适合干净语音
+\item
+  \textbf{RMVPE}：基于深度学习的鲁棒基频估计，对噪声环境更友好
+\item
+  \textbf{DIO}：计算效率较高的频域方法
+\end{itemize}
+
+提取的 F0 特征与内容特征一同作为生成器的输入条件。
+
+\textbf{特征检索机制（FAISS）}
+
+在训练完成后，RVC 对训练集中所有帧的内容特征建立 FAISS
+索引。推理时，对于输入语音的每一帧内容特征，从索引中检索与之最相似的 K
+个目标说话人特征，通过加权融合得到该帧对应的音色嵌入向量。这一机制有效缓解了内容泄露（content
+leakage）问题------即转换后的语音保留了源说话人的音色痕迹。
+
+\textbf{生成器与判别器}
+
+RVC 采用基于 HiFi-GAN 的生成器架构，接收内容特征、F0
+特征和音色嵌入，通过多尺度上采样生成目标采样率的高质量波形。训练过程中，多周期判别器（MPD）和多尺度判别器（MSD）对生成波形进行对抗性训练，结合
+Mel 频谱损失和特征匹配损失进行多目标优化。
+
+\subsubsection{训练目标}\label{ux8badux7ec3ux76eeux6807}
+
+RVC 的训练损失函数由以下分量组成：
+
+\[\mathcal{L}_{total} = \lambda_{mel}\mathcal{L}_{mel} + \lambda_{GAN}\mathcal{L}_{GAN} + \lambda_{FM}\mathcal{L}_{FM}\]
+
+其中 \(\mathcal{L}_{mel}\) 为生成音频与真实音频在 Mel 频谱域的 L1
+损失，\(\mathcal{L}_{GAN}\) 为对抗损失，\(\mathcal{L}_{FM}\)
+为判别器的特征匹配损失。
+
+\subsection{实验流程}\label{ux5b9eux9a8cux6d41ux7a0b-1}
+
+\subsubsection{环境配置}\label{ux73afux5883ux914dux7f6e}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  使用 conda 创建 Python 3.10
+  环境：\texttt{conda\ create\ -n\ rvc\ python=3.10}
+\item
+  安装依赖：\texttt{pip\ install\ -r\ requirements.txt}
+\item
+  安装 FFmpeg 并验证：\texttt{ffmpeg\ -version}
+\item
+  下载预训练权重：\texttt{python\ tools/download.py}
+\end{enumerate}
+
+\subsubsection{训练流程}\label{ux8badux7ec3ux6d41ux7a0b}
+
+用提供的数据集（AISLEE3-SSB0011，单说话人，不少于10分钟）完成训练，
+用训练好的模型执行推理，完成声音转换
+
+\texttt{tools/train\_cli.py} 串联以下步骤：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{数据预处理}：将原始音频切分为短片段，统一重采样到目标采样率（40kHz
+  或 48kHz）
+\item
+  \textbf{F0 提取}：对每个音频片段提取基频曲线
+\item
+  \textbf{HuBERT 特征提取}：将音频降采样至 16kHz，通过 HuBERT
+  提取内容特征
+\item
+  \textbf{模型训练}：生成器与判别器交替优化，每个 epoch 后保存检查点
+\item
+  \textbf{索引建立}：训练完成后建立 FAISS 特征检索索引
+\end{enumerate}
+
+\subsubsection{推理流程}\label{ux63a8ux7406ux6d41ux7a0b}
+
+\texttt{tools/infer\_cli.py}
+加载训练好的说话人模型权重和特征索引，对输入音频执行：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  提取输入音频的内容特征（HuBERT）和 F0
+\item
+  通过 FAISS 检索目标说话人的音色嵌入
+\item
+  生成器利用内容 + F0 + 音色嵌入生成目标说话人的语音
+\end{enumerate}
+
+\subsubsection{验证集补充（实验任务）}\label{ux9a8cux8bc1ux96c6ux8865ux5145ux5b9eux9a8cux4efbux52a1}
+
+原始代码仅将所有样本写入单一的
+\texttt{filelist.txt}，缺少验证/测试集划分以及训练过程中的验证评估环节。本实验共修改两处文件、补充三个函数，实现完整的训练/验证/测试集划分和每轮训练后的验证评估。
+
+\paragraph{\texorpdfstring{1. 数据划分：\texttt{write\_filelist()} ---
+\texttt{tools/train\_cli.py}}{1. 数据划分：write\_filelist() --- tools/train\_cli.py}}\label{ux6570ux636eux5212ux5206write_filelist-toolstrain_cli.py}
+
+将匹配到的样本名打乱后按 \textbf{8:1:1}
+比例划分为训练集、验证集和测试集，静音样本仅追加到训练集。代码修改如下：
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ write\_filelist(exp\_dir, sr, version, if\_f0, speaker\_id):}
+    \CommentTok{\# ... 收集所有匹配的样本名到 rows 列表（同上）...}
+
+    \CommentTok{\# 打乱并按照 8:1:1 的比例划分为训练集、验证集和测试集}
+\NormalTok{    shuffle(rows)}
+\NormalTok{    n\_total }\OperatorTok{=} \BuiltInTok{len}\NormalTok{(rows)}
+\NormalTok{    n\_train }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(n\_total }\OperatorTok{*} \FloatTok{0.8}\NormalTok{)}
+\NormalTok{    n\_val }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(n\_total }\OperatorTok{*} \FloatTok{0.1}\NormalTok{)}
+\NormalTok{    train\_rows }\OperatorTok{=}\NormalTok{ rows[:n\_train]}
+\NormalTok{    val\_rows }\OperatorTok{=}\NormalTok{ rows[n\_train : n\_train }\OperatorTok{+}\NormalTok{ n\_val]}
+\NormalTok{    test\_rows }\OperatorTok{=}\NormalTok{ rows[n\_train }\OperatorTok{+}\NormalTok{ n\_val:]}
+
+    \CommentTok{\# 静音样本只追加到训练集}
+\NormalTok{    mute\_rows }\OperatorTok{=}\NormalTok{ [...]  }\CommentTok{\# 2 条静音样本}
+\NormalTok{    train\_rows.extend(mute\_rows)}
+\NormalTok{    shuffle(train\_rows)}
+
+    \CommentTok{\# 分别写入三个文件}
+\NormalTok{    (exp\_dir }\OperatorTok{/} \StringTok{"filelist.txt"}\NormalTok{).write\_text(...)       }\CommentTok{\# 训练集（含静音）}
+\NormalTok{    (exp\_dir }\OperatorTok{/} \StringTok{"filelist\_val.txt"}\NormalTok{).write\_text(...)   }\CommentTok{\# 验证集}
+\NormalTok{    (exp\_dir }\OperatorTok{/} \StringTok{"filelist\_test.txt"}\NormalTok{).write\_text(...)  }\CommentTok{\# 测试集}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+80/10/10 比例说明：80\% 训练集用于模型参数更新，10\%
+验证集用于每轮训练后评估泛化性能，剩余 10\%
+作为测试集保留供最终评估使用。静音样本仅加入训练集，确保验证/测试集完全由真实语音样本组成，评估结果更具参考价值。
+\end{quote}
+
+\paragraph{\texorpdfstring{2. 构造验证集
+DataLoader：\texttt{build\_eval\_loader()} ---
+\texttt{train.py}}{2. 构造验证集 DataLoader：build\_eval\_loader() --- train.py}}\label{ux6784ux9020ux9a8cux8bc1ux96c6-dataloaderbuild_eval_loader-train.py}
+
+从 \texttt{filelist\_val.txt} 读取验证样本，根据 \texttt{if\_f0}
+标志选择合适的 Dataset 和 Collate 类，构造验证专用 DataLoader：
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ build\_eval\_loader(hps):}
+\NormalTok{    eval\_filelist }\OperatorTok{=}\NormalTok{ os.path.join(hps.model\_dir, }\StringTok{"filelist\_val.txt"}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ os.path.exists(eval\_filelist):}
+        \ControlFlowTok{return} \VariableTok{None}  \CommentTok{\# 验证集不存在则跳过评估}
+
+    \ControlFlowTok{if}\NormalTok{ hps.if\_f0 }\OperatorTok{==} \DecValTok{1}\NormalTok{:}
+\NormalTok{        eval\_dataset }\OperatorTok{=}\NormalTok{ TextAudioLoaderMultiNSFsid(eval\_filelist, hps.data)}
+\NormalTok{        collate\_fn }\OperatorTok{=}\NormalTok{ TextAudioCollateMultiNSFsid()}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        eval\_dataset }\OperatorTok{=}\NormalTok{ TextAudioLoader(eval\_filelist, hps.data)}
+\NormalTok{        collate\_fn }\OperatorTok{=}\NormalTok{ TextAudioCollate()}
+
+\NormalTok{    eval\_loader }\OperatorTok{=}\NormalTok{ DataLoader(}
+\NormalTok{        eval\_dataset,}
+\NormalTok{        num\_workers}\OperatorTok{=}\DecValTok{2}\NormalTok{,                          }\CommentTok{\# 较少 worker 避免与训练争抢资源}
+\NormalTok{        shuffle}\OperatorTok{=}\VariableTok{False}\NormalTok{,                          }\CommentTok{\# 验证不打乱，保证可复现}
+\NormalTok{        pin\_memory}\OperatorTok{=}\VariableTok{True}\NormalTok{,}
+\NormalTok{        collate\_fn}\OperatorTok{=}\NormalTok{collate\_fn,}
+\NormalTok{        batch\_size}\OperatorTok{=}\NormalTok{hps.train.batch\_size,}
+\NormalTok{    )}
+    \ControlFlowTok{return}\NormalTok{ eval\_loader}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+验证集 DataLoader 与训练集核心区别：(1) \texttt{shuffle=False}
+保证每次评估结果可复现；(2) 不使用
+\texttt{DistributedBucketSampler}，因为验证不需要按长度分桶且样本量较小；(3)
+\texttt{num\_workers=2} 减少资源占用。
+\end{quote}
+
+\paragraph{\texorpdfstring{3. 验证评估逻辑：\texttt{evaluate()} ---
+\texttt{train.py}}{3. 验证评估逻辑：evaluate() --- train.py}}\label{ux9a8cux8bc1ux8bc4ux4f30ux903bux8f91evaluate-train.py}
+
+在 \texttt{torch.no\_grad()} 下遍历验证集，兼容 \texttt{if\_f0=0/1} 两种
+batch 格式，计算平均 Mel L1 损失并记录到日志和 TensorBoard：
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ evaluate(epoch, hps, net\_g, eval\_loader, logger, writer\_eval, rank):}
+    \ControlFlowTok{if}\NormalTok{ eval\_loader }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}
+\NormalTok{    net\_g.}\BuiltInTok{eval}\NormalTok{()                              }\CommentTok{\# 1. 切换 eval 模式}
+\NormalTok{    total\_mel\_loss }\OperatorTok{=} \FloatTok{0.0}
+    \ControlFlowTok{with}\NormalTok{ torch.no\_grad():                     }\CommentTok{\# 2. 不进行梯度更新}
+        \ControlFlowTok{for}\NormalTok{ info }\KeywordTok{in}\NormalTok{ eval\_loader:}
+            \CommentTok{\# 3. 兼容 if\_f0 == 0 和 if\_f0 == 1 两种 batch}
+            \CommentTok{\# ... 解包 batch → 移到 GPU → net\_g 前向推理 ...}
+            \CommentTok{\# 4. 计算 mel L1 loss}
+\NormalTok{            mel }\OperatorTok{=}\NormalTok{ spec\_to\_mel\_torch(spec, ...)}
+\NormalTok{            y\_mel }\OperatorTok{=}\NormalTok{ commons.slice\_segments(mel, ids\_slice, ...)}
+\NormalTok{            y\_hat\_mel }\OperatorTok{=}\NormalTok{ mel\_spectrogram\_torch(y\_hat, ...)}
+\NormalTok{            loss\_mel }\OperatorTok{=}\NormalTok{ F.l1\_loss(y\_mel, y\_hat\_mel)}
+\NormalTok{            total\_mel\_loss }\OperatorTok{+=}\NormalTok{ loss\_mel.item()}
+\NormalTok{    avg\_mel\_loss }\OperatorTok{=}\NormalTok{ total\_mel\_loss }\OperatorTok{/}\NormalTok{ num\_batches}
+    \CommentTok{\# 5. 记录到日志和 TensorBoard}
+\NormalTok{    logger.info(}\SpecialStringTok{f"Epoch }\SpecialCharTok{\{}\NormalTok{epoch}\SpecialCharTok{\}}\SpecialStringTok{ | Val Loss (mel): }\SpecialCharTok{\{}\NormalTok{avg\_mel\_loss}\SpecialCharTok{:.4f\}}\SpecialStringTok{"}\NormalTok{)}
+\NormalTok{    writer\_eval.add\_scalar(}\StringTok{"val/loss\_mel"}\NormalTok{, avg\_mel\_loss, epoch)}
+\NormalTok{    net\_g.train()                             }\CommentTok{\# 6. 切回 train 模式}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+评估仅计算 Mel L1 损失（\texttt{loss\_mel}），不包含 GAN 损失和 KL
+散度------因为 Mel
+损失直接衡量生成频谱与真实频谱的幅度差异，是衡量重建质量的核心指标，且计算稳定、不受判别器状态影响。
+\end{quote}
+
+\paragraph{4.
+接入训练主循环}\label{ux63a5ux5165ux8badux7ec3ux4e3bux5faaux73af}
+
+在 \texttt{run()} 函数中构造 \texttt{eval\_loader}，传入
+\texttt{train\_and\_evaluate()}，并在每个 epoch 结束后调用
+\texttt{evaluate()}：
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# run() 中：}
+\NormalTok{eval\_loader }\OperatorTok{=}\NormalTok{ build\_eval\_loader(hps) }\ControlFlowTok{if}\NormalTok{ rank }\OperatorTok{==} \DecValTok{0} \ControlFlowTok{else} \VariableTok{None}
+\CommentTok{\# ... 将 eval\_loader 传入 train\_and\_evaluate 替代原来的 None}
+
+\CommentTok{\# train\_and\_evaluate() 末尾：}
+\ControlFlowTok{if}\NormalTok{ rank }\OperatorTok{==} \DecValTok{0}\NormalTok{:}
+\NormalTok{    logger.info(}\StringTok{"====\textgreater{} Epoch: }\SpecialCharTok{\{\}}\StringTok{ }\SpecialCharTok{\{\}}\StringTok{"}\NormalTok{.}\BuiltInTok{format}\NormalTok{(epoch, ...))}
+    \ControlFlowTok{if}\NormalTok{ eval\_loader }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{        evaluate(epoch, hps, net\_g, eval\_loader, logger, writer\_eval, rank)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+验证仅在 rank=0（主进程）上执行，避免多 GPU
+训练的重复计算。评估发生在每个 epoch 的所有训练 step
+完成后，不影响训练的正常梯度更新流程。
+\end{quote}
+
+\subsection{实验结果及分析}\label{ux5b9eux9a8cux7ed3ux679cux53caux5206ux6790-1}
+
+\subsubsection{实验环境部署结果}\label{ux5b9eux9a8cux73afux5883ux90e8ux7f72ux7ed3ux679c}
+
+按照任务要求完成以下环境配置步骤：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  创建 Python 3.10 虚拟环境，安装 \texttt{requirements.txt} 中的依赖
+\item
+  安装 FFmpeg 并配置系统 PATH
+\item
+  运行 \texttt{python\ tools/download.py} 下载 HuBERT 基础模型和 RVC v2
+  预训练权重
+\item
+  验证环境可用：成功运行推理脚本，完成原始音频到目标音色的转换
+\end{enumerate}
+
+\subsubsection{预训练权重对训练效果的影响}\label{ux9884ux8badux7ec3ux6743ux91cdux5bf9ux8badux7ec3ux6548ux679cux7684ux5f71ux54cd}
+
+为探究预训练权重对 RVC
+模型训练效率和最终效果的影响，本实验设置了两个对比组，均使用相同的数据集（AISLEE3-SSB0011，单说话人，约
+10 分钟）、相同的训练配置（v2 模型，40kHz
+采样率，batch\_size=4，epochs=20）和验证集划分（80\% 训练 / 10\% 验证 /
+10\% 测试），唯一变量为是否加载预训练权重：
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2105}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2632}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2632}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2632}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+实验组
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+预训练 G
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+预训练 D
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+实验目的
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+主实验（预训练组） & \texttt{assets/pretrained\_v2/G40k.pth} &
+\texttt{assets/pretrained\_v2/D40k.pth} & 验证预训练权重的迁移效果 \\
+辅助实验（无预训练组） & 无（随机初始化） & 无（随机初始化） &
+作为基线，衡量预训练的增益 \\
+\end{longtable}
+}
+
+\paragraph{训练损失对比}\label{ux8badux7ec3ux635fux5931ux5bf9ux6bd4}
+
+\subparagraph{\texorpdfstring{总损失对比（\texttt{loss/g/total} 与
+\texttt{loss/d/total}）}{总损失对比（loss/g/total 与 loss/d/total）}}\label{ux603bux635fux5931ux5bf9ux6bd4lossgtotal-ux4e0e-lossdtotal}
+
+\textbf{预训练组：}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{assets/images/pretrain_total.png}
+
+}
+
+\caption{预训练模型总损失}
+
+\end{figure}%
+
+\textbf{无预训练组：}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{assets/images/exp_total.png}
+
+}
+
+\caption{无预训练模型总损失}
+
+\end{figure}%
+
+总损失包含生成器总损失（\texttt{loss/g/total} = Mel 损失 + GAN 损失 +
+特征匹配损失 + KL
+散度）和判别器总损失（\texttt{loss/d/total}）。对比显示：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{预训练组}：生成器和判别器的总损失均处于较低水平且保持稳定，说明两者在预训练阶段已达到较好的博弈均衡，微调仅需小幅度调整。
+\item
+  \textbf{无预训练组}：生成器总损失起始较高且逐步下降，判别器总损失波动更大------这符合
+  GAN
+  训练初期的典型模式：生成器质量较差时判别器容易区分真假，双方剧烈博弈后逐渐趋于均衡。
+\end{itemize}
+
+\subparagraph{\texorpdfstring{Mel
+频谱损失（\texttt{loss/g/mel}）}{Mel 频谱损失（loss/g/mel）}}\label{mel-ux9891ux8c31ux635fux5931lossgmel}
+
+Mel 频谱损失直接衡量生成器输出音频的 Mel 频谱与真实音频 Mel 频谱之间的
+L1 距离，是评估生成音质的核心指标。
+
+\textbf{预训练组：}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{assets/images/pretrain_mel.png}
+
+}
+
+\caption{预训练模型训练 Mel Loss}
+
+\end{figure}%
+
+\textbf{无预训练组：}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{assets/images/exp_mel.png}
+
+}
+
+\caption{无预训练模型训练 Mel Loss}
+
+\end{figure}%
+
+对比可见，两组在 Mel 损失上的差异极为显著：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{预训练组}：\texttt{loss/g/mel}
+  从训练开始即处于极低水平，且全程保持稳定，几乎无明显下降趋势。这说明预训练生成器已经具备良好的
+  Mel 频谱建模能力，微调阶段只需要对目标说话人的音色特征做小幅适配。
+\item
+  \textbf{无预训练组}：\texttt{loss/g/mel}
+  从较高值开始，随着训练步数增加呈现明显下降趋势，最终降至约3.8左右。这表明随机初始化的生成器需要从零开始学习
+  Mel 频谱的映射关系，训练过程中的波动幅度也明显更大。
+\end{itemize}
+
+\paragraph{验证损失对比}\label{ux9a8cux8bc1ux635fux5931ux5bf9ux6bd4}
+
+每个 epoch 结束后，在预留的 10\% 验证集上计算
+\texttt{val/loss\_mel}（仅在 \texttt{torch.no\_grad()} 下计算 Mel L1
+损失，不含 GAN 损失），用于评估模型在未见数据上的泛化性能。
+
+\textbf{预训练组：}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{assets/images/pretrain_val_mel.png}
+
+}
+
+\caption{预训练模型验证 Loss}
+
+\end{figure}%
+
+\textbf{无预训练组：}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{assets/images/exp_val_mel.png}
+
+}
+
+\caption{无预训练模型验证 Loss}
+
+\end{figure}%
+
+两组验证损失的对比进一步验证了预训练权重的优势：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{预训练组}：验证 Mel 损失极低，且与训练 Mel
+  损失几乎无差距。这说明预训练模型泛化能力优秀，在未见过的验证样本上同样表现良好，未出现过拟合迹象。
+\item
+  \textbf{无预训练组}：验证 Mel 损失起始较高，随 epoch
+  增加逐步下降，与训练损失的下降趋势一致。但由于训练样本量有限（仅约 10
+  分钟语音），随机初始化模型在训练集上的拟合尚不充分，验证损失整体高于预训练组。
+\end{itemize}
+
+\paragraph{推理音频对比}\label{ux63a8ux7406ux97f3ux9891ux5bf9ux6bd4}
+
+训练完成后，使用两组模型分别对同一输入音频进行推理（声音转换），输出音频如下：
+
+\textbf{输入音频（源说话人）：}
+
+\textbf{预训练组推理输出：}
+
+\textbf{无预训练组推理输出：}
+
+在听感上，预训练组输出的音质自然，目标说话人音色还原度高，但无预训练组无法输出正常的音频。
+
+\paragraph{结果分析}\label{ux7ed3ux679cux5206ux6790-1}
+
+实验结果表明，预训练权重在小数据集场景下是 RVC
+模型正常工作的\textbf{必要条件}而非可选项。
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{预训练组}：损失从训练开始即处于低水平且保持稳定，验证损失与训练损失几乎无差距，推理输出音质自然、音色还原度高。预训练生成器已具备通用的频谱到波形映射能力，微调仅需适配目标说话人的频谱分布。
+\item
+  \textbf{无预训练组}：虽然损失曲线呈下降趋势，但推理时完全无法输出正常音频。原因是：(1)
+  生成器参数量大（数千万级），仅 10
+  分钟数据远不足以从零学习频谱-波形映射，神经声码器通常需数十小时以上数据；(2)
+  GAN
+  在小数据集上易不稳定------判别器快速过拟合导致生成器收到噪声梯度；(3)
+  Mel 损失虽从高位下降，但最终约 3.8 的水平仍远超可用阈值（预训练组约
+  0.25--0.35），频谱偏差过大无法形成可辨识语音。
+\end{itemize}
+
+本质上，预训练权重在大规模数据上完成了''学会如何生成语音''这一最困难的任务，微调阶段仅需解决''学会生成谁的语音''。脱离预训练，仅凭
+10
+分钟数据几乎不可能获得可用模型。此外，验证损失可作为高效的''哨兵''指标------异常偏高的损失值足以预判模型尚未达到可用状态，无需等待推理验证。
+
+\section{总结}\label{ux603bux7ed3}
+
+本次实验覆盖了语音合成与转换领域的三个关键技术层次：
+
+\textbf{实验一（Griffin-Lim 算法）}
+从理论基础出发，实现了基于迭代相位估计的经典声码器。实验表明，Griffin-Lim
+算法能够在无需神经网络的情况下从幅度谱恢复可理解的重建语音------迭代次数决定了相位收敛程度，帧移和窗长等
+STFT
+参数直接影响重建质量。该算法虽已被现代神经声码器取代，但其背后的交替投影思想仍然是理解频域-时域对偶关系的重要基础。
+
+\textbf{实验二（RVC 声音转换）} 深入实践了当前主流的声音转换框架。RVC
+的核心创新在于将内容特征与音色特征解耦，并通过 FAISS
+检索机制从目标说话人特征库中获取音色信息，有效缓解了内容泄露问题。实验中补充了验证集划分逻辑，为模型选择提供了客观的泛化性能指标。
+
+总体而言，本次实验构建了从经典信号处理到现代深度学习的完整知识链：频谱分析
+\(\rightarrow\) 相位重建 \(\rightarrow\) 特征解耦 \(\rightarrow\)
+检索增强生成 \(\rightarrow\) 端到端
+TTS，为后续在语音合成、声音克隆和音频生成领域的深入研究和应用奠定了坚实基础。
+
+
+
+
+\end{document}

@@ -1,0 +1,85 @@
+project:
+  type: website
+  output-dir: ../docs
+
+website:
+  title: ""
+  favicon: style/icon.avif
+  site-url: https://qsdong-bupt.github.io
+  repo-url: https://github.com/qsdong-bupt/qsdong-bupt.github.io
+  open-graph: true
+  google-analytics: "G-E8EJCZTZG1"
+
+  navbar:
+    background: dark
+    search: true
+    left:
+      - text: "About Me"
+        href: index.html
+      - icon: github
+        href: https://github.com/qsdong-bupt
+      - icon: linkedin
+        href: https://www.linkedin.com/in/qingsen-dong-9aab2520b/
+    right:
+      - text: "Blogs"
+        href: posts/Blogs/blogs_index.html
+      - text: "Projects"
+        href: posts/Projects/projects_index.html
+    tools:
+      - icon: toggle-dark-mode
+
+  page-footer:
+    center: |
+      &copy; 2025 Qingsen Dong. Built with [Quarto](https://quarto.org/).
+
+format:
+  html:
+    theme:
+      light: [flatly, style/custom.scss]
+      dark: [darkly, style/custom.scss]
+    css:
+      - https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap
+      - https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css
+    include-in-header:
+      text: |
+        <script>
+          MathJax = {
+            loader: { load: ['[tex]/boldsymbol'] },
+            tex: {
+              tags: "all",
+              inlineMath: [['$','$'], ['\\(','\\)']],
+              displayMath: [['$$','$$'], ['\\[','\\]']],
+              processEscapes: true,
+              processEnvironments: true,
+              packages: { '[+]': ['boldsymbol'] }
+            }
+          };
+        </script>
+    include-after-body:
+      text: |
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          document.querySelectorAll(".foldable-header").forEach(header => {
+            header.addEventListener("click", () => {
+              const block = header.closest(".foldable");
+              if (block) block.classList.toggle("is-open");
+            });
+            header.setAttribute("tabindex", "0");
+            header.addEventListener("keydown", e => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                header.click();
+              }
+            });
+          });
+        });
+        </script>
+    code-copy: true
+    code-overflow: wrap
+    page-layout: full
+
+# filters:  (install extensions first: quarto add quarto-ext/line-highlight quarto-ext/pseudocode)
+#  - line-highlight
+#  - pseudocode
+
+lang: en
