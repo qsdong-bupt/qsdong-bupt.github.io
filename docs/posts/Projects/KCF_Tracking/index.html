@@ -403,6 +403,7 @@ window.Quarto = {
   <li><a href="#系统架构与主循环" id="toc-系统架构与主循环" class="nav-link" data-scroll-target="#系统架构与主循环">3.1 系统架构与主循环</a></li>
   <li><a href="#hog-类" id="toc-hog-类" class="nav-link" data-scroll-target="#hog-类">3.2 HOG 类</a></li>
   <li><a href="#tracker-类" id="toc-tracker-类" class="nav-link" data-scroll-target="#tracker-类">3.3 Tracker 类</a></li>
+  <li><a href="#run.py主程序与算法流程" id="toc-run.py主程序与算法流程" class="nav-link" data-scroll-target="#run.py主程序与算法流程">3.4 run.py——主程序与算法流程</a></li>
   </ul></li>
   <li><a href="#实验结果分析" id="toc-实验结果分析" class="nav-link" data-scroll-target="#实验结果分析">4 实验结果分析</a>
   <ul class="collapse">
@@ -859,6 +860,70 @@ x_2 &amp; x_3 &amp; x_4 &amp; \dots &amp; x_1
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>        cx, cy, w, h <span class="op">=</span> <span class="va">self</span>.roi</span>
 <span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (cx <span class="op">-</span> w <span class="op">//</span> <span class="dv">2</span>, cy <span class="op">-</span> h <span class="op">//</span> <span class="dv">2</span>, w, h)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
+</section>
+<section id="run.py主程序与算法流程" class="level3">
+<h3 class="anchored" data-anchor-id="run.py主程序与算法流程">3.4 run.py——主程序与算法流程</h3>
+<p><code>run.py</code> 是串联前述模块的主入口，其核心逻辑直接对应 KCF 的四步算法流程：</p>
+<p><strong>算法流程</strong></p>
+<ol type="1">
+<li><strong>第一帧指定目标区域，提取特征并初始化滤波器 <span class="math inline">\(\boldsymbol{\alpha}\)</span></strong>。调用 <code>cv2.selectROI()</code> 框选目标，<code>Tracker(frame, roi)</code> 内部完成 HOG 特征提取、高斯标签生成及 <code>train()</code> 训练，得到初始 <code>alphaf</code>。</li>
+<li><strong>在后续帧中，在上一帧位置周围提取候选区域</strong>。<code>tracker.update(frame)</code> 以 <code>padding = 2.5</code> 在上一帧位置周围裁剪搜索区域，调用 <code>get_feature()</code> 提取 HOG 特征 <span class="math inline">\(\mathbf{z}\)</span>。</li>
+<li><strong>通过滤波器计算响应图，响应最大值即为新位置 <span class="math inline">\(\mathbf{p}\)</span></strong>。<code>detect()</code> 计算核互相关 <span class="math inline">\(\mathbf{k}^{zx}\)</span>，与 <code>alphaf</code> 频域相乘后逆 FFT 得到响应图，峰值位置对应目标位移 <span class="math inline">\((\mathrm{d}x, \mathrm{d}y)\)</span>。</li>
+<li><strong>利用新位置样本更新模型参数 <span class="math inline">\(\boldsymbol{\alpha}\)</span> 和 <span class="math inline">\(\mathbf{x}\)</span></strong>。以学习率 <span class="math inline">\(\eta = 0.012\)</span> 做指数滑动平均：<span class="math inline">\(\mathbf{x} \leftarrow (1-\eta)\mathbf{x} + \eta \mathbf{z}_{\text{best}}\)</span>，<span class="math inline">\(\boldsymbol{\alpha} \leftarrow (1-\eta)\boldsymbol{\alpha} + \eta \boldsymbol{\alpha}_{\text{new}}\)</span>。</li>
+</ol>
+<p>上述流程在代码中体现为简洁的主循环：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cap <span class="op">=</span> cv2.VideoCapture(args.video)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>ok, frame <span class="op">=</span> cap.read()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>roi <span class="op">=</span> cv2.selectROI(<span class="st">"tracking"</span>, frame, <span class="va">False</span>, <span class="va">False</span>)     <span class="co"># 步骤1: 初始化</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>tracker <span class="op">=</span> Tracker(frame, roi)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> cap.isOpened():</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    ok, frame <span class="op">=</span> cap.read()</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> ok: <span class="cf">break</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    x, y, w, h <span class="op">=</span> tracker.update(frame)                   <span class="co"># 步骤2-4: 检测+更新</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    cv2.rectangle(frame, (x, y), (x<span class="op">+</span>w, y<span class="op">+</span>h), (<span class="dv">0</span>,<span class="dv">255</span>,<span class="dv">255</span>), <span class="dv">1</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    cv2.imshow(<span class="st">'tracking'</span>, frame)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cv2.waitKey(<span class="dv">1</span>) <span class="op">&amp;</span> <span class="bn">0xFF</span> <span class="kw">in</span> [<span class="dv">27</span>, <span class="bu">ord</span>(<span class="st">'q'</span>)]: <span class="cf">break</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>cap.release()</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>cv2.destroyAllWindows()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">阶段</th>
+<th style="text-align: left;">操作</th>
+<th style="text-align: left;">对应代码</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">初始化</td>
+<td style="text-align: left;">读取首帧，用户框选 ROI</td>
+<td style="text-align: left;"><code>cap.read()</code> + <code>cv2.selectROI()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">训练</td>
+<td style="text-align: left;">提取特征并训练滤波器</td>
+<td style="text-align: left;"><code>Tracker(frame, roi)</code> → <code>__init__</code> → <code>train()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">检测</td>
+<td style="text-align: left;">多尺度候选区域提取 + 核互相关检测</td>
+<td style="text-align: left;"><code>update()</code> → <code>get_feature()</code> + <code>detect()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">更新</td>
+<td style="text-align: left;">位置更新 + 模板/滤波器加权融合</td>
+<td style="text-align: left;"><code>update()</code> 内的 EMA 更新公式</td>
+</tr>
+</tbody>
+</table>
 </section>
 </section>
 <section id="实验结果分析" class="level2">

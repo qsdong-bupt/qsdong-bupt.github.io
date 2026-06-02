@@ -390,6 +390,45 @@ $$ \hat{\mathbf{f}}(\mathbf{z}) = \hat{\mathbf{k}}^{zx} \odot \hat{\boldsymbol{\
         return (cx - w // 2, cy - h // 2, w, h)
 ```
 
+### 3.4 run.py——主程序与算法流程
+
+`run.py` 是串联前述模块的主入口，其核心逻辑直接对应 KCF 的四步算法流程：
+
+**算法流程**
+
+1. **第一帧指定目标区域，提取特征并初始化滤波器 $\boldsymbol{\alpha}$**。调用 `cv2.selectROI()` 框选目标，`Tracker(frame, roi)` 内部完成 HOG 特征提取、高斯标签生成及 `train()` 训练，得到初始 `alphaf`。
+2. **在后续帧中，在上一帧位置周围提取候选区域**。`tracker.update(frame)` 以 `padding = 2.5` 在上一帧位置周围裁剪搜索区域，调用 `get_feature()` 提取 HOG 特征 $\mathbf{z}$。
+3. **通过滤波器计算响应图，响应最大值即为新位置 $\mathbf{p}$**。`detect()` 计算核互相关 $\mathbf{k}^{zx}$，与 `alphaf` 频域相乘后逆 FFT 得到响应图，峰值位置对应目标位移 $(\mathrm{d}x, \mathrm{d}y)$。
+4. **利用新位置样本更新模型参数 $\boldsymbol{\alpha}$ 和 $\mathbf{x}$**。以学习率 $\eta = 0.012$ 做指数滑动平均：$\mathbf{x} \leftarrow (1-\eta)\mathbf{x} + \eta \mathbf{z}_{\text{best}}$，$\boldsymbol{\alpha} \leftarrow (1-\eta)\boldsymbol{\alpha} + \eta \boldsymbol{\alpha}_{\text{new}}$。
+
+上述流程在代码中体现为简洁的主循环：
+
+```python
+cap = cv2.VideoCapture(args.video)
+ok, frame = cap.read()
+
+roi = cv2.selectROI("tracking", frame, False, False)     # 步骤1: 初始化
+tracker = Tracker(frame, roi)
+
+while cap.isOpened():
+    ok, frame = cap.read()
+    if not ok: break
+    x, y, w, h = tracker.update(frame)                   # 步骤2-4: 检测+更新
+    cv2.rectangle(frame, (x, y), (x+w, y+h), (0,255,255), 1)
+    cv2.imshow('tracking', frame)
+    if cv2.waitKey(1) & 0xFF in [27, ord('q')]: break
+
+cap.release()
+cv2.destroyAllWindows()
+```
+
+| 阶段 | 操作 | 对应代码 |
+|:---|:---|:---|
+| 初始化 | 读取首帧，用户框选 ROI | `cap.read()` + `cv2.selectROI()` |
+| 训练 | 提取特征并训练滤波器 | `Tracker(frame, roi)` → `__init__` → `train()` |
+| 检测 | 多尺度候选区域提取 + 核互相关检测 | `update()` → `get_feature()` + `detect()` |
+| 更新 | 位置更新 + 模板/滤波器加权融合 | `update()` 内的 EMA 更新公式 |
+
 ## 4 实验结果分析
 在实现KCF跟踪器后，对其进行了多组视频序列测试。由于大幅降低了运算复杂度，并结合了多尺度自适应更新策略，检测精度较高，并维持了极佳的实时处理帧率。在各类包含形变、部分遮挡和光照变化的数据集中展现出优异鲁棒性。
 
