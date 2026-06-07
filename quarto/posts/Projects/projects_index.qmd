@@ -4,6 +4,7 @@ description: "This page contains all the projects I have done during my learning
 listing:
   - id: listing
     contents:
+      - "../Qwen3_TTS_Furina/index.qmd"
       - "../LLM_Pre-Training/index.qmd"
       - "../Voice_Experiment/index.qmd"
       - "../KCF_Tracking/index.qmd"
