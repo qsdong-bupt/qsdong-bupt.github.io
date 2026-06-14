@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="董庆森 秦政泽">
+<meta name="dcterms.date" content="2026-06-14">
+
+<title>BUPT校园知识问答数据集构建</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../style/icon.avif" rel="icon">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-0b09eb4da84538f8c2fd112b9812168b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-44ab3f0b617b077ba5b24bd1c24b061e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-E8EJCZTZG1"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E8EJCZTZG1', { 'anonymize_ip': true});
+</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script>
+  MathJax = {
+    loader: { load: ['[tex]/boldsymbol'] },
+    tex: {
+      tags: "all",
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      packages: { '[+]': ['boldsymbol'] }
+    }
+  };
+</script>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<meta property="og:title" content="BUPT校园知识问答数据集构建">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://qsdong-bupt.github.io/posts/Projects/BUPT_QA_Dataset/assets/inference_examples.png">
+<meta property="og:image:height" content="1230">
+<meta property="og:image:width" content="2560">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/qsdong-bupt"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/qingsen-dong-9aab2520b/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../posts/Blogs/blogs_index.html"> 
+<span class="menu-text">Blogs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../posts/Projects/projects_index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-toggle-dark-mode"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#about-this-project" id="toc-about-this-project" class="nav-link active" data-scroll-target="#about-this-project">1 About this Project</a>
+  <ul class="collapse">
+  <li><a href="#项目动机" id="toc-项目动机" class="nav-link" data-scroll-target="#项目动机">1.1 项目动机</a></li>
+  <li><a href="#系统架构" id="toc-系统架构" class="nav-link" data-scroll-target="#系统架构">1.2 系统架构</a></li>
+  <li><a href="#最终数据概览" id="toc-最终数据概览" class="nav-link" data-scroll-target="#最终数据概览">1.3 最终数据概览</a></li>
+  </ul></li>
+  <li><a href="#数据处理流程" id="toc-数据处理流程" class="nav-link" data-scroll-target="#数据处理流程">2 数据处理流程</a>
+  <ul class="collapse">
+  <li><a href="#中间产物示例" id="toc-中间产物示例" class="nav-link" data-scroll-target="#中间产物示例">中间产物示例</a></li>
+  <li><a href="#阶段一爬虫采集" id="toc-阶段一爬虫采集" class="nav-link" data-scroll-target="#阶段一爬虫采集">2.1 阶段一：爬虫采集</a>
+  <ul class="collapse">
+  <li><a href="#爬虫架构" id="toc-爬虫架构" class="nav-link" data-scroll-target="#爬虫架构">2.1.1 爬虫架构</a></li>
+  <li><a href="#爬取策略bfs-visited-去重" id="toc-爬取策略bfs-visited-去重" class="nav-link" data-scroll-target="#爬取策略bfs-visited-去重">2.1.2 爬取策略：BFS + visited 去重</a></li>
+  <li><a href="#正文提取差异化-xpath" id="toc-正文提取差异化-xpath" class="nav-link" data-scroll-target="#正文提取差异化-xpath">2.1.3 正文提取：差异化 XPath</a></li>
+  <li><a href="#url-去重与过滤" id="toc-url-去重与过滤" class="nav-link" data-scroll-target="#url-去重与过滤">2.1.4 URL 去重与过滤</a></li>
+  <li><a href="#产出" id="toc-产出" class="nav-link" data-scroll-target="#产出">2.1.5 产出</a></li>
+  </ul></li>
+  <li><a href="#阶段二清洗去重" id="toc-阶段二清洗去重" class="nav-link" data-scroll-target="#阶段二清洗去重">2.2 阶段二：清洗去重</a></li>
+  <li><a href="#阶段三文本切块" id="toc-阶段三文本切块" class="nav-link" data-scroll-target="#阶段三文本切块">2.3 阶段三：文本切块</a>
+  <ul class="collapse">
+  <li><a href="#句子切分" id="toc-句子切分" class="nav-link" data-scroll-target="#句子切分">2.3.1 句子切分</a></li>
+  <li><a href="#贪心合并" id="toc-贪心合并" class="nav-link" data-scroll-target="#贪心合并">2.3.2 贪心合并</a></li>
+  </ul></li>
+  <li><a href="#阶段四deepseek-api-生成-qa" id="toc-阶段四deepseek-api-生成-qa" class="nav-link" data-scroll-target="#阶段四deepseek-api-生成-qa">2.4 阶段四：DeepSeek API 生成 QA</a>
+  <ul class="collapse">
+  <li><a href="#prompt-设计" id="toc-prompt-设计" class="nav-link" data-scroll-target="#prompt-设计">2.4.1 Prompt 设计</a></li>
+  <li><a href="#api-调用" id="toc-api-调用" class="nav-link" data-scroll-target="#api-调用">2.4.2 API 调用</a></li>
+  <li><a href="#json-解析与容错" id="toc-json-解析与容错" class="nav-link" data-scroll-target="#json-解析与容错">2.4.3 JSON 解析与容错</a></li>
+  </ul></li>
+  <li><a href="#阶段五程序级过滤" id="toc-阶段五程序级过滤" class="nav-link" data-scroll-target="#阶段五程序级过滤">2.5 阶段五：程序级过滤</a>
+  <ul class="collapse">
+  <li><a href="#问题清洗" id="toc-问题清洗" class="nav-link" data-scroll-target="#问题清洗">2.5.1 问题清洗</a></li>
+  <li><a href="#答案清洗" id="toc-答案清洗" class="nav-link" data-scroll-target="#答案清洗">2.5.2 答案清洗</a></li>
+  <li><a href="#质量过滤规则" id="toc-质量过滤规则" class="nav-link" data-scroll-target="#质量过滤规则">2.5.3 质量过滤规则</a></li>
+  <li><a href="#过滤阈值的选择" id="toc-过滤阈值的选择" class="nav-link" data-scroll-target="#过滤阈值的选择">2.5.4 过滤阈值的选择</a></li>
+  </ul></li>
+  <li><a href="#阶段六去重与格式化" id="toc-阶段六去重与格式化" class="nav-link" data-scroll-target="#阶段六去重与格式化">2.6 阶段六：去重与格式化</a>
+  <ul class="collapse">
+  <li><a href="#问题级去重" id="toc-问题级去重" class="nav-link" data-scroll-target="#问题级去重">2.6.1 问题级去重</a></li>
+  <li><a href="#格式化" id="toc-格式化" class="nav-link" data-scroll-target="#格式化">2.6.2 格式化</a></li>
+  </ul></li>
+  <li><a href="#完整中间产物总览" id="toc-完整中间产物总览" class="nav-link" data-scroll-target="#完整中间产物总览">2.7 完整中间产物总览</a></li>
+  </ul></li>
+  <li><a href="#下游应用lora-微调" id="toc-下游应用lora-微调" class="nav-link" data-scroll-target="#下游应用lora-微调">3 下游应用：LoRA 微调</a>
+  <ul class="collapse">
+  <li><a href="#训练命令" id="toc-训练命令" class="nav-link" data-scroll-target="#训练命令">3.1 训练命令</a></li>
+  <li><a href="#训练结果摘要" id="toc-训练结果摘要" class="nav-link" data-scroll-target="#训练结果摘要">3.2 训练结果摘要</a></li>
+  <li><a href="#推理示例" id="toc-推理示例" class="nav-link" data-scroll-target="#推理示例">3.3 推理示例</a></li>
+  </ul></li>
+  <li><a href="#总结" id="toc-总结" class="nav-link" data-scroll-target="#总结">4 总结</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-page-left" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">BUPT校园知识问答数据集构建</h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-page-left">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>董庆森 秦政泽 </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 14, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="about-this-project" class="level1">
+<h1>1 About this Project</h1>
+<p>本项目目标是构建一个<strong>北京邮电大学校园知识问答数据集</strong>——从公开网页爬取原始语料，经过清洗、切块、API改写、过滤去重等流程，最终产出 259 条高质量短问短答样本。数据集采用 <code>ms-swift</code> 兼容的 messages JSONL 格式，可直接用于下游 LoRA 微调任务。</p>
+<section id="项目动机" class="level2">
+<h2 class="anchored" data-anchor-id="项目动机">1.1 项目动机</h2>
+<p>本项目是课程实践，核心目标不是训出好模型，而是<strong>走通”非结构化网页文本 → 结构化 QA 数据集”的完整构建管线</strong>。</p>
+<p>三个核心问题：</p>
+<ol type="1">
+<li><strong>爬取与清洗</strong>：不同网站 DOM 结构各异，如何稳定提取正文并去重？</li>
+<li><strong>长文本切分</strong>：一篇文章上千字、涵盖多个知识点，切成多长的块才适合生成 QA？</li>
+<li><strong>质量过滤</strong>：大模型生成的 QA 可能编造、冗余或多问，程序层面如何拦截？</li>
+</ol>
+<p>项目以北京邮电大学为场景，覆盖爬虫、清洗、切块、API 改写、过滤的全流程。下游的 LoRA 微调仅用于验证数据集可用性——<strong>重点在数据，不在模型</strong>。</p>
+</section>
+<section id="系统架构" class="level2">
+<h2 class="anchored" data-anchor-id="系统架构">1.2 系统架构</h2>
+<pre><code>  爬虫采集 ──→ 清洗去重 ──→ 句子切分 + 文本分块 ──→ DeepSeek API 生成 QA ──→ 过滤清洗去重 ──→ 格式化输出</code></pre>
+</section>
+<section id="最终数据概览" class="level2">
+<h2 class="anchored" data-anchor-id="最终数据概览">1.3 最终数据概览</h2>
+<p>数据来源于三个公开网站:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>网站</th>
+<th>简称</th>
+<th>内容类型</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://guide.byrdocs.org/">guide.byrdocs.org</a></td>
+<td><code>byrdocs_guide</code></td>
+<td>BUPT 生存指南</td>
+</tr>
+<tr class="even">
+<td><a href="https://xsc.bupt.edu.cn/jgjs/gzzd/xsgl.htm">xsc.bupt.edu.cn/jgjs/gzzd/xsgl.htm</a></td>
+<td><code>bupt_xsc</code></td>
+<td>学生处规章制度</td>
+</tr>
+<tr class="odd">
+<td><a href="https://xsc.bupt.edu.cn/xgdt/bszn.htm">xsc.bupt.edu.cn/xgdt/bszn.htm</a></td>
+<td><code>bupt_xsc_guide</code></td>
+<td>学生处办事指南</td>
+</tr>
+</tbody>
+</table>
+<p>最终数据集统计：</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>来源</th>
+<th style="text-align: right;">QA 数</th>
+<th style="text-align: right;">问题中位长度</th>
+<th style="text-align: right;">答案中位长度</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bupt_xsc</code></td>
+<td style="text-align: right;">172</td>
+<td style="text-align: right;">15 字</td>
+<td style="text-align: right;">72 字</td>
+</tr>
+<tr class="even">
+<td><code>byrdocs_guide</code></td>
+<td style="text-align: right;">76</td>
+<td style="text-align: right;">14 字</td>
+<td style="text-align: right;">65 字</td>
+</tr>
+<tr class="odd">
+<td><code>bupt_xsc_guide</code></td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">17 字</td>
+<td style="text-align: right;">78 字</td>
+</tr>
+<tr class="even">
+<td><strong>合计</strong></td>
+<td style="text-align: right;"><strong>259</strong></td>
+<td style="text-align: right;"><strong>15 字</strong></td>
+<td style="text-align: right;"><strong>69 字</strong></td>
+</tr>
+</tbody>
+</table>
+<p>数据采用 <code>ms-swift</code> 兼容的 messages JSONL 格式，每条样本示例如下：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"messages"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">"role"</span><span class="fu">:</span> <span class="st">"system"</span><span class="fu">,</span> <span class="dt">"content"</span><span class="fu">:</span> <span class="st">"你是北京邮电大学知识助手，请基于已知资料准确、简洁地回答问题。"</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">"role"</span><span class="fu">:</span> <span class="st">"user"</span><span class="fu">,</span> <span class="dt">"content"</span><span class="fu">:</span> <span class="st">"新生怎么连校园网？"</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">"role"</span><span class="fu">:</span> <span class="st">"assistant"</span><span class="fu">,</span> <span class="dt">"content"</span><span class="fu">:</span> <span class="st">"新生使用学工号作为网关账号，初始密码为身份证后6位（X改为0）。必须修改初始密码才能接入校园网，可通过企业微信-校园网或校园网自服务系统修改。无线网络推荐连接BUPT-mobile，该信号只使用5GHz频段，体验更好。"</span><span class="fu">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="数据处理流程" class="level1">
+<h1>2 数据处理流程</h1>
+<p>整个管道分为六个阶段，由两个核心脚本串联完成：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>阶段</th>
+<th>脚本</th>
+<th>做什么</th>
+<th>产物</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>一</td>
+<td><code>crawler.py</code></td>
+<td>从三个公开网站爬取原始页面</td>
+<td><code>data/raw/*.jsonl</code>（58 条）</td>
+</tr>
+<tr class="even">
+<td>二</td>
+<td><code>build_dataset.py</code></td>
+<td>跨文件清洗去重</td>
+<td><code>clean_corpus.jsonl</code>（58 条）</td>
+</tr>
+<tr class="odd">
+<td>三</td>
+<td><code>build_bupt_v2_dataset.py</code></td>
+<td>中文分句 + 贪心合并切块</td>
+<td>内存中约 150 个文本块</td>
+</tr>
+<tr class="even">
+<td>四</td>
+<td>同上</td>
+<td>DeepSeek API 生成 QA</td>
+<td><code>deepseek_qa_cache.json</code></td>
+</tr>
+<tr class="odd">
+<td>五</td>
+<td>同上</td>
+<td>程序级过滤（长度/多问/拒答）</td>
+<td>过滤后的 QA 列表</td>
+</tr>
+<tr class="even">
+<td>六</td>
+<td>同上</td>
+<td>问题去重 + ms-swift 格式化</td>
+<td><code>bupt_v2_messages.jsonl</code>（259 条）</td>
+</tr>
+</tbody>
+</table>
+<p>阶段一、二完成数据采集与清洗，阶段三至六完成从长文本到短 QA 的转换。其中阶段四是整个管道的核心——Prompt 设计和 API 调用质量直接决定最终数据集的上限，而阶段五的程序过滤则守住下限。</p>
+<section id="中间产物示例" class="level3">
+<h3 class="anchored" data-anchor-id="中间产物示例">中间产物示例</h3>
+<p>以”研究生学业奖学金证明打印”这条数据为例，展示它在管道各阶段的形态变化。</p>
+<p><strong>阶段一产出 — 原始页面</strong> (<code>data/raw/bupt_xsc_guide.jsonl</code>)：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"source_site"</span><span class="fu">:</span> <span class="st">"bupt_xsc_guide"</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"title"</span><span class="fu">:</span> <span class="st">"研究生学业奖学金证明打印服务事项办事指南"</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"content"</span><span class="fu">:</span> <span class="st">"服务事项：研究生学业奖学金证明打印 办理方式：部门办公室 / 报到注册一体机自助打印 咨询方式：1. 窗口咨询：西土城校区学生活动中心202室  ..."</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"url"</span><span class="fu">:</span> <span class="st">"https://xsc.bupt.edu.cn/info/1099/1497.htm"</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"publish_time"</span><span class="fu">:</span> <span class="st">"2025-09-01"</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>阶段二产出 — 干净语料</strong> (<code>data/clean_corpus.jsonl</code>)： 因为该页面内容较为独立，且 title 和 content 都不空，所以它会被保留，且 title 和 content 中的空白会被统一处理：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"source_site"</span><span class="fu">:</span> <span class="st">"bupt_xsc_guide"</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"title"</span><span class="fu">:</span> <span class="st">"研究生学业奖学金证明打印服务事项办事指南"</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"content"</span><span class="fu">:</span> <span class="st">"服务事项：研究生学业奖学金证明打印 办理方式：部门办公室 / 报到注册一体机自助打印 ..."</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"url"</span><span class="fu">:</span> <span class="st">"https://xsc.bupt.edu.cn/info/1099/1497.htm"</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"publish_time"</span><span class="fu">:</span> <span class="st">"2025-09-01"</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>与阶段一结构相同，经 <code>normalize_whitespace()</code> 统一空白（<code>\xa0</code> → 空格、合并连续空白），<code>MD5(title || content)</code> 跨文件去重后保留。</p>
+<p><strong>阶段四产出 — API 响应缓存</strong> (<code>data/deepseek_qa_cache.json</code>)：</p>
+<p>DeepSeek API 的每一条原始响应都会被缓存，key 为 SHA-256 哈希，value 包含 <code>raw</code>（原始返回文本）和 <code>parsed</code>（解析后的 QA 数组）：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"a0914436d6ce..."</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"raw"</span><span class="fu">:</span> <span class="st">"[</span><span class="ch">\n</span><span class="st">  {</span><span class="ch">\"</span><span class="st">question</span><span class="ch">\"</span><span class="st">: </span><span class="ch">\"</span><span class="st">研究生学业奖学金证明去哪打印？</span><span class="ch">\"</span><span class="st">,</span><span class="ch">\n</span><span class="st">    </span><span class="ch">\"</span><span class="st">answer</span><span class="ch">\"</span><span class="st">: </span><span class="ch">\"</span><span class="st">可在报到注册一体机自助打印...</span><span class="ch">\"\n</span><span class="st">  },</span><span class="ch">\n</span><span class="st">  {</span><span class="ch">\"</span><span class="st">question</span><span class="ch">\"</span><span class="st">: </span><span class="ch">\"</span><span class="st">学生活动中心202室办理证明的时间？</span><span class="ch">\"</span><span class="st">,</span><span class="ch">\n</span><span class="st">    </span><span class="ch">\"</span><span class="st">answer</span><span class="ch">\"</span><span class="st">: </span><span class="ch">\"</span><span class="st">办公时间为工作日8:00—11:30，13:30—17:30。</span><span class="ch">\"\n</span><span class="st">  }</span><span class="ch">\n</span><span class="st">]"</span><span class="fu">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"parsed"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"question"</span><span class="fu">:</span> <span class="st">"研究生学业奖学金证明去哪打印？"</span><span class="fu">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"answer"</span><span class="fu">:</span> <span class="st">"可在报到注册一体机自助打印：西土城校区在教一楼一层中厅，沙河校区在一站式服务大厅。需携带一卡通或身份证。"</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"question"</span><span class="fu">:</span> <span class="st">"学生活动中心202室办理证明的时间？"</span><span class="fu">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"answer"</span><span class="fu">:</span> <span class="st">"办公时间为工作日8:00—11:30，13:30—17:30。"</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>缓存保证中断重跑时不重复调用 API，节省费用。</p>
+<p><strong>阶段六产出 — 最终数据集</strong> (<code>data/bupt_v2_messages.jsonl</code>)：</p>
+<p>上面缓存中的第一条 QA 经过过滤、去重、格式化后，变成最终的训练样本：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"messages"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">"role"</span><span class="fu">:</span> <span class="st">"system"</span><span class="fu">,</span> <span class="dt">"content"</span><span class="fu">:</span> <span class="st">"你是北京邮电大学知识助手，请基于已知资料准确、简洁地回答问题。"</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">"role"</span><span class="fu">:</span> <span class="st">"user"</span><span class="fu">,</span> <span class="dt">"content"</span><span class="fu">:</span> <span class="st">"研究生学业奖学金证明去哪打印？"</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">"role"</span><span class="fu">:</span> <span class="st">"assistant"</span><span class="fu">,</span> <span class="dt">"content"</span><span class="fu">:</span> <span class="st">"可在报到注册一体机自助打印：西土城校区在教一楼一层中厅，沙河校区在一站式服务大厅。需携带一卡通或身份证。其他奖学金、荣誉称号证明请到西土城校区学生活动中心202室办理。"</span><span class="fu">}</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"metadata"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"source_site"</span><span class="fu">:</span> <span class="st">"bupt_xsc_guide"</span><span class="fu">,</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"title"</span><span class="fu">:</span> <span class="st">"研究生学业奖学金证明打印服务事项办事指南"</span><span class="fu">,</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"source_chunk"</span><span class="fu">:</span> <span class="st">"服务事项：研究生学业奖学金证明打印..."</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="阶段一爬虫采集" class="level2">
+<h2 class="anchored" data-anchor-id="阶段一爬虫采集">2.1 阶段一：爬虫采集</h2>
+<p>脚本：<code>crawler.py</code>，负责从三个公开来源采集原始网页。</p>
+<section id="爬虫架构" class="level3">
+<h3 class="anchored" data-anchor-id="爬虫架构">2.1.1 爬虫架构</h3>
+<p>使用 <code>requests</code> + <code>lxml</code> 的经典方案。三个爬虫继承同一基类 <code>BaseCrawler</code>，各自覆盖 URL 匹配和正文提取逻辑：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>爬虫类</th>
+<th>来源</th>
+<th>起始 URL</th>
+<th>采集页面数</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ByrdocsCrawler</code></td>
+<td>guide.byrdocs.org</td>
+<td>首页</td>
+<td>25</td>
+<td>宿舍、转专业、校园网、开学考试等</td>
+</tr>
+<tr class="even">
+<td><code>XscCrawler</code></td>
+<td>xsc.bupt.edu.cn</td>
+<td>学生管理列表页</td>
+<td>25</td>
+<td>奖学金、处分、助学贷款等规章制度</td>
+</tr>
+<tr class="odd">
+<td><code>XscGuideCrawler</code></td>
+<td>xsc.bupt.edu.cn</td>
+<td>办事指南列表页</td>
+<td>8</td>
+<td>补办学生证、在读证明等办事流程</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="爬取策略bfs-visited-去重" class="level3">
+<h3 class="anchored" data-anchor-id="爬取策略bfs-visited-去重">2.1.2 爬取策略：BFS + visited 去重</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ByrDocsCrawler 核心逻辑 (crawler.py:133-163)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>queue <span class="op">=</span> deque(start_urls)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>visited <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> queue:</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    current <span class="op">=</span> canonicalize_url(queue.popleft())   <span class="co"># URL 规范化</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> current <span class="kw">in</span> visited:</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    visited.add(current)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    sleep(<span class="fl">1.0</span>)                                   </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    tree <span class="op">=</span> get_tree(session, current)              <span class="co"># HTTP + lxml 解析</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    record <span class="op">=</span> extract_record(current, tree)         <span class="co"># 提取正文</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> record:</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        records.append(record)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> href <span class="kw">in</span> tree.xpath(<span class="st">"//a[@href]/@href"</span>):    <span class="co"># 提取子链接</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        absolute <span class="op">=</span> canonicalize_url(urljoin(current, href))</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> is_valid_doc(absolute):</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>            queue.append(absolute)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>XscCrawler</code> 采用两阶段策略：先将列表页的所有详情页 URL 加入 <code>detail_urls</code> 集合，再逐一访问，避免重复翻页。</p>
+</section>
+<section id="正文提取差异化-xpath" class="level3">
+<h3 class="anchored" data-anchor-id="正文提取差异化-xpath">2.1.3 正文提取：差异化 XPath</h3>
+<p>不同来源的 DOM 结构不同，分别写 XPath：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ByrDocs: 结构化页面, 内容在 &lt;main&gt; 内</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>title  <span class="op">=</span> tree.xpath(<span class="st">"string(//main//h1)"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>content <span class="op">=</span> text_join(tree.xpath(<span class="st">"//main//*[self::p or self::li or self::h2 or self::h3]//text()"</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Xsc: 旧式 CMS, 内容在 id=vsb_content 的 div 内</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>title  <span class="op">=</span> tree.xpath(<span class="st">"string(//div[contains(@class, 'art-tit')])"</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>content <span class="op">=</span> text_join(tree.xpath(<span class="st">"//div[@id='vsb_content']//text()"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>text_join()</code> 对所有文本节点做 <code>normalize_whitespace()</code>（<code>\xa0</code> → 空格，合并连续空白），然后以空格拼接。</p>
+</section>
+<section id="url-去重与过滤" class="level3">
+<h3 class="anchored" data-anchor-id="url-去重与过滤">2.1.4 URL 去重与过滤</h3>
+<p>爬虫级别的过滤规则：</p>
+<ul>
+<li><strong>去重</strong>：<code>visited</code> 集合按 URL 做精确匹配，<code>canonicalize_url()</code> 统一路径编码和末尾斜杠</li>
+<li><strong>域名锁定</strong>：byrdocs 只爬 <code>guide.byrdocs.org</code>，xsc 只爬 <code>xsc.bupt.edu.cn</code></li>
+<li><strong>路径过滤</strong>：排除 <code>/contributing</code>、<code>/acknowledgments</code> 等非内容页</li>
+<li><strong>类型过滤</strong>：排除 <code>_astro</code> 内部路径、图片/CSS/JS/XML 等静态资源</li>
+<li><strong>长度过滤</strong>：byrdocs &lt; 80 字丢弃，xsc &lt; 50 字丢弃</li>
+</ul>
+</section>
+<section id="产出" class="level3">
+<h3 class="anchored" data-anchor-id="产出">2.1.5 产出</h3>
+<pre><code>data/raw/byrdocs_guide.jsonl   → 25 条
+data/raw/bupt_xsc.jsonl        → 25 条
+data/raw/bupt_xsc_guide.jsonl  → 8 条</code></pre>
+<p>每条记录字段：<code>source_site</code> <code>source_name</code> <code>category</code> <code>title</code> <code>content</code> <code>url</code> <code>publish_time</code> <code>crawled_at</code></p>
+<hr>
+</section>
+</section>
+<section id="阶段二清洗去重" class="level2">
+<h2 class="anchored" data-anchor-id="阶段二清洗去重">2.2 阶段二：清洗去重</h2>
+<p>脚本：<code>build_dataset.py</code> 中的 <code>deduplicate()</code></p>
+<p>虽然三个爬虫各自做了去重，但三份原始文件之间可能存在重复（如同一篇文章被不同爬虫采集）。这一步做跨文件清洗：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> deduplicate(rows: <span class="bu">list</span>[<span class="bu">dict</span>]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    seen <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    deduped <span class="op">=</span> []</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> rows:</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        title   <span class="op">=</span> normalize_whitespace(row.get(<span class="st">"title"</span>, <span class="st">""</span>))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        content <span class="op">=</span> normalize_whitespace(row.get(<span class="st">"content"</span>, <span class="st">""</span>))</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> title <span class="kw">or</span> <span class="kw">not</span> content:</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span>                                    <span class="co"># ← 丢弃空字段</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        key <span class="op">=</span> hashlib.md5(<span class="ss">f"</span><span class="sc">{</span>title<span class="sc">}</span><span class="ss">||</span><span class="sc">{</span>content<span class="sc">}</span><span class="ss">"</span>.encode()).hexdigest()</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> key <span class="kw">in</span> seen:</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span>                                    <span class="co"># ← 去重</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        seen.add(key)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        row[<span class="st">"title"</span>]   <span class="op">=</span> title</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        row[<span class="st">"content"</span>] <span class="op">=</span> content</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        deduped.append(row)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> deduped</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>操作</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>字段清洗</td>
+<td><code>normalize_whitespace()</code> 再次统一空白，覆盖爬虫阶段未处理的边缘 case</td>
+</tr>
+<tr class="even">
+<td>去重</td>
+<td><code>MD5(title \|\| content)</code> 为 key，本质上是对 (标题, 正文) 去重</td>
+</tr>
+<tr class="odd">
+<td>丢弃</td>
+<td>title 或 content 为空字符串的记录</td>
+</tr>
+</tbody>
+</table>
+<p><strong>产出：</strong></p>
+<pre><code>data/processed/clean_corpus.jsonl → 58 条</code></pre>
+<p>三份原始文件共 58 条页面（25+25+8），跨文件去重后仍为 58 条——三个来源内容互不重叠，无跨站重复。</p>
+<hr>
+</section>
+<section id="阶段三文本切块" class="level2">
+<h2 class="anchored" data-anchor-id="阶段三文本切块">2.3 阶段三：文本切块</h2>
+<p>脚本：<code>build_bupt_v2_dataset.py</code> 中的 <code>split_sentences()</code> + <code>chunk_text()</code></p>
+<p>直接调用 DeepSeek API 处理整篇文章有两个问题：一是文章太长超出 context；二是单篇文章包含多个不相关的知识点，生成的 QA 质量不稳定。解决方法是先切块。</p>
+<section id="句子切分" class="level3">
+<h3 class="anchored" data-anchor-id="句子切分">2.3.1 句子切分</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> split_sentences(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> normalize_whitespace(text)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    parts <span class="op">=</span> re.split(<span class="vs">r"</span><span class="kw">(</span><span class="fu">?&lt;</span><span class="vs">=</span><span class="pp">[。；！？]</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">"</span>, text)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [p.strip() <span class="cf">for</span> p <span class="kw">in</span> parts <span class="cf">if</span> p.strip()]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>按中文句号、分号、叹号、问号断句，使用正向后顾 <code>(?&lt;=...)</code> 保留标点符号。</p>
+</section>
+<section id="贪心合并" class="level3">
+<h3 class="anchored" data-anchor-id="贪心合并">2.3.2 贪心合并</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> chunk_text(text, max_chars<span class="op">=</span><span class="dv">900</span>, min_chars<span class="op">=</span><span class="dv">120</span>):</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    sentences <span class="op">=</span> split_sentences(text)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    chunks <span class="op">=</span> []</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    current <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sent <span class="kw">in</span> sentences:</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> current:</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>            current <span class="op">=</span> sent</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(current) <span class="op">+</span> <span class="bu">len</span>(sent) <span class="op">+</span> <span class="dv">1</span> <span class="op">&lt;=</span> max_chars:</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>            current <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>current<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>sent<span class="sc">}</span><span class="ss">"</span>      <span class="co"># ← 还能装下，继续拼接</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span>(current) <span class="op">&gt;=</span> min_chars:</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>                chunks.append(current)          <span class="co"># ← 装不下了，截断</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>                current <span class="op">=</span> sent</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>                current <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>current<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>sent<span class="sc">}</span><span class="ss">"</span>   <span class="co"># ← 太短，继续追加</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> current <span class="kw">and</span> <span class="bu">len</span>(current) <span class="op">&gt;=</span> min_chars:</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        chunks.append(current)                  <span class="co"># ← 最后一块</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> chunks</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="阶段四deepseek-api-生成-qa" class="level2">
+<h2 class="anchored" data-anchor-id="阶段四deepseek-api-生成-qa">2.4 阶段四：DeepSeek API 生成 QA</h2>
+<p>脚本：<code>build_bupt_v2_dataset.py</code> 中的 <code>call_deepseek()</code> + <code>extract_json_array()</code></p>
+<p>这是管道中最关键的一步：利用大模型的语言能力，将非结构化的原文块改写为结构化的 question-answer 对。</p>
+<section id="prompt-设计" class="level3">
+<h3 class="anchored" data-anchor-id="prompt-设计">2.4.1 Prompt 设计</h3>
+<p>Prompt 是该步骤的核心，经过多轮迭代的最终版本：</p>
+<pre><code>请把下面的北邮资料改写成适合微调的数据集问答。
+
+要求：
+1. 生成 2 条以内 QA。
+2. 每条只问一个问题，不要把多个问题合在一起。
+3. 问题要像真实学生会问的话，简短自然，不要写"请问""同学您好"
+   "根据资料"等客套或元叙述。
+4. 答案必须严格来自资料，不要补充、猜测、编造。
+5. 答案要短，优先 80 到 220 字；确实需要列点时可以列点，
+   但不要长篇复述原文。
+6. 保留关键事实，比如地点、电话、时间、网址、尺寸、条件、流程。
+7. 如果资料信息太碎或不适合问答，返回空数组 []。
+
+只返回 JSON 数组，不要返回 Markdown，不要解释。
+格式：
+[
+  {"question": "问题？", "answer": "答案"}
+]
+
+标题：{title}
+资料：
+{content}</code></pre>
+<p>设计要点：</p>
+<ul>
+<li><strong>约束</strong> 2 和 <strong>约束</strong> 3 共同保证“一个问题、一个答案”的短格式，这是 v2 版本相比 v1 的核心改进</li>
+<li><strong>约束</strong> 4 是事实性的根基——宁可不生成，也不能编造</li>
+<li><strong>约束</strong> 5 给出数值范围（80–220 字），比“尽量短”这类模糊表述更有效</li>
+<li><strong>约束</strong> 7 给了模型一个“安全出口”，避免强行 QA 生成低质量样本</li>
+<li>明确的 JSON 只输出格式（无 Markdown 包裹），减少后续解析开销</li>
+</ul>
+</section>
+<section id="api-调用" class="level3">
+<h3 class="anchored" data-anchor-id="api-调用">2.4.2 API 调用</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> call_deepseek(prompt, api_key, model<span class="op">=</span><span class="st">"deepseek-v4-pro"</span>, timeout<span class="op">=</span><span class="dv">60</span>):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> requests.post(</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"https://api.deepseek.com/chat/completions"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        headers<span class="op">=</span>{<span class="st">"Authorization"</span>: <span class="ss">f"Bearer </span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>},</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        json<span class="op">=</span>{</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"model"</span>: model,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"messages"</span>: [</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"你负责把高校公开资料整理成..."</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"单问题的中文问答数据。只输出合法 JSON。"</span>},</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>                {<span class="st">"role"</span>: <span class="st">"user"</span>,   <span class="st">"content"</span>: prompt},</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>            ],</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"temperature"</span>: <span class="fl">0.2</span>,   <span class="co"># 低温度保证输出稳定</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"top_p"</span>: <span class="fl">0.9</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"max_tokens"</span>: <span class="dv">1200</span>,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        timeout<span class="op">=</span>timeout,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> response.json()[<span class="st">"choices"</span>][<span class="dv">0</span>][<span class="st">"message"</span>][<span class="st">"content"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="json-解析与容错" class="level3">
+<h3 class="anchored" data-anchor-id="json-解析与容错">2.4.3 JSON 解析与容错</h3>
+<p>DeepSeek 偶尔会在 JSON 外围包裹 Markdown 代码块标记，解析时先清洗再解析：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extract_json_array(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">list</span>:</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> text.strip()</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">^</span><span class="vs">```</span>(?:<span class="vs">json</span>)<span class="op">?</span><span class="dv">\s</span><span class="op">*</span><span class="vs">"</span>, <span class="st">""</span>, text)      <span class="co"># 去开头 ```</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">*</span><span class="vs">```</span><span class="dv">$</span><span class="vs">"</span>, <span class="st">""</span>, text)                <span class="co"># 去结尾 ```</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> json.loads(text)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> json.JSONDecodeError:</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 兜底：正则提取最近的 [...] 数组</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        match <span class="op">=</span> re.search(<span class="vs">r"</span><span class="ch">\[</span><span class="pp">[</span><span class="dv">\s\S</span><span class="pp">]</span><span class="op">*</span><span class="ch">\]</span><span class="vs">"</span>, text)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> match:</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> json.loads(match.group(<span class="dv">0</span>))</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(data, <span class="bu">list</span>):</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Not a JSON array"</span>)</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>如果三次重试都解析失败，该文本块写入缓存的 <code>"error"</code> 字段，不阻塞整体管道。</p>
+<hr>
+</section>
+</section>
+<section id="阶段五程序级过滤" class="level2">
+<h2 class="anchored" data-anchor-id="阶段五程序级过滤">2.5 阶段五：程序级过滤</h2>
+<p>脚本：<code>build_bupt_v2_dataset.py</code> 中的 <code>clean_question()</code> + <code>clean_answer()</code> + <code>is_valid_qa()</code></p>
+<p>DeepSeek 生成的 QA 不是 100% 可靠的，需要程序层面做二次把关。这一步从源头控制数据质量，避免“垃圾进垃圾出”。</p>
+<section id="问题清洗" class="level3">
+<h3 class="anchored" data-anchor-id="问题清洗">2.5.1 问题清洗</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> clean_question(question):</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 去掉客套前缀</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    question <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">^</span><span class="kw">(</span><span class="vs">请问</span><span class="cf">|</span><span class="vs">老师</span><span class="cf">|</span><span class="vs">同学</span><span class="cf">|</span><span class="vs">您好</span><span class="cf">|</span><span class="vs">你好</span><span class="kw">)</span><span class="pp">[，,:：</span><span class="dv">\s</span><span class="pp">]</span><span class="op">*</span><span class="vs">"</span>, <span class="st">""</span>, question)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 去掉元叙述</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    question <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">^</span><span class="kw">(</span><span class="vs">根据资料</span><span class="cf">|</span><span class="vs">根据上述资料</span><span class="cf">|</span><span class="vs">根据原文</span><span class="kw">)</span><span class="pp">[，,:：</span><span class="dv">\s</span><span class="pp">]</span><span class="op">*</span><span class="vs">"</span>, <span class="st">""</span>, question)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 去掉末尾句号，以问号结尾</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    question <span class="op">=</span> question.rstrip(<span class="st">"。；;"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> question.endswith(<span class="st">"？"</span>):</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        question <span class="op">+=</span> <span class="st">"？"</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> normalize_whitespace(question)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="答案清洗" class="level3">
+<h3 class="anchored" data-anchor-id="答案清洗">2.5.2 答案清洗</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> clean_answer(answer):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    answer <span class="op">=</span> normalize_whitespace(answer)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    answer <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">^</span><span class="kw">(</span><span class="vs">根据资料</span><span class="cf">|</span><span class="vs">根据原文</span><span class="cf">|</span><span class="vs">资料显示</span><span class="kw">)</span><span class="pp">[，,:：</span><span class="dv">\s</span><span class="pp">]</span><span class="op">*</span><span class="vs">"</span>, <span class="st">""</span>, answer)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> answer</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="质量过滤规则" class="level3">
+<h3 class="anchored" data-anchor-id="质量过滤规则">2.5.3 质量过滤规则</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_valid_qa(question, answer, max_question_chars<span class="op">=</span><span class="dv">45</span>, max_answer_chars<span class="op">=</span><span class="dv">320</span>):</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> question <span class="kw">or</span> <span class="kw">not</span> answer:</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span>                        <span class="co"># 空问题或空答案</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(question) <span class="op">&gt;</span> max_question_chars:</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span>                        <span class="co"># 问题过长 (&gt; 45 字)</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(answer) <span class="op">&gt;</span> max_answer_chars:</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span>                        <span class="co"># 答案过长 (&gt; 320 字)</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(answer) <span class="op">&lt;</span> <span class="dv">20</span>:</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span>                        <span class="co"># 答案过短 (&lt; 20 字, 信息量不足)</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> is_single_question(question):</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span>                        <span class="co"># 多问题 (含多个 ? 或 "分别是什么" 等)</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    bad_phrases <span class="op">=</span> [<span class="st">"无法从资料中得知"</span>, <span class="st">"资料未提及"</span>, <span class="st">"我不知道"</span>, <span class="st">"作为AI"</span>]</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">any</span>(phrase <span class="kw">in</span> answer <span class="cf">for</span> phrase <span class="kw">in</span> bad_phrases):</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span>                        <span class="co"># 模型拒答或编造的答案</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">True</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_single_question(question):</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> question.count(<span class="st">"？"</span>) <span class="op">&gt;</span> <span class="dv">1</span>:            <span class="co"># 多个问号</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    multi_markers <span class="op">=</span> [<span class="st">"分别是什么"</span>, <span class="st">"有哪些和"</span>, <span class="st">"以及哪些"</span>, <span class="st">"和什么"</span>, <span class="st">"及什么"</span>]</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">not</span> <span class="bu">any</span>(m <span class="kw">in</span> question <span class="cf">for</span> m <span class="kw">in</span> multi_markers)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="过滤阈值的选择" class="level3">
+<h3 class="anchored" data-anchor-id="过滤阈值的选择">2.5.4 过滤阈值的选择</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>阈值</th>
+<th>值</th>
+<th>设计考量</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>问题最长</td>
+<td>45 字</td>
+<td>覆盖最长自然问题（最短 6 字），拒绝多句堆砌</td>
+</tr>
+<tr class="even">
+<td>答案最⻓</td>
+<td>320 字</td>
+<td>Prompt 要求 80−220 字，320 给一定余量但拒绝长篇</td>
+</tr>
+<tr class="odd">
+<td>答案最短</td>
+<td>20 字</td>
+<td>低于 20 字通常无法承载有效信息</td>
+</tr>
+</tbody>
+</table>
+<p><code>clean_question</code> 确保格式统一，<code>clean_answer</code> 去掉元叙述，<code>is_valid_qa</code> 做硬阈值过滤。三者各自解耦，便于单独调整规则。</p>
+<hr>
+</section>
+</section>
+<section id="阶段六去重与格式化" class="level2">
+<h2 class="anchored" data-anchor-id="阶段六去重与格式化">2.6 阶段六：去重与格式化</h2>
+<section id="问题级去重" class="level3">
+<h3 class="anchored" data-anchor-id="问题级去重">2.6.1 问题级去重</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>deduped <span class="op">=</span> []</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>seen <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> output_rows:</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    question <span class="op">=</span> row[<span class="st">"messages"</span>][<span class="dv">1</span>][<span class="st">"content"</span>]   <span class="co"># user 消息</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> question <span class="kw">in</span> seen:</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    seen.add(question)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    deduped.append(row)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>完全相同的 question 只保留第一条（不同文本块可能生成相似问题，如 “转专业可以申请几次？” vs “北邮转专业有几次机会？”——这种情况去重不会捕获，属于合理保留）。</p>
+</section>
+<section id="格式化" class="level3">
+<h3 class="anchored" data-anchor-id="格式化">2.6.2 格式化</h3>
+<p>每条 QA 组装为 <code>ms-swift</code> 可直接训练的 messages JSONL 格式：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"messages"</span>: [</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"system"</span>,    <span class="st">"content"</span>: <span class="st">"你是北京邮电大学知识助手，..."</span>},</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"user"</span>,      <span class="st">"content"</span>: <span class="st">"海淀校区男女生各住哪些宿舍楼？"</span>},</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: <span class="st">"男生宿学苑1-4号楼，女生宿学苑5-8号楼。"</span>}</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"metadata"</span>: {</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"source"</span>:       <span class="st">"bupt_v2_deepseek_qa"</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"title"</span>:        <span class="st">"沙河六人间布局"</span>,</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"url"</span>:          <span class="st">"https://guide.byrdocs.org/沙河校区/六人间布局"</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"source_site"</span>:  <span class="st">"byrdocs_guide"</span>,</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"source_chunk"</span>: <span class="st">"即便有标号，也可与室友协商另行调换。..."</span>   <span class="co"># ← 原始文本块，方便审计溯源</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>metadata</code> 保留溯源信息，包括原始文本块 <code>source_chunk</code>——这意味着每一条 AI 生成的答案都可以直接比对原文，做事实性校验。</p>
+<hr>
+</section>
+</section>
+<section id="完整中间产物总览" class="level2">
+<h2 class="anchored" data-anchor-id="完整中间产物总览">2.7 完整中间产物总览</h2>
+<pre><code>data/raw/byrdocs_guide.jsonl               ← 阶段一: 爬虫 → 25 条原始页面
+data/raw/bupt_xsc.jsonl                    ← 阶段一: 爬虫 → 25 条原始页面
+data/raw/bupt_xsc_guide.jsonl              ← 阶段一: 爬虫 → 8 条原始页面
+data/processed/clean_corpus.jsonl          ← 阶段二: 去重 → 58 条干净语料
+data/bupt_v2/deepseek_qa_cache.json        ← 阶段四: API 原始响应缓存
+data/bupt_v2/bupt_v2_messages.jsonl        ← 阶段五+六: 最终数据集 → 259 条</code></pre>
+</section>
+</section>
+<section id="下游应用lora-微调" class="level1">
+<h1>3 下游应用：LoRA 微调</h1>
+<p>数据集构建的最终目的是用于下游模型训练。这里简要说明使用方法与结果，不做详细展开。</p>
+<section id="训练命令" class="level2">
+<h2 class="anchored" data-anchor-id="训练命令">3.1 训练命令</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">swift</span> sft <span class="dt">\</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--model</span> Qwen/Qwen2.5-1.5B-Instruct <span class="dt">\</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--tuner_type</span> lora <span class="dt">\</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--dataset</span> data/bupt_v2/bupt_v2_messages_train.jsonl <span class="dt">\</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--num_train_epochs</span> 5 <span class="dt">\</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--lora_rank</span> 16 <span class="dt">\</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--lora_alpha</span> 32 <span class="dt">\</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--max_length</span> 768 <span class="dt">\</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output_dir</span> ~/bupt_outputs/qwen25_bupt_lora_v2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="训练结果摘要" class="level2">
+<h2 class="anchored" data-anchor-id="训练结果摘要">3.2 训练结果摘要</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>指标</th>
+<th>数值</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>总参数</td>
+<td>1.562B</td>
+</tr>
+<tr class="even">
+<td>LoRA 可训练参数</td>
+<td>18.46M (1.18%)</td>
+</tr>
+<tr class="odd">
+<td>训练轮数</td>
+<td>5 epochs, 165 steps</td>
+</tr>
+<tr class="even">
+<td>训练耗时</td>
+<td>约 8 分 28 秒 (RTX 4060 Laptop 8GB)</td>
+</tr>
+<tr class="odd">
+<td>峰值显存</td>
+<td>约 4.48 GiB</td>
+</tr>
+<tr class="even">
+<td>初始 loss → 最终 loss</td>
+<td>2.2 → 1.0</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="推理示例" class="level2">
+<h2 class="anchored" data-anchor-id="推理示例">3.3 推理示例</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="assets/inference_examples.png" class="img-fluid figure-img"></p>
+<figcaption>推理示例</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="总结" class="level1">
+<h1>4 总结</h1>
+<p>本项目完整走通了从爬虫采集、清洗去重、文本切块、API 生成 QA、程序过滤到格式化输出的全流程，最终产出一个包含 259 条高质量问答样本的数据集，并成功用于 LoRA 微调。数据质量的核心保障在于精心设计的 Prompt 和严格的程序过滤规则，确保生成的 QA 简短、准确且信息量充足。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/qsdong-bupt\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025 Qingsen Dong. Built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".foldable-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const block = header.closest(".foldable");
+      if (block) block.classList.toggle("is-open");
+    });
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        header.click();
+      }
+    });
+  });
+});
+</script>
+
+
+
+
+<script src="../../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

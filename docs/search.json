@@ -53,7 +53,7 @@
     "href": "posts/Projects/projects_index.html",
     "title": "Projects",
     "section": "",
-    "text": "基于Qwen3-TTS的芙宁娜角色语音克隆\n\n\n全量微调实验报告\n\n\n\n\n\n\n\n\nJun 7, 2026\n\n\n\n\n\n\n\n\n\n\n\n\nKCF算法实现设计报告\n\n\n\n\n\n\n\n\n\n\n\nJun 1, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n第三次语音实验\n\n\n\n\n\n\n\n\n\n\n\nMay 31, 2026\n\n\n董庆森\n\n\n\n\n\n\n\n\n\n\n\n\nLLM Post-Training Project Report\n\n\n\n\n\n\n\n\n\n\n\nMay 20, 2026\n\n\n董庆森 秦政泽\n\n\n\n\n\n\n\n\n\n\n\n\nLLM Pre-Training Project Report\n\n\n\n\n\n\n\n\n\n\n\nMay 20, 2026\n\n\n董庆森 秦郑泽\n\n\n\n\n\nNo matching items"
+    "text": "BUPT校园知识问答数据集构建\n\n\n\n\n\n\n\n\n\n\n\nJun 14, 2026\n\n\n董庆森 秦政泽\n\n\n\n\n\n\n\n\n\n\n\n\n基于Qwen3-TTS的芙宁娜角色语音克隆\n\n\n全量微调实验报告\n\n\n\n\n\n\n\n\nJun 7, 2026\n\n\n\n\n\n\n\n\n\n\n\n\nKCF算法实现设计报告\n\n\n\n\n\n\n\n\n\n\n\nJun 1, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n第三次语音实验\n\n\n\n\n\n\n\n\n\n\n\nMay 31, 2026\n\n\n董庆森\n\n\n\n\n\n\n\n\n\n\n\n\nLLM Post-Training Project Report\n\n\n\n\n\n\n\n\n\n\n\nMay 20, 2026\n\n\n董庆森 秦政泽\n\n\n\n\n\n\n\n\n\n\n\n\nLLM Pre-Training Project Report\n\n\n\n\n\n\n\n\n\n\n\nMay 20, 2026\n\n\n董庆森 秦郑泽\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/Projects/LLM_Post-Training/报告.html",
@@ -224,11 +224,102 @@
     "text": "6.5 实验结果\n\n6.5.1 实验概述与训练过程\n本实验从 Qwen2.5-Math-1.5B Base 出发，使用 GRPO-Clip 损失在 MATH 数据集上进行了 130 步 semi-on-policy 强化学习训练。\n最终结果： 在全量 5,000 条 MATH 验证集上：\n\n\n\n指标\n零样本基线\nSFT-raw\nGRPO\n\n\n\n\n答案正确率\n2.6%\n18.6%\n34.6%\n\n\n格式正确率\n17.3%\n61.3%\n88.8%\n\n\n\n训练曲线的四个核心现象（详见 6.5.2）：\n\n格式与推理解耦： 格式在前 40 步快速收敛（S 型曲线），推理能力则近乎线性缓慢爬坡，两者发生在不同时间尺度；\n奖励信号退化： 二值奖励下训练奖励高度波动，后期格式趋于完美后奖励区分度退化；\n梯度不稳定： 训练过程频繁出现梯度尖峰；\n响应长度坍缩： 响应长度在训练中减半。\n\n综合来看，GRPO 显著有效但仍面临训练不稳定、奖励信号退化、响应长度坍缩等挑战（详见 6.5.4）。\n\n\n6.5.2 训练曲线\n以下结合 wandb 记录的 130 步训练曲线，从验证性能、训练奖励、损失与梯度稳定性、响应长度四个维度分析 GRPO 训练过程中的关键动态。\n\n验证性能：答案正确率与格式正确率\n\n\n\n验证集 avg_reward 与 avg_format_reward 曲线\n\n\n\n\n\n验证集 avg_format_reward 曲线\n\n\n关键观察：\n\n答案正确率稳步线性增长。 avg_reward 从 step 0 的 0.0278 上升至 step 120 的 0.3458，增长曲线接近线性，未见明显的平台或饱和迹象——训练在 130 步处仍有持续提升的空间。\n格式正确率在前 40 步快速收敛。 avg_format_reward 从 step 0 的 0.203 快速攀升，step 40 时已达 0.834，此后进入缓慢增长阶段（step 40→120 仅从 0.834→0.888）。这一”S 型”曲线表明：学会 &lt;think&gt;/&lt;answer&gt; 格式对 GRPO 而言是一个相对简单的任务；后续增长主要来自答案正确率的提升，格式已不再是瓶颈。\n格式-推理解耦。 格式正确率的快速收敛但答案正确率的缓慢爬坡，说明 RL 训练中格式习得与推理能力提升是两个不同时间尺度的过程，后者才是真正的挑战。\n\n\n\n训练损失与梯度范数：不稳定性和梯度爆炸\n\n\n\n训练 train/loss 曲线\n\n\n\n\n\n训练 train/loss_std 曲线\n\n\n\n\n\n训练 train/grad_norm 曲线\n\n\n关于 train/grad_norm。 代码使用 clip_grad_norm_(max_norm=1.0)，图中所有值均为裁剪前的原始范数，公式为 \\(\\text{grad\\_norm} = \\sqrt{\\sum_{p} \\|\\nabla_p \\mathcal{L}\\|_2^2}\\)。\n关键观察：\n\nloss 量级极低且非单调。 稳定时 loss 约为 \\(10^{-5} \\sim 10^{-3}\\)，可正可负。GRPO 的 loss = \\(-\\min(r_t A_t, \\text{clip}(r_t)A_t)\\) 并非 SFT 的 NLL（恒正），其绝对值与梯度范数无单调关系——loss 小不意味着梯度小，反之亦然。\n梯度爆炸的根因：min 操作的不对称性。 130 步中共 12 次 grad_norm &gt; 1.0 的尖峰，最严重为 step 121（14.8M，伴随 loss=332、loss_std=664）。clip(r_t) 本身将 importance sampling 比率限制在 \\([0.8, 1.2]\\) 内，工作正常。问题在于 min 的二选一逻辑在两个方向上不对称：\n\n\\(A_t &gt; 0\\)（好 token，鼓励）：\\(r_t\\) 膨胀时，\\(\\min(r_t A_t,\\; 1.2 A_t)\\) 选 \\(1.2 A_t\\)，更新幅度被限制在 \\(1.2|A_t|\\) 以内。裁剪生效。\n\\(A_t &lt; 0\\)（坏 token，惩罚）：\\(r_t\\) 膨胀时，\\(\\min(r_t A_t,\\; 0.8 A_t)\\) 两个都是负数，min 必然选更负的那个——即 \\(r_t A_t\\)。CLIP 把 surr2 压到了 \\(0.8 A_t\\)（例如 −3.12），但 \\(r_t A_t\\) 可能是 −2,600,000，min 直接绕过裁剪值。\n\n爆炸的完整链条：离策略训练（每批 2 epoch）→ 策略漂移 → \\(r_t = e^{15} \\approx 3.3\\times 10^6\\) → 负优势下 min 绕过 clip → per-token loss = \\(|r_t A_t| \\approx 2.6\\times 10^6\\)（正常值 ~0.1）→ 28 层链式法则逐层放大 → 梯度范数膨胀至 \\(10^7\\) 量级。\n梯度裁剪的局限。 clip_grad_norm_ 将范数压到 1.0，但无法修正方向——若梯度方向已被单一异常 token 主导，裁剪后的更新仍然指向噪声。模型每次爆炸后均能自动恢复，说明异常 token 方向的 loss landscape 足够平坦，且范数压到 1.0 后实际更新幅度极小。\n后期尖峰频率增加。 前 60 步无 &gt;1.0 尖峰；60–90 步 3 次；90–130 步 10 次。策略离初始点越远，ratio 方差越大，极端值概率越高。\n\n\n\n响应长度：策略持续”收敛”\n\n\n\n训练 mean_token_counts 曲线\n\n\n\n\n\n训练 train/total_tokens 曲线\n\n\n关键观察：\n\n响应长度持续下降。 mean_token_counts 从初始的 ~371 下降至 ~202（降幅 45%），train/total_tokens（每步训练总 token 数）同步从 ~190K 降至 ~103K。下降在前 20 步尤为剧烈（371→195），此后稳定在 170~230 的区间内波动。\n长度下降的双面性。 对二值奖励的 GRPO 而言，长短答案在奖励上一视同仁，但短答案在每个 response token 上分摊的优势信号更强，因此策略被推向简洁。这一方面可能是正向的效率提升（模型学会更精炼的推理），但也可能隐含推理简化，模型可能会减少探索步骤以降低生成坏 token 的风险。需要进一步分析正确/错误答案的长度分布来区分这两种情况。\ntotal_tokens 与 mean_token_counts 高度一致。 两者的 Pearson 相关接近 1.0，说明 token 总量的变化完全由平均长度的变化驱动，而非 batch 大小的波动——这确认了 DataLoader 和采样流程的稳定性。\n\n\n\n\n6.5.3 最终评估结果\n\n\n\n指标\n零样本基线\nSFT-raw\nGRPO\n\n\n\n\navg_reward\n0.0258\n0.1860\n0.3458\n\n\navg_format_reward\n0.1728\n0.6134\n0.8880\n\n\n条件正确率\n14.9%\n30.3%\n~38.9%\n\n\n\n\n\n6.5.4 核心发现与局限性\n\n核心发现\n1. GRPO 有效：从零教会 Base 模型推理。 仅靠二值验证奖励，在 130 步内将条件正确率从 14.9% 推至 38.9%（+24pp）。模型无需推理示范，通过奖励信号自主探索出有效推理策略，印证了 DeepSeek-R1-Zero 的核心结论。\n2. 格式与推理解耦，学习速度差异巨大。 格式正确率 40 步内即完成 S 型收敛（20%→83%），而答案正确率 120 步内近乎线性爬坡。格式习得是 low-hanging fruit，推理能力则需在巨大策略空间中逐步探索。\n3. 训练不稳定。 训练后期尖峰频发，根因三点：二值稀疏奖励 + 组内归一化导致优势值极端分化；离策略训练（同一批数据更新 4 次）增大重要性采样比率方差；无 KL 正则化使策略可自由漂移。但模型每次爆炸后均能自动恢复。\n4. 响应长度减半。 mean_token_counts 从 ~371 降至 ~202（−45%）。二值奖励下长短答案等价，但短答案每 token 优势信号更强，策略被推向简洁——可能是正向效率提升，也可能隐含推理质量下降。\n5. 二值奖励区分度在训练后期退化。 格式趋于饱和后奖励退化为纯”对/错”，组内方差进一步压缩。当同组响应全部正确格式但全错时，\\(\\sigma_g=0\\) 优势全零，该步无学习信号，构成限制 GRPO 持续进步的结构性瓶颈。\n\n\n局限性\n1. 非对称裁剪导致梯度无上界。 GRPO-Clip 仅在 \\(A_t &gt; 0\\) 时裁剪。当 \\(A_t &lt; 0\\)，per-token loss 无理论上界，离策略下 \\(r_t\\) 可膨胀至 \\(10^6\\) 量级，造成梯度爆炸（本实验 step 121: 14.8M）。\n2. 组内归一化 + 二值奖励 → 方差退化。 同组全对或全错时 \\(\\sigma_g=0\\)，优势全零、无学习信号。训练后期格式饱和后奖励退化为一维，等效训练步数被稀释，这是二值奖励机制的内在局限。\n3. 二值奖励不惩罚长度，响应持续坍缩。 短答案每 token 优势更强，mean_token_counts 降 45% 未见止跌。二值奖励无法区分”精炼推理”与”仓促猜测”。\n4. 无 KL 约束，策略无锚点。 去除 KL 惩罚以降低显存的代价是策略可自由漂移，训练不稳定性增加。"
   },
   {
-    "objectID": "posts/Blogs/blogs_index.html",
-    "href": "posts/Blogs/blogs_index.html",
-    "title": "Welcome to Qingsen’s Blog",
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html",
+    "title": "BUPT校园知识问答数据集构建",
     "section": "",
-    "text": "No matching items"
+    "text": "本项目目标是构建一个北京邮电大学校园知识问答数据集——从公开网页爬取原始语料，经过清洗、切块、API改写、过滤去重等流程，最终产出 259 条高质量短问短答样本。数据集采用 ms-swift 兼容的 messages JSONL 格式，可直接用于下游 LoRA 微调任务。\n\n\n本项目是课程实践，核心目标不是训出好模型，而是走通”非结构化网页文本 → 结构化 QA 数据集”的完整构建管线。\n三个核心问题：\n\n爬取与清洗：不同网站 DOM 结构各异，如何稳定提取正文并去重？\n长文本切分：一篇文章上千字、涵盖多个知识点，切成多长的块才适合生成 QA？\n质量过滤：大模型生成的 QA 可能编造、冗余或多问，程序层面如何拦截？\n\n项目以北京邮电大学为场景，覆盖爬虫、清洗、切块、API 改写、过滤的全流程。下游的 LoRA 微调仅用于验证数据集可用性——重点在数据，不在模型。\n\n\n\n  爬虫采集 ──→ 清洗去重 ──→ 句子切分 + 文本分块 ──→ DeepSeek API 生成 QA ──→ 过滤清洗去重 ──→ 格式化输出\n\n\n\n数据来源于三个公开网站:\n\n\n\n网站\n简称\n内容类型\n\n\n\n\nguide.byrdocs.org\nbyrdocs_guide\nBUPT 生存指南\n\n\nxsc.bupt.edu.cn/jgjs/gzzd/xsgl.htm\nbupt_xsc\n学生处规章制度\n\n\nxsc.bupt.edu.cn/xgdt/bszn.htm\nbupt_xsc_guide\n学生处办事指南\n\n\n\n最终数据集统计：\n\n\n\n来源\nQA 数\n问题中位长度\n答案中位长度\n\n\n\n\nbupt_xsc\n172\n15 字\n72 字\n\n\nbyrdocs_guide\n76\n14 字\n65 字\n\n\nbupt_xsc_guide\n11\n17 字\n78 字\n\n\n合计\n259\n15 字\n69 字\n\n\n\n数据采用 ms-swift 兼容的 messages JSONL 格式，每条样本示例如下：\n{\n  \"messages\": [\n    {\"role\": \"system\", \"content\": \"你是北京邮电大学知识助手，请基于已知资料准确、简洁地回答问题。\"},\n    {\"role\": \"user\", \"content\": \"新生怎么连校园网？\"},\n    {\"role\": \"assistant\", \"content\": \"新生使用学工号作为网关账号，初始密码为身份证后6位（X改为0）。必须修改初始密码才能接入校园网，可通过企业微信-校园网或校园网自服务系统修改。无线网络推荐连接BUPT-mobile，该信号只使用5GHz频段，体验更好。\"}\n  ]\n}"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#项目动机",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#项目动机",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "",
+    "text": "本项目是课程实践，核心目标不是训出好模型，而是走通”非结构化网页文本 → 结构化 QA 数据集”的完整构建管线。\n三个核心问题：\n\n爬取与清洗：不同网站 DOM 结构各异，如何稳定提取正文并去重？\n长文本切分：一篇文章上千字、涵盖多个知识点，切成多长的块才适合生成 QA？\n质量过滤：大模型生成的 QA 可能编造、冗余或多问，程序层面如何拦截？\n\n项目以北京邮电大学为场景，覆盖爬虫、清洗、切块、API 改写、过滤的全流程。下游的 LoRA 微调仅用于验证数据集可用性——重点在数据，不在模型。"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#系统架构",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#系统架构",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "",
+    "text": "爬虫采集 ──→ 清洗去重 ──→ 句子切分 + 文本分块 ──→ DeepSeek API 生成 QA ──→ 过滤清洗去重 ──→ 格式化输出"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#最终数据概览",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#最终数据概览",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "",
+    "text": "数据来源于三个公开网站:\n\n\n\n网站\n简称\n内容类型\n\n\n\n\nguide.byrdocs.org\nbyrdocs_guide\nBUPT 生存指南\n\n\nxsc.bupt.edu.cn/jgjs/gzzd/xsgl.htm\nbupt_xsc\n学生处规章制度\n\n\nxsc.bupt.edu.cn/xgdt/bszn.htm\nbupt_xsc_guide\n学生处办事指南\n\n\n\n最终数据集统计：\n\n\n\n来源\nQA 数\n问题中位长度\n答案中位长度\n\n\n\n\nbupt_xsc\n172\n15 字\n72 字\n\n\nbyrdocs_guide\n76\n14 字\n65 字\n\n\nbupt_xsc_guide\n11\n17 字\n78 字\n\n\n合计\n259\n15 字\n69 字\n\n\n\n数据采用 ms-swift 兼容的 messages JSONL 格式，每条样本示例如下：\n{\n  \"messages\": [\n    {\"role\": \"system\", \"content\": \"你是北京邮电大学知识助手，请基于已知资料准确、简洁地回答问题。\"},\n    {\"role\": \"user\", \"content\": \"新生怎么连校园网？\"},\n    {\"role\": \"assistant\", \"content\": \"新生使用学工号作为网关账号，初始密码为身份证后6位（X改为0）。必须修改初始密码才能接入校园网，可通过企业微信-校园网或校园网自服务系统修改。无线网络推荐连接BUPT-mobile，该信号只使用5GHz频段，体验更好。\"}\n  ]\n}"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#阶段一爬虫采集",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#阶段一爬虫采集",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "2.1 阶段一：爬虫采集",
+    "text": "2.1 阶段一：爬虫采集\n脚本：crawler.py，负责从三个公开来源采集原始网页。\n\n2.1.1 爬虫架构\n使用 requests + lxml 的经典方案。三个爬虫继承同一基类 BaseCrawler，各自覆盖 URL 匹配和正文提取逻辑：\n\n\n\n\n\n\n\n\n\n\n爬虫类\n来源\n起始 URL\n采集页面数\n内容\n\n\n\n\nByrdocsCrawler\nguide.byrdocs.org\n首页\n25\n宿舍、转专业、校园网、开学考试等\n\n\nXscCrawler\nxsc.bupt.edu.cn\n学生管理列表页\n25\n奖学金、处分、助学贷款等规章制度\n\n\nXscGuideCrawler\nxsc.bupt.edu.cn\n办事指南列表页\n8\n补办学生证、在读证明等办事流程\n\n\n\n\n\n2.1.2 爬取策略：BFS + visited 去重\n# ByrDocsCrawler 核心逻辑 (crawler.py:133-163)\nqueue = deque(start_urls)\nvisited = set()\n\nwhile queue:\n    current = canonicalize_url(queue.popleft())   # URL 规范化\n    if current in visited:\n        continue\n    visited.add(current)\n    sleep(1.0)                                   \n\n    tree = get_tree(session, current)              # HTTP + lxml 解析\n    record = extract_record(current, tree)         # 提取正文\n    if record:\n        records.append(record)\n\n    for href in tree.xpath(\"//a[@href]/@href\"):    # 提取子链接\n        absolute = canonicalize_url(urljoin(current, href))\n        if is_valid_doc(absolute):\n            queue.append(absolute)\nXscCrawler 采用两阶段策略：先将列表页的所有详情页 URL 加入 detail_urls 集合，再逐一访问，避免重复翻页。\n\n\n2.1.3 正文提取：差异化 XPath\n不同来源的 DOM 结构不同，分别写 XPath：\n# ByrDocs: 结构化页面, 内容在 &lt;main&gt; 内\ntitle  = tree.xpath(\"string(//main//h1)\")\ncontent = text_join(tree.xpath(\"//main//*[self::p or self::li or self::h2 or self::h3]//text()\"))\n\n# Xsc: 旧式 CMS, 内容在 id=vsb_content 的 div 内\ntitle  = tree.xpath(\"string(//div[contains(@class, 'art-tit')])\")\ncontent = text_join(tree.xpath(\"//div[@id='vsb_content']//text()\"))\ntext_join() 对所有文本节点做 normalize_whitespace()（\\xa0 → 空格，合并连续空白），然后以空格拼接。\n\n\n2.1.4 URL 去重与过滤\n爬虫级别的过滤规则：\n\n去重：visited 集合按 URL 做精确匹配，canonicalize_url() 统一路径编码和末尾斜杠\n域名锁定：byrdocs 只爬 guide.byrdocs.org，xsc 只爬 xsc.bupt.edu.cn\n路径过滤：排除 /contributing、/acknowledgments 等非内容页\n类型过滤：排除 _astro 内部路径、图片/CSS/JS/XML 等静态资源\n长度过滤：byrdocs &lt; 80 字丢弃，xsc &lt; 50 字丢弃\n\n\n\n2.1.5 产出\ndata/raw/byrdocs_guide.jsonl   → 25 条\ndata/raw/bupt_xsc.jsonl        → 25 条\ndata/raw/bupt_xsc_guide.jsonl  → 8 条\n每条记录字段：source_site source_name category title content url publish_time crawled_at"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#阶段二清洗去重",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#阶段二清洗去重",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "2.2 阶段二：清洗去重",
+    "text": "2.2 阶段二：清洗去重\n脚本：build_dataset.py 中的 deduplicate()\n虽然三个爬虫各自做了去重，但三份原始文件之间可能存在重复（如同一篇文章被不同爬虫采集）。这一步做跨文件清洗：\ndef deduplicate(rows: list[dict]) -&gt; list[dict]:\n    seen = set()\n    deduped = []\n    for row in rows:\n        title   = normalize_whitespace(row.get(\"title\", \"\"))\n        content = normalize_whitespace(row.get(\"content\", \"\"))\n        if not title or not content:\n            continue                                    # ← 丢弃空字段\n        key = hashlib.md5(f\"{title}||{content}\".encode()).hexdigest()\n        if key in seen:\n            continue                                    # ← 去重\n        seen.add(key)\n        row[\"title\"]   = title\n        row[\"content\"] = content\n        deduped.append(row)\n    return deduped\n\n\n\n\n\n\n\n操作\n说明\n\n\n\n\n字段清洗\nnormalize_whitespace() 再次统一空白，覆盖爬虫阶段未处理的边缘 case\n\n\n去重\nMD5(title \\|\\| content) 为 key，本质上是对 (标题, 正文) 去重\n\n\n丢弃\ntitle 或 content 为空字符串的记录\n\n\n\n产出：\ndata/processed/clean_corpus.jsonl → 58 条\n三份原始文件共 58 条页面（25+25+8），跨文件去重后仍为 58 条——三个来源内容互不重叠，无跨站重复。"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#阶段三文本切块",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#阶段三文本切块",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "2.3 阶段三：文本切块",
+    "text": "2.3 阶段三：文本切块\n脚本：build_bupt_v2_dataset.py 中的 split_sentences() + chunk_text()\n直接调用 DeepSeek API 处理整篇文章有两个问题：一是文章太长超出 context；二是单篇文章包含多个不相关的知识点，生成的 QA 质量不稳定。解决方法是先切块。\n\n2.3.1 句子切分\ndef split_sentences(text: str) -&gt; list[str]:\n    text = normalize_whitespace(text)\n    parts = re.split(r\"(?&lt;=[。；！？])\\s*\", text)\n    return [p.strip() for p in parts if p.strip()]\n按中文句号、分号、叹号、问号断句，使用正向后顾 (?&lt;=...) 保留标点符号。\n\n\n2.3.2 贪心合并\ndef chunk_text(text, max_chars=900, min_chars=120):\n    sentences = split_sentences(text)\n    chunks = []\n    current = \"\"\n\n    for sent in sentences:\n        if not current:\n            current = sent\n            continue\n        if len(current) + len(sent) + 1 &lt;= max_chars:\n            current = f\"{current} {sent}\"      # ← 还能装下，继续拼接\n        else:\n            if len(current) &gt;= min_chars:\n                chunks.append(current)          # ← 装不下了，截断\n                current = sent\n            else:\n                current = f\"{current} {sent}\"   # ← 太短，继续追加\n\n    if current and len(current) &gt;= min_chars:\n        chunks.append(current)                  # ← 最后一块\n    return chunks"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#阶段四deepseek-api-生成-qa",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#阶段四deepseek-api-生成-qa",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "2.4 阶段四：DeepSeek API 生成 QA",
+    "text": "2.4 阶段四：DeepSeek API 生成 QA\n脚本：build_bupt_v2_dataset.py 中的 call_deepseek() + extract_json_array()\n这是管道中最关键的一步：利用大模型的语言能力，将非结构化的原文块改写为结构化的 question-answer 对。\n\n2.4.1 Prompt 设计\nPrompt 是该步骤的核心，经过多轮迭代的最终版本：\n请把下面的北邮资料改写成适合微调的数据集问答。\n\n要求：\n1. 生成 2 条以内 QA。\n2. 每条只问一个问题，不要把多个问题合在一起。\n3. 问题要像真实学生会问的话，简短自然，不要写\"请问\"\"同学您好\"\n   \"根据资料\"等客套或元叙述。\n4. 答案必须严格来自资料，不要补充、猜测、编造。\n5. 答案要短，优先 80 到 220 字；确实需要列点时可以列点，\n   但不要长篇复述原文。\n6. 保留关键事实，比如地点、电话、时间、网址、尺寸、条件、流程。\n7. 如果资料信息太碎或不适合问答，返回空数组 []。\n\n只返回 JSON 数组，不要返回 Markdown，不要解释。\n格式：\n[\n  {\"question\": \"问题？\", \"answer\": \"答案\"}\n]\n\n标题：{title}\n资料：\n{content}\n设计要点：\n\n约束 2 和 约束 3 共同保证“一个问题、一个答案”的短格式，这是 v2 版本相比 v1 的核心改进\n约束 4 是事实性的根基——宁可不生成，也不能编造\n约束 5 给出数值范围（80–220 字），比“尽量短”这类模糊表述更有效\n约束 7 给了模型一个“安全出口”，避免强行 QA 生成低质量样本\n明确的 JSON 只输出格式（无 Markdown 包裹），减少后续解析开销\n\n\n\n2.4.2 API 调用\ndef call_deepseek(prompt, api_key, model=\"deepseek-v4-pro\", timeout=60):\n    response = requests.post(\n        \"https://api.deepseek.com/chat/completions\",\n        headers={\"Authorization\": f\"Bearer {api_key}\"},\n        json={\n            \"model\": model,\n            \"messages\": [\n                {\"role\": \"system\", \"content\": \"你负责把高校公开资料整理成...\"\n                 \"单问题的中文问答数据。只输出合法 JSON。\"},\n                {\"role\": \"user\",   \"content\": prompt},\n            ],\n            \"temperature\": 0.2,   # 低温度保证输出稳定\n            \"top_p\": 0.9,\n            \"max_tokens\": 1200,\n        },\n        timeout=timeout,\n    )\n    return response.json()[\"choices\"][0][\"message\"][\"content\"]\n\n\n2.4.3 JSON 解析与容错\nDeepSeek 偶尔会在 JSON 外围包裹 Markdown 代码块标记，解析时先清洗再解析：\ndef extract_json_array(text: str) -&gt; list:\n    text = text.strip()\n    text = re.sub(r\"^```(?:json)?\\s*\", \"\", text)      # 去开头 ```\n    text = re.sub(r\"\\s*```$\", \"\", text)                # 去结尾 ```\n\n    try:\n        data = json.loads(text)\n    except json.JSONDecodeError:\n        # 兜底：正则提取最近的 [...] 数组\n        match = re.search(r\"\\[[\\s\\S]*\\]\", text)\n        if not match:\n            raise\n        data = json.loads(match.group(0))\n\n    if not isinstance(data, list):\n        raise ValueError(\"Not a JSON array\")\n    return data\n如果三次重试都解析失败，该文本块写入缓存的 \"error\" 字段，不阻塞整体管道。"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#阶段五程序级过滤",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#阶段五程序级过滤",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "2.5 阶段五：程序级过滤",
+    "text": "2.5 阶段五：程序级过滤\n脚本：build_bupt_v2_dataset.py 中的 clean_question() + clean_answer() + is_valid_qa()\nDeepSeek 生成的 QA 不是 100% 可靠的，需要程序层面做二次把关。这一步从源头控制数据质量，避免“垃圾进垃圾出”。\n\n2.5.1 问题清洗\ndef clean_question(question):\n    # 去掉客套前缀\n    question = re.sub(r\"^(请问|老师|同学|您好|你好)[，,:：\\s]*\", \"\", question)\n    # 去掉元叙述\n    question = re.sub(r\"^(根据资料|根据上述资料|根据原文)[，,:：\\s]*\", \"\", question)\n    # 去掉末尾句号，以问号结尾\n    question = question.rstrip(\"。；;\")\n    if not question.endswith(\"？\"):\n        question += \"？\"\n    return normalize_whitespace(question)\n\n\n2.5.2 答案清洗\ndef clean_answer(answer):\n    answer = normalize_whitespace(answer)\n    answer = re.sub(r\"^(根据资料|根据原文|资料显示)[，,:：\\s]*\", \"\", answer)\n    return answer\n\n\n2.5.3 质量过滤规则\ndef is_valid_qa(question, answer, max_question_chars=45, max_answer_chars=320):\n    if not question or not answer:\n        return False                        # 空问题或空答案\n\n    if len(question) &gt; max_question_chars:\n        return False                        # 问题过长 (&gt; 45 字)\n\n    if len(answer) &gt; max_answer_chars:\n        return False                        # 答案过长 (&gt; 320 字)\n\n    if len(answer) &lt; 20:\n        return False                        # 答案过短 (&lt; 20 字, 信息量不足)\n\n    if not is_single_question(question):\n        return False                        # 多问题 (含多个 ? 或 \"分别是什么\" 等)\n\n    bad_phrases = [\"无法从资料中得知\", \"资料未提及\", \"我不知道\", \"作为AI\"]\n    if any(phrase in answer for phrase in bad_phrases):\n        return False                        # 模型拒答或编造的答案\n\n    return True\ndef is_single_question(question):\n    if question.count(\"？\") &gt; 1:            # 多个问号\n        return False\n    multi_markers = [\"分别是什么\", \"有哪些和\", \"以及哪些\", \"和什么\", \"及什么\"]\n    return not any(m in question for m in multi_markers)\n\n\n2.5.4 过滤阈值的选择\n\n\n\n阈值\n值\n设计考量\n\n\n\n\n问题最长\n45 字\n覆盖最长自然问题（最短 6 字），拒绝多句堆砌\n\n\n答案最⻓\n320 字\nPrompt 要求 80−220 字，320 给一定余量但拒绝长篇\n\n\n答案最短\n20 字\n低于 20 字通常无法承载有效信息\n\n\n\nclean_question 确保格式统一，clean_answer 去掉元叙述，is_valid_qa 做硬阈值过滤。三者各自解耦，便于单独调整规则。"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#阶段六去重与格式化",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#阶段六去重与格式化",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "2.6 阶段六：去重与格式化",
+    "text": "2.6 阶段六：去重与格式化\n\n2.6.1 问题级去重\ndeduped = []\nseen = set()\nfor row in output_rows:\n    question = row[\"messages\"][1][\"content\"]   # user 消息\n    if question in seen:\n        continue\n    seen.add(question)\n    deduped.append(row)\n完全相同的 question 只保留第一条（不同文本块可能生成相似问题，如 “转专业可以申请几次？” vs “北邮转专业有几次机会？”——这种情况去重不会捕获，属于合理保留）。\n\n\n2.6.2 格式化\n每条 QA 组装为 ms-swift 可直接训练的 messages JSONL 格式：\n{\n    \"messages\": [\n        {\"role\": \"system\",    \"content\": \"你是北京邮电大学知识助手，...\"},\n        {\"role\": \"user\",      \"content\": \"海淀校区男女生各住哪些宿舍楼？\"},\n        {\"role\": \"assistant\", \"content\": \"男生宿学苑1-4号楼，女生宿学苑5-8号楼。\"}\n    ],\n    \"metadata\": {\n        \"source\":       \"bupt_v2_deepseek_qa\",\n        \"title\":        \"沙河六人间布局\",\n        \"url\":          \"https://guide.byrdocs.org/沙河校区/六人间布局\",\n        \"source_site\":  \"byrdocs_guide\",\n        \"source_chunk\": \"即便有标号，也可与室友协商另行调换。...\"   # ← 原始文本块，方便审计溯源\n    }\n}\nmetadata 保留溯源信息，包括原始文本块 source_chunk——这意味着每一条 AI 生成的答案都可以直接比对原文，做事实性校验。"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#完整中间产物总览",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#完整中间产物总览",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "2.7 完整中间产物总览",
+    "text": "2.7 完整中间产物总览\ndata/raw/byrdocs_guide.jsonl               ← 阶段一: 爬虫 → 25 条原始页面\ndata/raw/bupt_xsc.jsonl                    ← 阶段一: 爬虫 → 25 条原始页面\ndata/raw/bupt_xsc_guide.jsonl              ← 阶段一: 爬虫 → 8 条原始页面\ndata/processed/clean_corpus.jsonl          ← 阶段二: 去重 → 58 条干净语料\ndata/bupt_v2/deepseek_qa_cache.json        ← 阶段四: API 原始响应缓存\ndata/bupt_v2/bupt_v2_messages.jsonl        ← 阶段五+六: 最终数据集 → 259 条"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#训练命令",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#训练命令",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "3.1 训练命令",
+    "text": "3.1 训练命令\nswift sft \\\n  --model Qwen/Qwen2.5-1.5B-Instruct \\\n  --tuner_type lora \\\n  --dataset data/bupt_v2/bupt_v2_messages_train.jsonl \\\n  --num_train_epochs 5 \\\n  --lora_rank 16 \\\n  --lora_alpha 32 \\\n  --max_length 768 \\\n  --output_dir ~/bupt_outputs/qwen25_bupt_lora_v2"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#训练结果摘要",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#训练结果摘要",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "3.2 训练结果摘要",
+    "text": "3.2 训练结果摘要\n\n\n\n指标\n数值\n\n\n\n\n总参数\n1.562B\n\n\nLoRA 可训练参数\n18.46M (1.18%)\n\n\n训练轮数\n5 epochs, 165 steps\n\n\n训练耗时\n约 8 分 28 秒 (RTX 4060 Laptop 8GB)\n\n\n峰值显存\n约 4.48 GiB\n\n\n初始 loss → 最终 loss\n2.2 → 1.0"
+  },
+  {
+    "objectID": "posts/Projects/BUPT_QA_Dataset/index.html#推理示例",
+    "href": "posts/Projects/BUPT_QA_Dataset/index.html#推理示例",
+    "title": "BUPT校园知识问答数据集构建",
+    "section": "3.3 推理示例",
+    "text": "3.3 推理示例\n\n\n\n推理示例"
   },
   {
     "objectID": "index.html",
@@ -236,6 +327,13 @@
     "title": "About QINGSEN",
     "section": "",
     "text": "I am an undergraduate student at Beijing University of Posts and Telecommunications (BUPT), School of Artificial Intelligence. With a strong foundation in machine learning, deep learning, and large language models, I have hands-on experience in building AI-driven solutions. I am currently seeking full-time opportunities in the AI field where I can contribute, grow, and make a meaningful impact. Open to Work – feel free to reach out at qsdong@bupt.edu.cn!"
+  },
+  {
+    "objectID": "posts/Blogs/blogs_index.html",
+    "href": "posts/Blogs/blogs_index.html",
+    "title": "Welcome to Qingsen’s Blog",
+    "section": "",
+    "text": "No matching items"
   },
   {
     "objectID": "posts/Projects/KCF_Tracking/index.html",
