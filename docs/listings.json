@@ -2,16 +2,22 @@
   {
     "listing": "/posts/Projects/projects_index.html",
     "items": [
-      "/posts/Projects/BUPT_QA_Dataset/index.html",
+      "/posts/Projects/Language_Modeling_from_Scratch/index.html",
       "/posts/Projects/Qwen3_TTS_Furina/index.html",
       "/posts/Projects/KCF_Tracking/index.html",
-      "/posts/Projects/Voice_Experiment/index.html",
-      "/posts/Projects/LLM_Post-Training/报告.html",
-      "/posts/Projects/LLM_Pre-Training/index.html"
+      "/posts/Projects/Voice_Experiment/index.html"
     ]
   },
   {
     "listing": "/posts/Blogs/blogs_index.html",
     "items": []
+  },
+  {
+    "listing": "/posts/Projects/Language_Modeling_from_Scratch/index.html",
+    "items": [
+      "/posts/Projects/LLM_Pre-Training/index.html",
+      "/posts/Projects/LLM_Post-Training/报告.html",
+      "/posts/Projects/BUPT_QA_Dataset/index.html"
+    ]
   }
 ]

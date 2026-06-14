@@ -1,0 +1,14 @@
+---
+title: "Language Modeling from Scratch"
+description: "从零构建语言模型系列项目：预训练、后训练微调、数据集构建"
+listing:
+  - id: listing
+    contents:
+      - "../../LLM_Pre-Training/index.qmd"
+      - "../../LLM_Post-Training/index.qmd"
+      - "../../BUPT_QA_Dataset/index.qmd"
+    type: default
+    sort: "date asc"
+---
+
+本系列包含三个项目，按时间顺序从基础预训练到后训练微调、再到下游数据集构建，覆盖了从零构建语言模型的完整流程。
