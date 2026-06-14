@@ -6,8 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="董庆森 秦郑泽">
-<meta name="dcterms.date" content="2026-06-10">
+<meta name="author" content="董庆森 秦政泽">
+<meta name="dcterms.date" content="2026-05-20">
 
 <title>LLM Post-Training Project Report</title>
 <style>
@@ -516,14 +516,14 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>董庆森 秦郑泽 </p>
+             <p>董庆森 秦政泽 </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 10, 2026</p>
+      <p class="date">May 20, 2026</p>
     </div>
   </div>
   
@@ -845,7 +845,7 @@ window.Quarto = {
 <tr class="odd">
 <td><code>reward</code></td>
 <td style="text-align: center;"><code>float</code></td>
-<td>综合奖励 = <code>format_reward + answer_reward</code></td>
+<td>综合奖励 = 格式正确且答案正确为 1，其余为 0</td>
 </tr>
 </tbody>
 </table>
@@ -1071,7 +1071,7 @@ window.Quarto = {
 <span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>{<span class="st">"format_reward"</span>: <span class="fl">0.0</span>, <span class="st">"answer_reward"</span>: <span class="fl">0.0</span>, <span class="st">"reward"</span>: <span class="fl">0.0</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>设计要点：</strong></p>
 <ul>
-<li><code>reward = format_reward + answer_reward</code>，取值范围 {0, 1, 2}。由于 <code>answer_reward</code> 依赖 <code>format_reward</code>（格式错误不检查答案），实际 reward 只能是 0 或 1。</li>
+<li><code>reward</code> 为二值综合奖励：格式正确且答案正确时返回 1，其余情况（格式错误、或格式正确但答案错误）均返回 0。注意它不是 <code>format_reward + answer_reward</code> 的求和——代码中格式正确但答案错误时返回 <code>reward: 0.0</code>，而非 1.0。即只有同时满足格式和答案两个条件，<code>reward</code> 才为 1。</li>
 <li><code>fast=True</code> 模式跳过 <code>is_latex_equal()</code>（<code>math_verify</code> 库的完整 LaTeX 验证），在精度与速度之间选择速度。这对评估 5000 条验证集至关重要——sympy 单次调用可达数百毫秒，<code>math_verify</code> 更慢。</li>
 </ul>
 </section>
@@ -3405,6 +3405,7 @@ evaluate_vllm()                   # ③ 执行评估（内部调用 sft_helper �
 <tr class="header">
 <th>指标</th>
 <th style="text-align: center;">零样本基线</th>
+<th style="text-align: center;">SFT-raw</th>
 <th style="text-align: center;">GRPO</th>
 </tr>
 </thead>
@@ -3412,11 +3413,13 @@ evaluate_vllm()                   # ③ 执行评估（内部调用 sft_helper �
 <tr class="odd">
 <td>答案正确率</td>
 <td style="text-align: center;">2.6%</td>
+<td style="text-align: center;">18.6%</td>
 <td style="text-align: center;">34.6%</td>
 </tr>
 <tr class="even">
 <td>格式正确率</td>
 <td style="text-align: center;">17.3%</td>
+<td style="text-align: center;">61.3%</td>
 <td style="text-align: center;">88.8%</td>
 </tr>
 </tbody>
@@ -3454,40 +3457,6 @@ evaluate_vllm()                   # ③ 执行评估（内部调用 sft_helper �
 <li><p><strong>格式-推理解耦。</strong> 格式正确率的快速收敛但答案正确率的缓慢爬坡，说明 RL 训练中格式习得与推理能力提升是两个<strong>不同时间尺度的过程</strong>，后者才是真正的挑战。</p></li>
 </ol>
 </section>
-<section id="训练奖励组内波动与稀疏信号" class="level4">
-<h4 class="anchored" data-anchor-id="训练奖励组内波动与稀疏信号">训练奖励：组内波动与稀疏信号</h4>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="assets/grpo/train_rewards_mean.png" class="img-fluid figure-img"></p>
-<figcaption>训练集 train_rewards_mean 曲线</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="assets/grpo/train_rewards_std.png" class="img-fluid figure-img"></p>
-<figcaption>训练集 train_rewards_std 曲线</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="assets/grpo/train_format_reward_mean.png" class="img-fluid figure-img"></p>
-<figcaption>训练集 train_format_reward_mean 曲线</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="assets/grpo/train_format_reward_std.png" class="img-fluid figure-img"></p>
-<figcaption>训练集 train_format_reward_std 曲线</figcaption>
-</figure>
-</div>
-<p><strong>关键观察：</strong></p>
-<ol type="1">
-<li><p><strong>训练奖励高度波动。</strong> <code>train_rewards_mean</code> 在 0.02~0.54 之间剧烈波动。这是二值稀疏奖励（0 或 1）配合组内归一化的直接后果——每个 step 的 rollout 仅 32 题 × 8 条，统计样本小，正确率对采样随机性高度敏感。</p></li>
-<li><p><strong>奖励标准差 ≈ 均值。</strong> 由于二值奖励下 <span class="math inline">\(\text{Var}(r) = p(1-p) \approx p\)</span>（当 <span class="math inline">\(p\)</span> 较小时），<code>train_rewards_std</code> 始终约等于 <code>train_rewards_mean</code>。这意味着优势值的组内归一化效果在不同步之间差异巨大——当 <code>rewards_std</code> 接近 0 时（同组 8 条全部答对或全部答错），优势值退化至接近 0，该步几乎无学习信号。</p></li>
-<li><p><strong>后期奖励趋于上升但波动未减。</strong> step 80 后 <code>train_rewards_mean</code> 的中位数在 0.35~0.45，但仍有低至 0.21 的”干枯步”。 这表明训练虽然在提升正确率，但奖励的稀疏性和小样本统计波动仍是主要挑战。</p></li>
-<li><p><strong>格式奖励快速收敛且方差趋零。</strong> <code>train_format_reward_mean</code> 从初始 ~0.03 快速上升至 ~0.93（与验证集趋势一致），而 <code>train_format_reward_std</code> 从 ~0.25 持续下降至 ~0.20 以下。格式标准差的下降意味着：到训练后期，256 条 rollout 中绝大多数都已遵循 <code>&lt;think&gt;/&lt;answer&gt;</code> 格式（93%），组内格式差异显著缩小。格式已不再是区分样本质量的有效信号——训练的重心完全落在了答案正确性上。</p></li>
-</ol>
-</section>
 <section id="训练损失与梯度范数不稳定性和梯度爆炸" class="level4">
 <h4 class="anchored" data-anchor-id="训练损失与梯度范数不稳定性和梯度爆炸">训练损失与梯度范数：不稳定性和梯度爆炸</h4>
 <div class="quarto-figure quarto-figure-center">
@@ -3508,18 +3477,18 @@ evaluate_vllm()                   # ③ 执行评估（内部调用 sft_helper �
 <figcaption>训练 train/grad_norm 曲线</figcaption>
 </figure>
 </div>
-<p><strong>关于 <code>train/grad_norm</code>。</strong> 代码使用 <code>clip_grad_norm_(max_norm=1.0)</code>，实际更新梯度被裁剪到 ≤1.0，但函数返回的是裁剪前的原始范数（用于日志）。公式为 <span class="math inline">\(\text{grad\_norm} = \sqrt{\sum_{p} \|\nabla_p \mathcal{L}\|_2^2}\)</span>。图中所有值均为裁剪前范数。</p>
+<p><strong>关于 <code>train/grad_norm</code>。</strong> 代码使用 <code>clip_grad_norm_(max_norm=1.0)</code>，图中所有值均为裁剪前的原始范数，公式为 <span class="math inline">\(\text{grad\_norm} = \sqrt{\sum_{p} \|\nabla_p \mathcal{L}\|_2^2}\)</span>。</p>
 <p><strong>关键观察：</strong></p>
 <ol type="1">
-<li><p><strong><code>train/loss</code> 量级极低。</strong> 稳定时约 <span class="math inline">\(10^{-5} \sim 10^{-3}\)</span>，且可正可负。GRPO 的 loss = <span class="math inline">\(-\min(r_t A_t, \text{clip}(r_t) A_t)\)</span>，并非 SFT 的 NLL（恒正），其绝对值与梯度范数无单调关系。</p></li>
-<li><p><strong>梯度爆炸的根因：GRPO-Clip 在负优势下不提供保护。</strong> 130 步中共 12 次 grad_norm &gt; 1.0 的尖峰，最严重为 step 121（14.8M，伴随 <code>loss=332</code>、<code>loss_std=664</code>）。爆炸的机制链条为：</p>
+<li><p><strong>loss 量级极低且非单调。</strong> 稳定时 loss 约为 <span class="math inline">\(10^{-5} \sim 10^{-3}\)</span>，可正可负。GRPO 的 loss = <span class="math inline">\(-\min(r_t A_t, \text{clip}(r_t)A_t)\)</span> 并非 SFT 的 NLL（恒正），其绝对值与梯度范数无单调关系——loss 小不意味着梯度小，反之亦然。</p></li>
+<li><p><strong>梯度爆炸的根因：<code>min</code> 操作的不对称性。</strong> 130 步中共 12 次 grad_norm &gt; 1.0 的尖峰，最严重为 step 121（14.8M，伴随 loss=332、loss_std=664）。<code>clip(r_t)</code> 本身将 importance sampling 比率限制在 <span class="math inline">\([0.8, 1.2]\)</span> 内，工作正常。问题在于 <code>min</code> 的二选一逻辑在两个方向上不对称：</p>
 <ul>
-<li><strong>ratio 指数膨胀</strong>：<span class="math inline">\(r_t = \exp(\log\pi_\theta - \log\pi_{\theta_{\text{old}}})\)</span>。off-policy 下（2 epoch/rollout），新策略可能大幅偏离旧策略，<span class="math inline">\(\Delta\log p\)</span> 可达 15 以上，<span class="math inline">\(r_t = e^{15} \approx 3.3\times 10^6\)</span>。</li>
-<li><strong>负优势绕过裁剪</strong>：GRPO-Clip 的 <span class="math inline">\(\min(r_t A_t, \text{clip}(r_t)A_t)\)</span> 仅在 <span class="math inline">\(A_t&gt;0\)</span> 且 ratio 超限时提供保护。当 <span class="math inline">\(A_t&lt;0\)</span>，<code>min</code> 必然选 <span class="math inline">\(r_t A_t\)</span>（更负），per-token loss = <span class="math inline">\(|r_t A_t|\)</span> 无上界。该 token 贡献的 loss 可达 <span class="math inline">\(10^6 \times 2.6 \approx 2.6\times 10^6\)</span>（正常值 ~0.1）。</li>
-<li><strong>链式法则逐层放大</strong>：异常 loss 经 28 层 Transformer 反向传播，总范数膨胀至 1.5×10⁷。</li>
-</ul></li>
-<li><p><strong>梯度裁剪的局限。</strong> <code>clip_grad_norm_</code> 将范数裁到 1.0，但无法改变梯度方向。若爆炸前方向已被单一异常 token 主导，裁剪后的更新仍指向该噪声方向。模型能自动恢复，说明该方向的更新幅度极小（范数被压缩到 1.0）且局部 loss landscape 足够平坦。</p></li>
-<li><p><strong>后期尖峰频率增加。</strong> 前 60 步无 &gt;1.0 尖峰；60–90 步 3 次；90–130 步 10 次。随着策略偏离初始点，ratio 方差持续上升，<code>cliprange=0.2</code> 仅在 <span class="math inline">\(A_t&gt;0\)</span> 时提供有效保护。</p></li>
+<li><strong><span class="math inline">\(A_t &gt; 0\)</span>（好 token，鼓励）</strong>：<span class="math inline">\(r_t\)</span> 膨胀时，<span class="math inline">\(\min(r_t A_t,\; 1.2 A_t)\)</span> 选 <span class="math inline">\(1.2 A_t\)</span>，更新幅度被限制在 <span class="math inline">\(1.2|A_t|\)</span> 以内。裁剪生效。</li>
+<li><strong><span class="math inline">\(A_t &lt; 0\)</span>（坏 token，惩罚）</strong>：<span class="math inline">\(r_t\)</span> 膨胀时，<span class="math inline">\(\min(r_t A_t,\; 0.8 A_t)\)</span> 两个都是负数，<code>min</code> 必然选<strong>更负</strong>的那个——即 <span class="math inline">\(r_t A_t\)</span>。CLIP 把 surr2 压到了 <span class="math inline">\(0.8 A_t\)</span>（例如 −3.12），但 <span class="math inline">\(r_t A_t\)</span> 可能是 −2,600,000，<code>min</code> 直接绕过裁剪值。</li>
+</ul>
+<p>爆炸的完整链条：离策略训练（每批 2 epoch）→ 策略漂移 → <span class="math inline">\(r_t = e^{15} \approx 3.3\times 10^6\)</span> → 负优势下 <code>min</code> 绕过 clip → per-token loss = <span class="math inline">\(|r_t A_t| \approx 2.6\times 10^6\)</span>（正常值 ~0.1）→ 28 层链式法则逐层放大 → 梯度范数膨胀至 <span class="math inline">\(10^7\)</span> 量级。</p></li>
+<li><p><strong>梯度裁剪的局限。</strong> <code>clip_grad_norm_</code> 将范数压到 1.0，但无法修正方向——若梯度方向已被单一异常 token 主导，裁剪后的更新仍然指向噪声。模型每次爆炸后均能自动恢复，说明异常 token 方向的 loss landscape 足够平坦，且范数压到 1.0 后实际更新幅度极小。</p></li>
+<li><p><strong>后期尖峰频率增加。</strong> 前 60 步无 &gt;1.0 尖峰；60–90 步 3 次；90–130 步 10 次。策略离初始点越远，ratio 方差越大，极端值概率越高。</p></li>
 </ol>
 </section>
 <section id="响应长度策略持续收敛" class="level4">
@@ -3551,28 +3520,28 @@ evaluate_vllm()                   # ③ 执行评估（内部调用 sft_helper �
 <tr class="header">
 <th style="text-align: left;">指标</th>
 <th style="text-align: center;">零样本基线</th>
+<th style="text-align: center;">SFT-raw</th>
 <th style="text-align: center;">GRPO</th>
-<th style="text-align: center;"></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;"><code>avg_reward</code></td>
 <td style="text-align: center;">0.0258</td>
+<td style="text-align: center;">0.1860</td>
 <td style="text-align: center;"><strong>0.3458</strong></td>
-<td style="text-align: center;"></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>avg_format_reward</code></td>
 <td style="text-align: center;">0.1728</td>
+<td style="text-align: center;">0.6134</td>
 <td style="text-align: center;"><strong>0.8880</strong></td>
-<td style="text-align: center;"></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">条件正确率</td>
 <td style="text-align: center;">14.9%</td>
+<td style="text-align: center;">30.3%</td>
 <td style="text-align: center;"><strong>~38.9%</strong></td>
-<td style="text-align: center;"></td>
 </tr>
 </tbody>
 </table>
